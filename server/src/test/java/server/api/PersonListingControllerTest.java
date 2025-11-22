@@ -26,28 +26,28 @@ import commons.Person;
 
 public class PersonListingControllerTest {
 
-	private static final Person MICKEY = new Person("Mickey", "Mouse");
-	private static final Person DONALD = new Person("Donald", "Duck");
-	private static final Person SCROOGE = new Person("Scrooge", "McDuck");
+    private static final Person MICKEY = new Person("Mickey", "Mouse");
+    private static final Person DONALD = new Person("Donald", "Duck");
+    private static final Person SCROOGE = new Person("Scrooge", "McDuck");
 
-	private PersonListingController sut;
+    private PersonListingController sut;
 
-	@BeforeEach
-	public void setup() {
-		sut = new PersonListingController();
-	}
+    @BeforeEach
+    public void setup() {
+        sut = new PersonListingController();
+    }
 
-	@Test
-	public void containsTwoDefaultNames() {
-		var actual = sut.list();
-		var expected = List.of(MICKEY, DONALD);
-		assertEquals(expected, actual);
-	}
+    @Test
+    public void containsTwoDefaultNames() {
+        List<Person> actual = sut.list();
+        List<Person> expected = List.of(MICKEY, DONALD);
+        assertEquals(expected, actual);
+    }
 
-	@Test
-	public void canAddPeople() {
-		var actual = sut.add(SCROOGE);
-		var expected = List.of(MICKEY, DONALD, SCROOGE);
-		assertEquals(expected, actual);
-	}
+    @Test
+    public void canAddPeople() {
+        List<Person> actual = sut.add(SCROOGE);
+        List<Person> expected = List.of(MICKEY, DONALD, SCROOGE);
+        assertEquals(expected, actual);
+    }
 }

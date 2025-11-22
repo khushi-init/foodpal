@@ -64,7 +64,7 @@ public class QuoteOverviewCtrl implements Initializable {
     }
 
     public void refresh() {
-        var quotes = server.getQuotes();
+        java.util.List<Quote> quotes = server.getQuotes();
         data = FXCollections.observableList(quotes);
         table.setItems(data);
     }

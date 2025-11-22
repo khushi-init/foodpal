@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import commons.Person;
 import commons.Quote;
+import org.springframework.http.ResponseEntity;
 
 public class QuoteControllerTest {
 
@@ -44,7 +45,7 @@ public class QuoteControllerTest {
 
     @Test
     public void cannotAddNullPerson() {
-        var actual = sut.add(getQuote(null));
+        ResponseEntity<Quote> actual = sut.add(getQuote(null));
         assertEquals(BAD_REQUEST, actual.getStatusCode());
     }
 
@@ -53,7 +54,7 @@ public class QuoteControllerTest {
         sut.add(getQuote("q1"));
         sut.add(getQuote("q2"));
         nextInt = 1;
-        var actual = sut.getRandom();
+        ResponseEntity<Quote> actual = sut.getRandom();
 
         assertTrue(random.wasCalled);
         assertEquals("q2", actual.getBody().quote);
