@@ -120,6 +120,124 @@
         </module>
     </module>
 
+    <module name="TreeWalker">
+        <module name="FileFilter">
+            <property name="regex" value=".Test\.java$"/>
+        </module>
+        <module name="TypeName">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="LambdaParameterName">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="StaticVariableName">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="LocalVariableName">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="ParameterName">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="MethodName">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="MemberName">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="ClassTypeParameterName">
+            <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*$)"/>
+            <message key="name.invalidPattern" value="Class type name ''{0}'' must match pattern ''{1}''."/>
+        </module>
+        <module name="MissingJavadocMethod">
+            <property name="severity" value="warning"/>
+            <property name="scope" value="public,protected"/>
+            <property name="ignoreMethodNames" value="^(get|set|is).*$"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="severity" value="warning"/>
+            <property name="accessModifiers" value="public,protected"/>
+            <property name="allowedAnnotations" value="Override"/>
+            <property name="allowMissingParamTags" value="false"/>
+            <property name="allowMissingReturnTag" value="false"/>
+        </module>
+        <module name="JavadocStyle">
+            <property name="checkEmptyJavadoc" value="true"/>
+            <property name="checkFirstSentence" value="false"/>
+        </module>
+        <module name="NonEmptyAtclauseDescription">
+            <property name="javadocTokens" value="PARAM_LITERAL,THROWS_LITERAL,RETURN_LITERAL"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="severity" value="warning"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+            <property name="max" value="8"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="severity" value="warning"/>
+            <property name="switchBlockAsSingleDecisionPoint" value="true"/>
+            <property name="max" value="5"/>
+            <property name="tokens" value="LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, QUESTION"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="severity" value="warning"/>
+            <property name="switchBlockAsSingleDecisionPoint" value="true"/>
+            <property name="max" value="10"/>
+            <property name="tokens" value="LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, QUESTION"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="4"/>
+        </module>
+        <module name="NestedForDepth">
+            <property name="max" value="4"/>
+        </module>
+        <module name="NestedWhileDepth">
+            <property name="max" value="4"/>
+        </module>
+        <module name="NestedTryDepth">
+            <property name="max" value="4"/>
+        </module>
+        <module name="VisibilityModifier">
+            <property name="severity" value="warning"/>
+            <property name="protectedAllowed" value="true"/>
+        </module>
+        <module name="MagicNumber">
+            <property name="severity" value="warning"/>
+            <property name="ignoreHashCodeMethod" value="true"/>
+            <property name="ignoreAnnotation" value="true"/>
+            <property name="ignoreFieldDeclaration" value="true"/>
+        </module>
+        <module name="Indentation">
+            <property name="severity" value="warning"/>
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="8"/>
+        </module>
+        <module name="LeftCurly">
+            <property name="severity" value="warning"/>
+            <property name="option" value="eol"/>
+        </module>
+        <module name="CovariantEquals"/>
+        <module name="EqualsHashCode"/>
+        <module name="UnusedImports">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="MethodLength">
+            <property name="severity" value="warning"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
+            <property name="max" value="75"/>
+        </module>
+        <module name="OuterTypeFilename">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="LocalVariableType">
+            <property name="severity" value="warning"/>
+            <property name="allowWildcardWithBounds" value="true"/>
+        </module>
+    </module>
+
     <module name="LineLength">
         <property name="severity" value="error"/>
         <property name="fileExtensions" value="java"/>
