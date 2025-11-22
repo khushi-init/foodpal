@@ -72,8 +72,8 @@ public class QuoteController {
 
     @GetMapping("rnd")
     public ResponseEntity<Quote> getRandom() {
-        var quotes = repo.findAll();
-        var idx = random.nextInt((int) repo.count());
+        List<Quote> quotes = repo.findAll();
+        int idx = random.nextInt((int) repo.count());
         return ResponseEntity.ok(quotes.get(idx));
     }
 }

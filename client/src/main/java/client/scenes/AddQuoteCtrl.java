@@ -58,7 +58,7 @@ public class AddQuoteCtrl {
             server.addQuote(getQuote());
         } catch (WebApplicationException e) {
 
-            var alert = new Alert(Alert.AlertType.ERROR);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(e.getMessage());
             alert.showAndWait();
@@ -70,8 +70,8 @@ public class AddQuoteCtrl {
     }
 
     private Quote getQuote() {
-        var p = new Person(firstName.getText(), lastName.getText());
-        var q = quote.getText();
+        Person p = new Person(firstName.getText(), lastName.getText());
+        String q = quote.getText();
         return new Quote(p, q);
     }
 
@@ -83,14 +83,14 @@ public class AddQuoteCtrl {
 
     public void keyPressed(KeyEvent e) {
         switch (e.getCode()) {
-        case ENTER:
-            ok();
-            break;
-        case ESCAPE:
-            cancel();
-            break;
-        default:
-            break;
+            case ENTER:
+                ok();
+                break;
+            case ESCAPE:
+                cancel();
+                break;
+            default:
+                break;
         }
     }
 }

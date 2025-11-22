@@ -27,31 +27,33 @@ import client.scenes.MainCtrl;
 import client.scenes.QuoteOverviewCtrl;
 import client.utils.ServerUtils;
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 public class Main extends Application {
 
-	private static final Injector INJECTOR = createInjector(new MyModule());
-	private static final MyFXML FXML = new MyFXML(INJECTOR);
+    private static final Injector INJECTOR = createInjector(new MyModule());
+    private static final MyFXML FXML = new MyFXML(INJECTOR);
 
-	public static void main(String[] args) throws URISyntaxException, IOException {
-		launch();
-	}
+    public static void main(String[] args) throws URISyntaxException, IOException {
+        launch();
+    }
 
-	@Override
-	public void start(Stage primaryStage) throws Exception {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
 
-		var serverUtils = INJECTOR.getInstance(ServerUtils.class);
-		if (!serverUtils.isServerAvailable()) {
-			var msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
-			System.err.println(msg);
-			return;
-		}
+        ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
+        if (!serverUtils.isServerAvailable()) {
+            String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
+            System.err.println(msg);
+            return;
+        }
 
-		var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
-		var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
+        Pair<QuoteOverviewCtrl, Parent> overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
+        Pair<AddQuoteCtrl, javafx.scene.Parent> add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
 
-		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-		mainCtrl.initialize(primaryStage, overview, add);
-	}
+        MainCtrl mainCtrl = INJECTOR.getInstance(MainCtrl.class);
+        mainCtrl.initialize(primaryStage, overview, add);
+    }
 }
