@@ -17,7 +17,9 @@ public class RecipeIngredient {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    @ManyToOne
+    // CascadeTpe.PERSIST --> if you use a new Ingredient when trying to create an instance of RecipeIngredient,
+    // it saves the new Ingredient first
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
