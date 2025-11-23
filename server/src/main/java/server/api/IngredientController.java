@@ -20,12 +20,12 @@ public class IngredientController {
 
     // GET ENDPOINTS
     @GetMapping
-    public List<Ingredient> getAll() {
+    public List<Ingredient> getAllIngredients() {
         return ingredientRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ingredient> getById(@PathVariable Long id) {
+    public ResponseEntity<Ingredient> getIngredientById(@PathVariable Long id) {
         Optional<Ingredient> ingredient = ingredientRepository.findById(id);
 
         // if the ingredient is found return 200 OK or else return 404 not found
