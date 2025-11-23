@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import client.scenes.*;
+import client.utils.ServerUtils;
 import com.google.inject.Injector;
 
 import javafx.application.Application;
@@ -40,12 +41,12 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-//        ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
-//        if (!serverUtils.isServerAvailable()) {
-//            String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
-//            System.err.println(msg);
-//            return;
-//        }
+        ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
+        if (!serverUtils.isServerAvailable()) {
+            String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
+            System.err.println(msg);
+            return;
+        }
 
         // All scenes must be initialized here as such
         Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
