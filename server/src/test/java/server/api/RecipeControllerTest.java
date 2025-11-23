@@ -23,6 +23,21 @@ public class RecipeControllerTest {
         testRecipe.setId(1L);
     }
 
-    
+    @Test
+    public void getAllRecipesTest(){
+        // ARRANGE: Tell the mock to return a list containing one recipe
+        List<Recipe> expectedList = List.of(testRecipe);
+        when(mockRepository.findAll()).thenReturn(expectedList);
+
+        // ACT
+        List<Recipe> actualList = sut.findAllRecipes();
+
+        // ASSERT: Check that the returned list matches the one the mock gave
+        assertEquals(expectedList, actualList);
+        // Check that the method was called on the fake database (Verification)
+        verify(mockRepository, times(1)).findAll();
+    }
+
+
 
 }

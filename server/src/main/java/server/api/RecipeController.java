@@ -20,7 +20,7 @@ public class RecipeController {
 
     // GET ENDPOINTS
     @GetMapping
-    public List<Recipe> findAll() {
+    public List<Recipe> findAllRecipes() {
         return recipeRepository.findAll();
     }
 
