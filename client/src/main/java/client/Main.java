@@ -20,12 +20,9 @@ import static com.google.inject.Guice.createInjector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import client.scenes.*;
 import com.google.inject.Injector;
 
-import client.scenes.AddQuoteCtrl;
-import client.scenes.MainCtrl;
-import client.scenes.QuoteOverviewCtrl;
-import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
@@ -43,17 +40,17 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
-        if (!serverUtils.isServerAvailable()) {
-            String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
-            System.err.println(msg);
-            return;
-        }
+//        ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
+//        if (!serverUtils.isServerAvailable()) {
+//            String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
+//            System.err.println(msg);
+//            return;
+//        }
 
-        Pair<QuoteOverviewCtrl, Parent> overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
-        Pair<AddQuoteCtrl, javafx.scene.Parent> add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
+        // All scenes must be initialized here as such
+        Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
 
-        MainCtrl mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview, add);
+        PrimaryCtrl prime = INJECTOR.getInstance(PrimaryCtrl.class);
+        prime.init(primaryStage, recipesWindow);
     }
 }
