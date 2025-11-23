@@ -14,9 +14,9 @@ import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    public Long id;
+    private Long id;
 
-    public String name;
+    private String name;
 
     /**
      * JPA required no argument constructor
@@ -31,6 +31,19 @@ public class Ingredient {
     public Ingredient (String name) {
         this.name = name;
     }
+
+    // GETTERS AND SETTERS MANDATORY
+    // for frameworks (JPA/Jackson) to read and write object data from/to the database and JSON
+
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {}
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {}
 
     @Override
     public boolean equals(Object obj) {

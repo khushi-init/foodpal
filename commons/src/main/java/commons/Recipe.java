@@ -13,13 +13,20 @@ import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    public Long id;
+    private Long id;
 
-    public String name;
-    public List<Ingredient> ingredients;
+    private String name;
+
+    // One Recipe has MANY RecipeIngredients (the join entity)
+    @OneToMany(
+            mappedBy = "recipe",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<RecipeIngredient> ingredients;
 
     @ElementCollection
-    public List<String> preparationSteps;
+    private List<String> preparationSteps;
 
     /**
      * JPA required no argument constructor
@@ -33,9 +40,44 @@ public class Recipe {
      * @param ingredients list of ingredients
      * @param preparationSteps list of preparation steps
      */
-    public Recipe (String name, List<Ingredient> ingredients, List<String> preparationSteps) {
+    public Recipe (String name, List<RecipeIngredient> ingredients, List<String> preparationSteps) {
         this.name = name;
         this.ingredients = ingredients;
+        this.preparationSteps = preparationSteps;
+    }
+
+    // GETTERS AND SETTERS MANDATORY
+    // for frameworks (JPA/Jackson) to read and write object data from/to the database and JSON
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<RecipeIngredient> getIngredients() {
+        return ingredients;
+    }
+
+    public List<String> getPreparationSteps() {
+        return preparationSteps;
+    }
+
+    public void setIngredients(List<RecipeIngredient> ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public void setPreparationSteps(List<String> preparationSteps) {
         this.preparationSteps = preparationSteps;
     }
 
