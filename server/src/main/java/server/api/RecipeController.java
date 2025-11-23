@@ -29,12 +29,11 @@ public class RecipeController {
         Optional<Recipe> recipe = recipeRepository.findById(id);
 
         // if the recipe is found return 200 OK or else return 404 not found
-
         return recipe.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST ENDPOINTS
+    // POST ENDPOINT
     @PostMapping
     public ResponseEntity<Recipe> createRecipe(@RequestBody Recipe recipe) {
         // checking if the recipe has a valid name
