@@ -17,6 +17,9 @@ public class RecipeControllerTest {
     private RecipeController sut;
     private RecipeRepository mockRepository;
     private Recipe testRecipe;
+    private Long id = 1L;
+    private Long id2 = 2L;
+    private Long fakeId = 99L;
 
     @BeforeEach
     public void setUp(){
@@ -24,7 +27,7 @@ public class RecipeControllerTest {
         mockRepository = mock(RecipeRepository.class);
         sut = new RecipeController(mockRepository);
         testRecipe = new Recipe("Mock recipe", null, null);
-        testRecipe.setId(1L);
+        testRecipe.setId(id);
     }
 
     @Test
@@ -43,40 +46,40 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void getById_Correct() {
+    public void getByIdCorrect() {
         // ARRANGE: Tell the mock that when findById(1L) is called, return the testRecipe
-        when(mockRepository.findById(1L)).thenReturn(Optional.of(testRecipe));
+        when(mockRepository.findById(id)).thenReturn(Optional.of(testRecipe));
 
         // ACT: Call the controller method
-        ResponseEntity<Recipe> response = sut.findRecipeById(1L);
+        ResponseEntity<Recipe> response = sut.findRecipeById(id);
 
         // ASSERT: Check HTTP status (200 OK)
         assertEquals(OK, response.getStatusCode());
-        verify(mockRepository, times(1)).findById(1L);
+        verify(mockRepository, times(1)).findById(id);
     }
 
 
     @Test
-    public void getById_NotFound() {
+    public void getByIdNotFound() {
         // ARRANGE: Tell the mock that when findById(99L) is called, return an empty Optional
-        when(mockRepository.findById(99L)).thenReturn(Optional.empty());
+        when(mockRepository.findById(fakeId)).thenReturn(Optional.empty());
 
         // ACT: Call the controller method with a non-existent ID
-        ResponseEntity<Recipe> response = sut.findRecipeById(99L);
+        ResponseEntity<Recipe> response = sut.findRecipeById(fakeId);
 
         // ASSERT: Check HTTP status (404 Not Found)
         assertEquals(NOT_FOUND, response.getStatusCode());
-        verify(mockRepository, times(1)).findById(99L);
+        verify(mockRepository, times(1)).findById(fakeId);
     }
 
     @Test
-    public void createRecipe_Correct() {
+    public void createRecipeCorrect() {
         // ARRANGE: Input recipe with no ID
         Recipe inputRecipe = new Recipe("New Cake", null, null);
 
         // ARRANGE: The mock must simulate the database assigning an ID upon save
         Recipe savedRecipe = new Recipe("New Cake",  null, null);
-        savedRecipe.setId(2L);
+        savedRecipe.setId(id2);
         when(mockRepository.save(inputRecipe)).thenReturn(savedRecipe);
 
         // ACT
@@ -88,7 +91,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void createRecipe_BadRequest() {
+    public void createRecipeBadRequest() {
         // ARRANGE: Create a recipe that fails validation (empty name)
         Recipe badRecipe = new Recipe("",  null, null);
 
@@ -103,31 +106,31 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void deleteRecipe_Correct() {
+    public void deleteRecipeCorrect() {
         // ARRANGE: Tell the mock that the recipe with ID 1 exists
-        when(mockRepository.existsById(1L)).thenReturn(true);
+        when(mockRepository.existsById(id)).thenReturn(true);
 
         // ACT
-        ResponseEntity<?> response = sut.deleteRecipeById(1L);
+        ResponseEntity<?> response = sut.deleteRecipeById(id);
 
         // ASSERT: Check HTTP status (204 No Content)
         assertEquals(NO_CONTENT, response.getStatusCode());
 
-        verify(mockRepository, times(1)).deleteById(1L);
+        verify(mockRepository, times(1)).deleteById(id);
     }
 
     @Test
-    public void deleteRecipe_NotFound() {
+    public void deleteRecipeNotFound() {
         // ARRANGE: Tell the mock that the recipe with ID 99 does not exist
-        when(mockRepository.existsById(99L)).thenReturn(false);
+        when(mockRepository.existsById(fakeId)).thenReturn(false);
 
         // ACT
-        ResponseEntity<?> response = sut.deleteRecipeById(99L);
+        ResponseEntity<?> response = sut.deleteRecipeById(fakeId);
 
         // ASSERT: Check HTTP status (404 Not Found)
         assertEquals(NOT_FOUND, response.getStatusCode());
 
-        verify(mockRepository, never()).deleteById(99L);
+        verify(mockRepository, never()).deleteById(fakeId);
     }
 
 

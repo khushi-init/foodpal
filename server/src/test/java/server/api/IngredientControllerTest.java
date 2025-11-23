@@ -18,6 +18,9 @@ public class IngredientControllerTest {
     private IngredientController sut;
     private IngredientRepository mockRepository;
     private Ingredient testIngredient;
+    private Long id = 1L;
+    private Long id2 = 2L;
+    private Long fakeId = 99L;
 
     @BeforeEach
     public void setUp(){
@@ -27,7 +30,7 @@ public class IngredientControllerTest {
 
         // Setup test data
         testIngredient = new Ingredient("Sugar");
-        testIngredient.setId(1L);
+        testIngredient.setId(id);
     }
 
     @Test
@@ -45,37 +48,37 @@ public class IngredientControllerTest {
     }
 
     @Test
-    public void getById_Correct() {
+    public void getByIdCorrect() {
         // ARRANGE: Mock repository to return the ingredient when ID 1 is requested
-        when(mockRepository.findById(1L)).thenReturn(Optional.of(testIngredient));
+        when(mockRepository.findById(id)).thenReturn(Optional.of(testIngredient));
 
         // ACT
-        ResponseEntity<Ingredient> response = sut.getIngredientById(1L);
+        ResponseEntity<Ingredient> response = sut.getIngredientById(id);
 
         // ASSERT: Check 200 OK status
         assertEquals(OK, response.getStatusCode());
-        verify(mockRepository, times(1)).findById(1L);
+        verify(mockRepository, times(1)).findById(id);
     }
 
     @Test
-    public void getById_NotFound() {
+    public void getByIdNotFound() {
         // ARRANGE: Mock repository to return empty when ID 99 is requested
-        when(mockRepository.findById(99L)).thenReturn(Optional.empty());
+        when(mockRepository.findById(fakeId)).thenReturn(Optional.empty());
 
         // ACT
-        ResponseEntity<Ingredient> response = sut.getIngredientById(99L);
+        ResponseEntity<Ingredient> response = sut.getIngredientById(fakeId);
 
         // ASSERT: Check 404 Not Found status
         assertEquals(NOT_FOUND, response.getStatusCode());
-        verify(mockRepository, times(1)).findById(99L);
+        verify(mockRepository, times(1)).findById(fakeId);
     }
 
     @Test
-    public void createIngredient_Correct() {
+    public void createIngredientCorrect() {
         // ARRANGE: Mock repository to return the saved object with a new ID
         Ingredient inputIngredient = new Ingredient("Flour");
         Ingredient savedIngredient = new Ingredient("Flour");
-        savedIngredient.setId(2L);
+        savedIngredient.setId(id2);
         when(mockRepository.save(inputIngredient)).thenReturn(savedIngredient);
 
         // ACT
@@ -87,7 +90,7 @@ public class IngredientControllerTest {
     }
 
     @Test
-    public void createIngredient_BadRequest() {
+    public void createIngredientBadRequest() {
         // ARRANGE: Ingredient that fails validation (empty name)
         Ingredient badIngredient = new Ingredient("");
 
@@ -102,30 +105,30 @@ public class IngredientControllerTest {
     }
 
     @Test
-    public void deleteIngredient_Correct() {
+    public void deleteIngredientCorrect() {
         // ARRANGE: Mock repository to confirm ID 1 exists
-        when(mockRepository.existsById(1L)).thenReturn(true);
+        when(mockRepository.existsById(id)).thenReturn(true);
 
         // ACT
-        ResponseEntity<?> response = sut.deleteIngredient(1L);
+        ResponseEntity<?> response = sut.deleteIngredient(id);
 
         // ASSERT: Check 204 No Content status and verify delete call
         assertEquals(NO_CONTENT, response.getStatusCode());
-        verify(mockRepository, times(1)).deleteById(1L);
+        verify(mockRepository, times(1)).deleteById(id);
     }
 
     @Test
-    public void deleteIngredient_NotFound() {
+    public void deleteIngredientNotFound() {
         // ARRANGE: Mock repository to confirm ID 99 does not exist
-        when(mockRepository.existsById(99L)).thenReturn(false);
+        when(mockRepository.existsById(fakeId)).thenReturn(false);
 
         // ACT
-        ResponseEntity<?> response = sut.deleteIngredient(99L);
+        ResponseEntity<?> response = sut.deleteIngredient(fakeId);
 
         // ASSERT: Check 404 Not Found status
         assertEquals(NOT_FOUND, response.getStatusCode());
 
         // ASSERT: Verify delete was not called
-        verify(mockRepository, never()).deleteById(99L);
+        verify(mockRepository, never()).deleteById(fakeId);
     }
 }
