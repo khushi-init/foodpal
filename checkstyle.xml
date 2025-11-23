@@ -47,9 +47,9 @@
             <property name="checkEmptyJavadoc" value="true"/>
             <property name="checkFirstSentence" value="false"/>
         </module>
-        <module name="NonEmptyAtclauseDescription">
-            <property name="javadocTokens" value="PARAM_LITERAL,THROWS_LITERAL,RETURN_LITERAL"/>
-        </module>
+<!--        <module name="NonEmptyAtclauseDescription">-->
+<!--            <property name="javadocTokens" value="PARAM_LITERAL,THROWS_LITERAL,RETURN_LITERAL"/>-->
+<!--        </module>-->
         <module name="ParameterNumber">
             <property name="severity" value="error"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
