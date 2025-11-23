@@ -1,35 +1,42 @@
 package commons;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.List;
+
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 @Entity
-public class Ingredient {
+public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     public Long id;
 
     public String name;
+    public List<Ingredient> ingredients;
+
+    @ElementCollection
+    public List<String> preparationSteps;
 
     /**
      * JPA required no argument constructor
      */
-    public Ingredient () {
+    public  Recipe () {
     }
 
     /**
-     * constructor for creation of new Ingredient
-     * @param name  name of ingredient
+     * constructor for a new recipe
+     * @param name  name of recipe
+     * @param ingredients list of ingredients
+     * @param preparationSteps list of preparation steps
      */
-    public Ingredient (String name) {
+    public Recipe (String name, List<Ingredient> ingredients, List<String> preparationSteps) {
         this.name = name;
+        this.ingredients = ingredients;
+        this.preparationSteps = preparationSteps;
     }
 
     @Override
@@ -46,5 +53,6 @@ public class Ingredient {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
     }
+    
 
 }
