@@ -28,8 +28,10 @@ import javafx.util.Pair;
 
 public class Main extends Application {
 
+    private final boolean debug = true;
+
     private static final Injector INJECTOR = createInjector(new MyModule());
-    private static final MyFXML FXML = new MyFXML(INJECTOR);
+    public static final MyFXML FXML = new MyFXML(INJECTOR);
 
 //    public static void main(String[] args) throws URISyntaxException, IOException {
 //        launch();
@@ -39,7 +41,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
 
         ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
-        if (!serverUtils.isServerAvailable()) {
+        if (!serverUtils.isServerAvailable() && !debug) {
             String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             return;

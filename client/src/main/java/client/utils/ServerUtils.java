@@ -57,7 +57,7 @@ public class ServerUtils {
     }
 
     // WARNING THE FOLLOWING METHODS ARE TEMPLATES AND NOT PART OF THE BASE CLIENT, THEY ARE TO BE
-    // REWORKED AS PART OF OTHER ISSUES
+    // REWORKED AS PART OF OTHER ISSUES. Until implemented, ignore javadoc warnings
 
     public void getRecipesTheHardWay() throws IOException, URISyntaxException {
         java.net.URL url = new URI("http://localhost:8080/api/recipes").toURL();

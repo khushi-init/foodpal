@@ -2,25 +2,41 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipesWindowCtrl">
-  <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="25.0" />
-    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="75.0" />
-  </columnConstraints>
-    <VBox fx:id="sidebarVBox" style="-fx-background-color: red;" GridPane.columnIndex="0">
+<SplitPane dividerPositions="0.25" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipesWindowCtrl">
+    <items>
+        <VBox fx:id="sidebarVBox" maxWidth="300.0" style="-fx-background-color: red;">
+            <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="1050.0" VBox.vgrow="ALWAYS">
+                <ListView fx:id="sidebarRecipeNamesList" prefWidth="200.0" />
+            </ScrollPane>
 
-        <!--<spacing>5</spacing>-->
-        <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="1050.0" VBox.vgrow="ALWAYS">
-            <ListView fx:id="sidebarRecipeNamesList" prefWidth="200.0" />
-        </ScrollPane>
+            <HBox alignment="CENTER" prefHeight="50.0" VBox.vgrow="ALWAYS">
+                <Button focusTraversable="false" maxHeight="Infinity" maxWidth="Infinity" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="+" HBox.hgrow="ALWAYS" />
+                <Button focusTraversable="false" maxHeight="Infinity" maxWidth="Infinity" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="-" HBox.hgrow="ALWAYS" />
+                <Button maxHeight="Infinity" maxWidth="Infinity" mnemonicParsing="false" prefHeight="Infinity" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="Refresh" HBox.hgrow="ALWAYS" />
+            </HBox>
+        </VBox>
 
-        <HBox alignment="CENTER" prefHeight="50.0" VBox.vgrow="ALWAYS">
-            <Button focusTraversable="false" maxHeight="Infinity" maxWidth="Infinity" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="+" HBox.hgrow="ALWAYS" />
-            <Button focusTraversable="false" maxHeight="Infinity" maxWidth="Infinity" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="-" HBox.hgrow="ALWAYS" />
-        </HBox>
-    </VBox>
-    <rowConstraints>
-        <RowConstraints percentHeight="100.0" vgrow="ALWAYS" />
-    </rowConstraints>
-</GridPane>
+        <BorderPane minHeight="200.0">
+            <top>
+                <HBox prefHeight="30.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                    <children>
+                        <Label prefHeight="Infinity" text="RECIPE NAME">
+                            <font>
+                                <Font name="System Bold" size="18.0" />
+                            </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" prefHeight="Infinity" text="Duplicate" />
+                    </children>
+                </HBox>
+            </top>
+            <center>
+                <ScrollPane maxWidth="Infinity" BorderPane.alignment="CENTER">
+                    <VBox fx:id="recipeView" maxWidth="Infinity" maxHeight="Infinity"/>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+    </items>
+</SplitPane>
