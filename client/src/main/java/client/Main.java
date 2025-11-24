@@ -28,6 +28,8 @@ import javafx.util.Pair;
 
 public class Main extends Application {
 
+    // Debug variable to disable checking for an active server when launching client. Will be useful for early
+    // development. Set to false or remove altogether before finalizing.
     private final boolean debug = true;
 
     private static final Injector INJECTOR = createInjector(new MyModule());
