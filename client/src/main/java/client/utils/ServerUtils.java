@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import commons.Recipe;
 import org.glassfish.jersey.client.ClientConfig;
 
 import commons.Quote;
@@ -37,30 +38,10 @@ public class ServerUtils {
 
     private static final String SERVER = "http://localhost:8080/";
 
-    public void getQuotesTheHardWay() throws IOException, URISyntaxException {
-        java.net.URL url = new URI("http://localhost:8080/api/quotes").toURL();
-        java.io.InputStream is = url.openConnection().getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.out.println(line);
-        }
-    }
-
-    public List<Quote> getQuotes() {
-        return ClientBuilder.newClient(new ClientConfig()) //
-                .target(SERVER).path("api/quotes") //
-                .request(APPLICATION_JSON) //
-                .get(new GenericType<List<Quote>>() {});
-    }
-
-    public Quote addQuote(Quote quote) {
-        return ClientBuilder.newClient(new ClientConfig()) //
-                .target(SERVER).path("api/quotes") //
-                .request(APPLICATION_JSON) //
-                .post(Entity.entity(quote, APPLICATION_JSON), Quote.class);
-    }
-
+    /**
+     * Returns true if a server is running on port 8080
+     * @return - Boolean value representing an active server
+     */
     public boolean isServerAvailable() {
         try {
             ClientBuilder.newClient(new ClientConfig()) //
@@ -73,5 +54,32 @@ public class ServerUtils {
             }
         }
         return true;
+    }
+
+    // WARNING THE FOLLOWING METHODS ARE TEMPLATES AND NOT PART OF THE BASE CLIENT, THEY ARE TO BE
+    // REWORKED AS PART OF OTHER ISSUES
+
+    public void getRecipesTheHardWay() throws IOException, URISyntaxException {
+        java.net.URL url = new URI("http://localhost:8080/api/recipes").toURL();
+        java.io.InputStream is = url.openConnection().getInputStream();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String line;
+        while ((line = br.readLine()) != null) {
+            System.out.println(line);
+        }
+    }
+
+    public List<Recipe> getRecipes() {
+        return ClientBuilder.newClient(new ClientConfig()) //
+                .target(SERVER).path("api/recipes") //
+                .request(APPLICATION_JSON) //
+                .get(new GenericType<List<Recipe>>() {});
+    }
+
+    public Quote addRecipe(Recipe recipe) {
+        return ClientBuilder.newClient(new ClientConfig()) //
+                .target(SERVER).path("api/quotes") //
+                .request(APPLICATION_JSON) //
+                .post(Entity.entity(recipe, APPLICATION_JSON), Quote.class);
     }
 }

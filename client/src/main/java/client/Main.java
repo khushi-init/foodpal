@@ -17,15 +17,10 @@ package client;
 
 import static com.google.inject.Guice.createInjector;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
+import client.scenes.*;
+import client.utils.ServerUtils;
 import com.google.inject.Injector;
 
-import client.scenes.AddQuoteCtrl;
-import client.scenes.MainCtrl;
-import client.scenes.QuoteOverviewCtrl;
-import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
@@ -36,12 +31,12 @@ public class Main extends Application {
     private static final Injector INJECTOR = createInjector(new MyModule());
     private static final MyFXML FXML = new MyFXML(INJECTOR);
 
-    public static void main(String[] args) throws URISyntaxException, IOException {
-        launch();
-    }
+//    public static void main(String[] args) throws URISyntaxException, IOException {
+//        launch();
+//    }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
 
         ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
@@ -50,10 +45,10 @@ public class Main extends Application {
             return;
         }
 
-        Pair<QuoteOverviewCtrl, Parent> overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
-        Pair<AddQuoteCtrl, javafx.scene.Parent> add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
+        // All scenes must be initialized here as such
+        Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
 
-        MainCtrl mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview, add);
+        PrimaryCtrl prime = INJECTOR.getInstance(PrimaryCtrl.class);
+        prime.init(primaryStage, recipesWindow);
     }
 }
