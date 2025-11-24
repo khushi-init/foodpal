@@ -38,6 +38,10 @@ public class ServerUtils {
 
     private static final String SERVER = "http://localhost:8080/";
 
+    /**
+     * Returns true if a server is running on port 8080
+     * @return - Boolean value representing an active server
+     */
     public boolean isServerAvailable() {
         try {
             ClientBuilder.newClient(new ClientConfig()) //

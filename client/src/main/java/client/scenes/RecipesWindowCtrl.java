@@ -15,6 +15,9 @@ public class RecipesWindowCtrl {
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private final ObservableList<String> items = FXCollections.observableArrayList();
 
+    /**
+     * Initializes the sidebar items (Recipe names) to track the ObervableList items
+     */
     public void initialize() {
         sidebarRecipeNamesList.setItems(items);
 

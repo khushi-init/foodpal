@@ -33,10 +33,15 @@ public class MyFXML {
 
     private Injector injector;
 
+    /**
+     * Constructor of the MyFXML module
+     * @param injector - The injector provided
+     */
     public MyFXML(Injector injector) {
         this.injector = injector;
     }
 
+    // I don't know what this does, it's magic
     public <T> Pair<T, Parent> load(Class<T> c, String... parts) {
         try {
             FXMLLoader loader = new FXMLLoader(getLocation(parts), null, null, new MyFactory(), StandardCharsets.UTF_8);
