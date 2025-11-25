@@ -96,6 +96,10 @@ public class Recipe {
         return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
     }
 
+    /**
+     * Turn the recipe into a markdown format.
+     * @return the string with the markdown format.
+     */
     public String toMarkdown() {
         StringBuilder output = new StringBuilder();
 
