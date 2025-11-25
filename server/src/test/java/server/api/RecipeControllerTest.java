@@ -5,15 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import server.database.RecipeRepository;
 
-import java.nio.charset.StandardCharsets;
+import server.database.RecipeRepository;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.springframework.http.HttpStatus.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -91,7 +88,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void downloadRecipe_Found() {
+    public void downloadRecipeFound() {
         // ARRANGE
         Long id = 1L;
 
