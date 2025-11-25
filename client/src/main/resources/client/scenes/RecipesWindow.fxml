@@ -5,6 +5,8 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -35,7 +37,14 @@
                             </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#onCloneRecipe" prefHeight="Infinity" text="Duplicate" />
+                        <Button fx:id="duplicateBtn" mnemonicParsing="false" onAction="#onCloneRecipe" prefHeight="Infinity" style="-fx-background-color: transparent; -fx-padding: 4; -fx-cursor: hand;">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0">
+                           <image>
+                              <Image url="@client/images/duplicate-icon-sm.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></Button>
                     </children>
                 </HBox>
             </top>
