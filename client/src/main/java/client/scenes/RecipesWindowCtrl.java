@@ -19,6 +19,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -119,5 +120,49 @@ public class RecipesWindowCtrl {
             recipeView.getChildren().add(ingNode);
         }
         recipeView.requestLayout();
+    }
+
+    @FXML
+    public void onCloneRecipe(){
+        System.out.println("clone butt works");
+        Recipe selected = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            return;
+        }
+        String newName = createCopyName(selected.getName());
+        Recipe clone = cloneRecipe(selected, newName);
+
+        recipes.add(clone);
+
+        sidebarRecipeNamesList.getSelectionModel().select(clone);
+    }
+
+    private String createCopyName(String baseName){
+        int i = 1;
+        while(true){
+            String candidate = baseName + "(" + i +")";
+            boolean exists = recipes.stream().anyMatch(r -> r.getName().equals(candidate));
+            if(!exists){
+                return candidate;
+            }
+            i++;
+        }
+    }
+    private Recipe cloneRecipe(Recipe original, String newName){
+        List<String> stepsCopy = new ArrayList<>(original.getPreparationSteps());
+
+        Recipe clone = new Recipe(newName, null, stepsCopy);
+
+        List<RecipeIngredient>  ingredientsCopy = new ArrayList<>();
+        for(RecipeIngredient ri : original.getIngredients()){
+            RecipeIngredient newRi = new RecipeIngredient(clone, ri.getIngredient(), ri.getQuantity());
+            ingredientsCopy.add(newRi);
+        }
+        clone.setIngredients(ingredientsCopy);
+
+        return clone;
+
+
+
     }
 }
