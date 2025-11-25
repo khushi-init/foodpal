@@ -1,5 +1,5 @@
 Marnix:
- - refresh button
+ - refresh button.
 Luca:
  - printable version
 Adel:
