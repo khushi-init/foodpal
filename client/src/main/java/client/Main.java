@@ -42,6 +42,8 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        System.out.println("Opening very cool amazing recipe app!");
+
         ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable() && !debug) {
             String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
