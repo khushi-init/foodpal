@@ -23,9 +23,13 @@ import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import commons.Recipe;
+import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.client.ClientConfig;
 
 import commons.Quote;
@@ -37,6 +41,7 @@ import jakarta.ws.rs.core.GenericType;
 public class ServerUtils {
 
     private static final String SERVER = "http://localhost:8080/";
+    private static final int statusOK = 200;
 
     /**
      * Returns true if a server is running on port 8080
@@ -82,4 +87,33 @@ public class ServerUtils {
                 .request(APPLICATION_JSON) //
                 .post(Entity.entity(recipe, APPLICATION_JSON), Quote.class);
     }
+
+    /**
+     * Download a recipe markdown file.
+     * @param recipeId the id of the recipe to download.
+     */
+    public void downloadRecipe(Long recipeId) {
+        try {
+            Response response = ClientBuilder.newClient()
+                    .target(SERVER)
+                    .path("api/recipes/download/" + recipeId)
+                    .request()
+                    .get(Response.class);
+
+            if (response.getStatus() == statusOK) {
+                // The path to save the file to
+                String userDownloads = System.getProperty("user.home") + "/Downloads/";
+                String fileName = "recipe_" + recipeId + ".md";
+                Path filePath = Paths.get(userDownloads + fileName);
+
+                // Write the file to the path
+                Files.write(filePath, response.readEntity(byte[].class));
+                System.out.println("Downloaded recipe " + recipeId + " to " + filePath);
+            }
+
+        } catch (Exception e) {
+            System.out.println("An error has occurred!");
+        }
+    }
+
 }
