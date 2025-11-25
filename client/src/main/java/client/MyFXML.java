@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import com.google.inject.Injector;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.util.Builder;
 import javafx.util.BuilderFactory;
@@ -41,7 +42,13 @@ public class MyFXML {
         this.injector = injector;
     }
 
-    // I don't know what this does, it's magic
+    /**
+     * Returns a module controller, and it's parent in a pair
+     * @param c - The class of the FXML controller class
+     * @param parts - The file location as many strings
+     * @return - The Pair of the controller instance and the parent
+     * @param <T> - The class of the desired controller
+     */
     public <T> Pair<T, Parent> load(Class<T> c, String... parts) {
         try {
             FXMLLoader loader = new FXMLLoader(getLocation(parts), null, null, new MyFactory(), StandardCharsets.UTF_8);
@@ -53,6 +60,29 @@ public class MyFXML {
         }
     }
 
+    /**
+     * Returns a module controller, and the respective Node as a Pair
+     * @param c - The class of the FXML node controller class
+     * @param parts - The file location as many strings
+     * @return - The Pair of the controller instance and the node
+     * @param <T> - The class of the desired controller
+     */
+    public <T> Pair<T, Node> loadNode(Class<T> c, String... parts) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getLocation(parts), null, null, new MyFactory(), StandardCharsets.UTF_8);
+            Node node = loader.load();
+            T ctrl = loader.getController();
+            return new Pair<>(ctrl, node);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Converts a path as a string to a URL
+     * @param parts - The path as many strings
+     * @return - The URL derived from the string path
+     */
     private URL getLocation(String... parts) {
         String path = Path.of("", parts).toString();
         return MyFXML.class.getClassLoader().getResource(path);

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox maxHeight="30.0" maxWidth="Infinity" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeInstructionUICtrl">
+    <Label fx:id="instructionText" prefHeight="Infinity" text="Recipe Instruction" wrapText="true"/>
+    <Region HBox.hgrow="ALWAYS" />
+    <Button prefHeight="Infinity" prefWidth="30.0" text="D" />
+    <Button prefHeight="Infinity" prefWidth="30.0" text="E" />
+</HBox>
