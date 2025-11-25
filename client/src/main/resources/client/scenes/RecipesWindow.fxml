@@ -28,7 +28,7 @@
                             </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" prefHeight="Infinity" text="Duplicate" />
+                        <Button mnemonicParsing="false" prefHeight="Infinity" text="Duplicate" onAction="#onCloneRecipe" />
                     </children>
                 </HBox>
             </top>

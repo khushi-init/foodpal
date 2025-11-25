@@ -19,6 +19,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -71,6 +72,7 @@ public class RecipesWindowCtrl {
      * @param recipe - The recipe to load
      */
     public void openRecipe(Recipe recipe) {
+        recipeView.getChildren().clear(); //cleaning - otherwise would duplicate all steps and ingredients for every child
         loadIngredients(recipe.getIngredients());
         Separator sep = new Separator();
         recipeView.getChildren().add(sep);
@@ -119,5 +121,64 @@ public class RecipesWindowCtrl {
             recipeView.getChildren().add(ingNode);
         }
         recipeView.requestLayout();
+    }
+
+    /**
+     * Event handler for "Duplicate" button.
+     * Clones currently selected recipe and adds it a new name(i)
+     */
+    @FXML
+    public void onCloneRecipe(){
+        Recipe selected = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+        String newName = createCopyName(selected.getName());
+        Recipe clone = cloneRecipe(selected, newName);
+
+        recipes.add(clone);
+
+        sidebarRecipeNamesList.getSelectionModel().select(clone);
+    }
+
+    /**
+     * Creates unique name for a recipe based on from which recipe its duplicated.
+     * @param baseName the name of recipe that is being duplicated
+     * @return a new unique name of the clone
+     */
+    private String createCopyName(String baseName){
+        int i = 1;
+        while(true){
+            String candidate = baseName + "(" + i +")";
+            boolean exists = recipes.stream().anyMatch(r -> r.getName().equals(candidate));
+            if(!exists){
+                return candidate;
+            }
+            i++;
+        }
+    }
+
+    /**
+     * Creates a deep copy of the given recipe but with new name.
+     * @param original the recipe we want duplicate
+     * @param newName name assigned to this duplicate of the recipe
+     * @return a new Recipe that is clone of the original
+     */
+    private Recipe cloneRecipe(Recipe original, String newName){
+        List<String> stepsCopy = new ArrayList<>(original.getPreparationSteps());
+
+        Recipe clone = new Recipe(newName, null, stepsCopy);
+
+        List<RecipeIngredient>  ingredientsCopy = new ArrayList<>();
+        for(RecipeIngredient ri : original.getIngredients()){
+            RecipeIngredient newRi = new RecipeIngredient(clone, ri.getIngredient(), ri.getQuantity());
+            ingredientsCopy.add(newRi);
+        }
+        clone.setIngredients(ingredientsCopy);
+
+        return clone;
+
+
+
     }
 }
