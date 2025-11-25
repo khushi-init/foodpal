@@ -14,6 +14,8 @@ public class RecipeTest {
     private Ingredient ingredient2;
     private RecipeIngredient recipeIngredient1;
     private RecipeIngredient recipeIngredient2;
+    private double amount1 = 50.0;
+    private double amount2 = 25.0
     private List<RecipeIngredient> ingredientList;
     private List<String> preparationSteps;
 
@@ -22,8 +24,8 @@ public class RecipeTest {
         ingredient1 = new Ingredient("Sugar");
         ingredient2 = new Ingredient("Butter");
 
-        recipeIngredient1 = new RecipeIngredient(recipe, ingredient1, 50.0);
-        recipeIngredient2 = new RecipeIngredient(recipe, ingredient2, 25.0);
+        recipeIngredient1 = new RecipeIngredient(recipe, ingredient1, amount1);
+        recipeIngredient2 = new RecipeIngredient(recipe, ingredient2, amount2);
 
         ingredientList = new ArrayList<>(List.of(recipeIngredient1, recipeIngredient2));
         preparationSteps = new ArrayList<>(List.of(
