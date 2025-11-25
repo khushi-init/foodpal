@@ -95,6 +95,32 @@ public class Recipe {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
     }
-    
 
+    public String toMarkdown() {
+        StringBuilder output = new StringBuilder();
+
+        // Header 1 with the name of the recipe
+        output.append("# ").append(name).append("\n\n");
+        // List of ingredients in a table
+        output.append("## Ingredients\n");
+        output.append("| Name | Amount |\n");
+        output.append("|------|--------|\n");
+
+        // Add all ingredients to the table.
+        for (RecipeIngredient i : ingredients) {
+            output.append("| ")
+                    .append(i.getIngredient().getName())
+                    .append(" | ")
+                    .append(i.getQuantity())
+                    .append(" |\n");
+        }
+
+        // List of all preparation steps.
+        output.append("\n## Preparation Steps\n");
+        for (String step : preparationSteps) {
+            output.append("* ").append(step).append("\n");
+        }
+
+        return output.toString();
+    }
 }

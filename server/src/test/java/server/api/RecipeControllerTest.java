@@ -3,12 +3,17 @@ package server.api;
 import commons.Recipe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import server.database.RecipeRepository;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.springframework.http.HttpStatus.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -70,6 +75,40 @@ public class RecipeControllerTest {
         // ASSERT: Check HTTP status (404 Not Found)
         assertEquals(NOT_FOUND, response.getStatusCode());
         verify(mockRepository, times(1)).findById(fakeId);
+    }
+
+    @Test
+    public void downloadRecipeNotFoundTest() {
+        // ARRANGE
+        when(mockRepository.findById(fakeId)).thenReturn(Optional.empty());
+
+        // ACT
+        ResponseEntity<byte[]> response = sut.downloadRecipe(fakeId);
+
+        // ASSERT
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(mockRepository, times(1)).findById(fakeId);
+    }
+
+    @Test
+    public void downloadRecipe_Found() {
+        // ARRANGE
+        Long id = 1L;
+
+        Recipe recipe = new Recipe();
+        recipe.setName("TestRecipe");
+        recipe.setIngredients(List.of());
+        recipe.setPreparationSteps(List.of("Do this"));
+
+        when(mockRepository.findById(id)).thenReturn(Optional.of(recipe));
+
+        // ACT
+        ResponseEntity<byte[]> response = sut.downloadRecipe(id);
+
+        // ASSERT
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("attachment; filename=recipe-TestRecipe.md",
+                response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION));
     }
 
     @Test
