@@ -15,7 +15,7 @@ public class RecipeTest {
     private RecipeIngredient recipeIngredient1;
     private RecipeIngredient recipeIngredient2;
     private double amount1 = 50.0;
-    private double amount2 = 25.0
+    private double amount2 = 25.0;
     private List<RecipeIngredient> ingredientList;
     private List<String> preparationSteps;
 
