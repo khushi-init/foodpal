@@ -5,8 +5,6 @@ import java.io.PrintWriter;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
-// import client.utils.ServerUtils;
-
 public class ErrorCtrl {
     /**
     * Can be called to display a proper error message when the server is unavailable

@@ -198,6 +198,7 @@ public class RecipesWindowCtrl {
 
 
     }
+    
     /**
      * Fetches the current recipe data from the server and loads it in the local storage of the recipes
      */
@@ -208,7 +209,12 @@ public class RecipesWindowCtrl {
             primaryCtrl.showServerUnavailableError();
             return;
         }
-        List<Recipe> serverResponse = serverUtils.getRecipes();
-        this.recipes.setAll(serverResponse);
+        try{
+            List<Recipe> serverResponse = serverUtils.getRecipes();
+            this.recipes.setAll(serverResponse);
+        } catch (Exception e){
+            primaryCtrl.showGenericError(e);
+        }
+        
     }
 }
