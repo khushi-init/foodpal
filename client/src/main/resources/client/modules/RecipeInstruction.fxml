@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 
-<HBox maxHeight="30.0" maxWidth="Infinity" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeInstructionUICtrl">
+<HBox fx:id="instructionBox" maxHeight="30.0" maxWidth="Infinity" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeInstructionUICtrl">
     <Label fx:id="instructionText" prefHeight="Infinity" text="Recipe Instruction" wrapText="true" />
     <Region HBox.hgrow="ALWAYS" />
-    <Button fx:id="deleteButton" onAction="#handleDeleteButton" prefHeight="Infinity" prefWidth="30.0" text="D" />
-    <Button fx:id="editButton" prefHeight="Infinity" prefWidth="30.0" text="E" />
+    <Button onAction="#handleDeleteButton" prefHeight="Infinity" prefWidth="30.0" text="D" />
+    <Button onAction="#handleEditButton" prefHeight="Infinity" prefWidth="30.0" text="E" />
 </HBox>

@@ -1,11 +1,18 @@
 package client.utils;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.util.function.Consumer;
+
 public class RecipeInstructionUICtrl {
+
+    @FXML
+    private HBox instructionBox;
 
     @FXML
     private VBox recipeView;
@@ -13,13 +20,9 @@ public class RecipeInstructionUICtrl {
     @FXML
     private Label instructionText;
 
-    @FXML
-    private Button deleteButton;
+    private Runnable deleteCheck;
 
-    @FXML
-    private Button editButton;
-
-    private Runnable clickCheck;
+    private Consumer<String> editInstruction;
 
     private long index; // Someone will probably need this to handle deletes
 
@@ -35,14 +38,31 @@ public class RecipeInstructionUICtrl {
         return this.index;
     }
 
-    public void setClickCheck(Runnable clickCheck) {
-        this.clickCheck = clickCheck;
+    public void setDeleteCheck(Runnable deleteCheck) {
+        this.deleteCheck = deleteCheck;
+    }
+    public void setEditInstruction(Consumer<String> editInstruction) {
+        this.editInstruction = editInstruction;
     }
 
     @FXML
     private void handleDeleteButton() {
-        if (clickCheck != null) {
-            clickCheck.run();
+        if (deleteCheck != null) {
+            deleteCheck.run();
         }
+    }
+
+    @FXML
+    private void handleEditButton() {
+        TextField textField = new TextField(instructionText.getText());
+        HBox.setHgrow(textField, Priority.ALWAYS);
+        textField.setPromptText(instructionText.getText());
+        textField.setFocusTraversable(false);
+        textField.setOnAction(actionEvent -> {
+            editInstruction.accept(textField.getText());
+            instructionBox.getChildren().set(0, instructionText);
+        });
+        instructionBox.getChildren().set(0, textField);
+        textField.requestFocus();
     }
 }

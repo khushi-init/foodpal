@@ -56,6 +56,14 @@ public class RecipesWindowCtrl {
         RecipeIngredient ri2 = new RecipeIngredient(sampler, sample2, debugDummyQuantity);
         sampler.setIngredients(List.of(ri, ri2));
         recipes.add(sampler);
+        // SECOND RECIPE FOR TESTING
+        sample = new Ingredient("Carrot but better");
+        sample2 = new Ingredient("Egg but more awesome");
+        sampler = new Recipe("Eggs and Carrot+", null, new ArrayList<>(List.of("oops", "I", "dropped", "everything", "fuck")));
+        ri = new RecipeIngredient(sampler, sample, debugDummyQuantity);
+        ri2 = new RecipeIngredient(sampler, sample2, debugDummyQuantity);
+        sampler.setIngredients(List.of(ri, ri2));
+        recipes.add(sampler);
         // TEMPORARY DUMMY DATA TO AID DEVELOPMENT
 
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
@@ -118,11 +126,18 @@ public class RecipesWindowCtrl {
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
             int currentIndex = i;
-            instCtrl.setClickCheck(() -> {
-                // This code runs when .run() is called in the child
+            instCtrl.setDeleteCheck(() -> {
+                // This code runs when .run() is called on click in deleteCheck runnable
+                // Not sure if this is a proper solution to the callback though
                 recipeInstructions.remove(currentIndex);
                 openRecipe(currentRecipe);
-                System.out.println("Pressed!");
+                System.out.println("Instruction removed");
+            });
+            instCtrl.setEditInstruction(newInstruction -> {
+                // This code is run when a string is passed into the editInstruction consumer
+                System.out.println("Instruction edit from " + recipeInstructions.get(currentIndex) + " to " + newInstruction);
+                recipeInstructions.set(currentIndex, newInstruction);
+                openRecipe(currentRecipe);
             });
             instCtrl.setText("- " + instruction);
             instCtrl.setIndex(i);
