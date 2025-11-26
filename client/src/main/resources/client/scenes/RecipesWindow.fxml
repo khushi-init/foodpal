@@ -37,11 +37,11 @@
                             </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="duplicateBtn" mnemonicParsing="false" onAction="#onCloneRecipe" prefHeight="Infinity" style="-fx-background-color: transparent; -fx-padding: 4; -fx-cursor: hand;">
+                        <Button fx:id="duplicateBtn" mnemonicParsing="false" onAction="#onCloneRecipe" prefHeight="Infinity" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
                      <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
+                        <ImageView fitHeight="200.0" fitWidth="200.0" style="-fx-fit-height: 20; -fx-fit-width: 20;">
                            <image>
-                              <Image url="@client/images/duplicate-icon-sm.png" />
+                              <Image url="@../images/duplicate-icon-sm.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>
