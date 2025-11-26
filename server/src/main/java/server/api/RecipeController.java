@@ -1,11 +1,14 @@
 package server.api;
 
 import commons.Recipe;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.database.RecipeRepository;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +34,25 @@ public class RecipeController {
         // if the recipe is found return 200 OK or else return 404 not found
         return recipe.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> downloadRecipe(@PathVariable Long id) {
+        Optional<Recipe> recipe = recipeRepository.findById(id);
+
+        if (recipe.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String text = recipe.get().toMarkdown();
+        byte[] fileBytes = text.getBytes(StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=recipe-" +
+                                recipe.get().getName() + ".md")
+                .contentType(MediaType.TEXT_MARKDOWN)
+                .body(fileBytes);
     }
 
     // POST ENDPOINT
