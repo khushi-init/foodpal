@@ -12,11 +12,10 @@ public class ErrorCtrl {
     * Can be called to display a proper error message when the server is unavailable
     **/
     public void showServerUnavailableError(){
-        Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText("Server unavailable");
-        alert.setContentText("The server is offline or dealing with a DDOS attack");
-        alert.showAndWait();
+        showErrorPopup("Error",
+                "Server unavailable",
+                "The server is offline or dealing with a DDOS attack"
+        );
     }
 
     /**
@@ -32,10 +31,6 @@ public class ErrorCtrl {
             writeStackTraceSucces = false;
         }
 
-        Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText("Uh oh, that's an error.");
-
         String errorContextText = "The following exception was raised ";
         if(writeStackTraceSucces){
             errorContextText += "(for the full stack trace, see stacktrace.txt)";
@@ -45,8 +40,10 @@ public class ErrorCtrl {
         errorContextText += ":\n";
         errorContextText += e.toString();
 
-        alert.setContentText(errorContextText);
-        alert.showAndWait();
+        showErrorPopup("Error",
+                "Uh oh, that's an error.",
+                errorContextText
+        );
     }
 
     /**
@@ -54,17 +51,18 @@ public class ErrorCtrl {
      * @param message The String to be displayed
      */
     public void showGenericError(String message){
-        Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText("");
-        alert.setContentText(message);
-        alert.showAndWait();
         showErrorPopup("Error",
                 "",
                 message
         );
     }
 
+    /**
+     * Shows an error popup with the specified contents
+     * @param title Title of the window
+     * @param headerText
+     * @param message
+     */
     public void showErrorPopup(String title, String headerText, String message){
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle(title);
