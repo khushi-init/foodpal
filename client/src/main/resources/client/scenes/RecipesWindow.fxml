@@ -42,7 +42,7 @@
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0">
                            <image>
-                              <Image url="@client/images/duplicate.png" />
+                              <Image url="@/client/images/duplicate.png" />
                            </image>
                         </ImageView>
                      </graphic></Button>

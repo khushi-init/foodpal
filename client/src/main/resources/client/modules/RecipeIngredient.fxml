@@ -16,7 +16,7 @@
       <graphic>
          <ImageView fitHeight="16.0" fitWidth="16.0">
             <image>
-               <Image url="@client/images/delete.png" />
+               <Image url="@/client/images/delete.png" />
             </image>
          </ImageView>
       </graphic></Button>
@@ -24,7 +24,7 @@
       <graphic>
          <ImageView fitHeight="15.0" fitWidth="15.0">
             <image>
-               <Image url="@client/images/change_text.png" />
+               <Image url="@/client/images/change_text.png" />
             </image>
          </ImageView>
       </graphic></Button>
