@@ -19,6 +19,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,6 +36,8 @@ public class RecipesWindowCtrl {
     @FXML
     private VBox recipeView;
 
+    private Recipe currentRecipe;
+
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
@@ -48,7 +51,7 @@ public class RecipesWindowCtrl {
         // TEMPORARY DUMMY DATA TO AID DEVELOPMENT
         Ingredient sample = new Ingredient("Carrot");
         Ingredient sample2 = new Ingredient("Egg");
-        Recipe sampler = new Recipe("Eggs and Carrot", null, List.of("Stirffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff lmao"));
+        Recipe sampler = new Recipe("Eggs and Carrot", null, new ArrayList<>(List.of("Stirff", "fooo", "bar", "Hello World!", "Bruh")));
         RecipeIngredient ri = new RecipeIngredient(sampler, sample, debugDummyQuantity);
         RecipeIngredient ri2 = new RecipeIngredient(sampler, sample2, debugDummyQuantity);
         sampler.setIngredients(List.of(ri, ri2));
@@ -71,6 +74,8 @@ public class RecipesWindowCtrl {
      * @param recipe - The recipe to load
      */
     public void openRecipe(Recipe recipe) {
+        this.currentRecipe = recipe;
+        recipeView.getChildren().clear();
         loadIngredients(recipe.getIngredients());
         Separator sep = new Separator();
         recipeView.getChildren().add(sep);
@@ -112,7 +117,13 @@ public class RecipesWindowCtrl {
             Pair<RecipeInstructionUICtrl, Node> ing = Main.FXML.loadNode(RecipeInstructionUICtrl.class,"client", "modules", "RecipeInstruction.fxml");
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
-
+            int currentIndex = i;
+            instCtrl.setClickCheck(() -> {
+                // This code runs when .run() is called in the child
+                recipeInstructions.remove(currentIndex);
+                openRecipe(currentRecipe);
+                System.out.println("Pressed!");
+            });
             instCtrl.setText("- " + instruction);
             instCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
@@ -120,4 +131,5 @@ public class RecipesWindowCtrl {
         }
         recipeView.requestLayout();
     }
+
 }
