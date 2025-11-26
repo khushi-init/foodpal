@@ -90,14 +90,14 @@ public class RecipesWindowCtrl {
         recipeNameLabel.setText(recipe.getName());
 
     }
-
+    private final int fontSize = 16;
     /**
      * Loads the ingredients within a list to the recipeView UI element
      * @param recipeIngredients - A list of RecipeIngredients
      */
     public void loadIngredients(List<RecipeIngredient> recipeIngredients){
         Label ingredientsLabel = new Label("Ingredients:");
-        ingredientsLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
+        ingredientsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(ingredientsLabel);
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
@@ -120,7 +120,7 @@ public class RecipesWindowCtrl {
     // This might look like code duplication now, but the way we handle ingredients and steps might change dramatically in the future
     public void loadSteps(List<String> recipeInstructions){
         Label stepsLabel = new Label("Steps:");
-        stepsLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
+        stepsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(stepsLabel);
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
