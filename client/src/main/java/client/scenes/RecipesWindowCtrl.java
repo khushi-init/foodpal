@@ -221,6 +221,7 @@ public class RecipesWindowCtrl {
                 if(recipe.getId() == selectedRecipe.getId()){
                     selectedRecipe = recipe;
                     openRecipe(recipe);
+                    recipeStillExists = true;
                     break;
                 }
             }
