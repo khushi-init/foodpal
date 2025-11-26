@@ -21,6 +21,8 @@ public class RecipeController {
     // GET ENDPOINTS
     @GetMapping
     public List<Recipe> findAllRecipes() {
+        System.out.println("Retrieving all recipes, output:");
+        System.out.println(recipeRepository.findAll().toString());
         return recipeRepository.findAll();
     }
 

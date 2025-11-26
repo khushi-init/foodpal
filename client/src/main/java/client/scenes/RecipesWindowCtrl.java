@@ -4,6 +4,7 @@ import client.Main;
 import client.RecipeListCell;
 import client.utils.RecipeIngredientUICtrl;
 import client.utils.RecipeInstructionUICtrl;
+import client.utils.ServerUtils;
 import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
@@ -22,6 +23,8 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.Inject;
+
 
 public class RecipesWindowCtrl {
 
@@ -39,6 +42,20 @@ public class RecipesWindowCtrl {
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
+
+    private ServerUtils serverUtils;
+    private PrimaryCtrl primaryCtrl;
+
+    /**
+     * Injectable constructor for RecipesWindowCtrl
+     * @param u ServerUtils instance to be injected
+     * @param p PrimaryCtrl instance to be injected
+     */
+    @Inject
+    public RecipesWindowCtrl(ServerUtils u, PrimaryCtrl p){
+        this.serverUtils = u;
+        this.primaryCtrl = p;
+    }
 
     /**
      * Initializes the sidebar items (Recipe names) to track the ObervableList items
@@ -180,5 +197,18 @@ public class RecipesWindowCtrl {
 
 
 
+    }
+    /**
+     * Fetches the current recipe data from the server and loads it in the local storage of the recipes
+     */
+    @FXML
+    public void refreshLocalRecipes(){
+        boolean serverAvailable = serverUtils.isServerAvailable();
+        if(!serverAvailable){
+            primaryCtrl.showServerUnavailableError();
+            return;
+        }
+        List<Recipe> serverResponse = serverUtils.getRecipes();
+        this.recipes.setAll(serverResponse);
     }
 }

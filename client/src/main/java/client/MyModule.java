@@ -16,6 +16,8 @@
 package client;
 
 import client.scenes.*;
+import client.utils.ErrorCtrl;
+
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -26,5 +28,6 @@ public class MyModule implements Module {
     public void configure(Binder binder) {
         binder.bind(PrimaryCtrl.class).in(Scopes.SINGLETON);
         binder.bind(RecipesWindowCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(ErrorCtrl.class).in(Scopes.SINGLETON);
     }
 }

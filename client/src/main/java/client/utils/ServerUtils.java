@@ -70,6 +70,7 @@ public class ServerUtils {
     }
 
     public List<Recipe> getRecipes() {
+        System.out.println("Retrieving all recipes...");
         return ClientBuilder.newClient(new ClientConfig()) //
                 .target(SERVER).path("api/recipes") //
                 .request(APPLICATION_JSON) //
