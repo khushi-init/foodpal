@@ -48,7 +48,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void getByIdCorrect() {
+    public void getByIdCorrectTest() {
         // ARRANGE: Tell the mock that when findById(1L) is called, return the testRecipe
         when(mockRepository.findById(id)).thenReturn(Optional.of(testRecipe));
 
@@ -62,7 +62,7 @@ public class RecipeControllerTest {
 
 
     @Test
-    public void getByIdNotFound() {
+    public void getByIdNotFoundTest() {
         // ARRANGE: Tell the mock that when findById(99L) is called, return an empty Optional
         when(mockRepository.findById(fakeId)).thenReturn(Optional.empty());
 
@@ -88,7 +88,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void downloadRecipeFound() {
+    public void downloadRecipeFoundTest() {
         // ARRANGE
         Long id = 1L;
 
@@ -109,7 +109,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void createRecipeCorrect() {
+    public void createRecipeCorrectTest() {
         // ARRANGE: Input recipe with no ID
         Recipe inputRecipe = new Recipe("New Cake", null, null);
 
@@ -127,7 +127,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void createRecipeBadRequest() {
+    public void createRecipeBadRequestTest() {
         // ARRANGE: Create a recipe that fails validation (empty name)
         Recipe badRecipe = new Recipe("",  null, null);
 
@@ -142,7 +142,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void deleteRecipeCorrect() {
+    public void deleteRecipeCorrectTest() {
         // ARRANGE: Tell the mock that the recipe with ID 1 exists
         when(mockRepository.existsById(id)).thenReturn(true);
 
@@ -156,7 +156,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void deleteRecipeNotFound() {
+    public void deleteRecipeNotFoundTest() {
         // ARRANGE: Tell the mock that the recipe with ID 99 does not exist
         when(mockRepository.existsById(fakeId)).thenReturn(false);
 
