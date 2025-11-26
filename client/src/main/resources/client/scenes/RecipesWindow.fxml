@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.25" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #f5f5f5;" stylesheets="@client/scenes/scrollfix.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipesWindowCtrl">
+<SplitPane dividerPositions="0.25" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #f5f5f5;" stylesheets="@/client/scenes/scrollfix.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipesWindowCtrl">
     <items>
         <VBox fx:id="sidebarVBox" maxWidth="300.0" style="-fx-background-color: transparent;">
             <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="1050.0" VBox.vgrow="ALWAYS">
