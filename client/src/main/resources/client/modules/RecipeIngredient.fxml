@@ -5,17 +5,26 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.scene.text.Font?>
 
-<HBox maxHeight="30.0" minWidth="200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeIngredientUICtrl">
-    <Label fx:id="ingredientText" prefHeight="Infinity" text="Recipe Ingredient" />
-    <Region HBox.hgrow="ALWAYS" />
-    <Button prefHeight="Infinity" prefWidth="30.0" text="D" />
-    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
+<HBox maxHeight="30.0" minWidth="200.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeIngredientUICtrl">
+    <Label fx:id="ingredientText" prefHeight="Infinity" style="-fx-padding: 8 0 4 0;" text="Recipe Ingredient" textFill="#111827">
+      <font>
+         <Font size="14.0" />
+      </font></Label>
+    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
       <graphic>
-         <ImageView fitHeight="200.0" fitWidth="200.0" style="-fx-fit-height: 20; -fx-fit-width: 20;">
+         <ImageView fitHeight="16.0" fitWidth="16.0">
             <image>
-               <Image url="@../images/change_text.png" />
+               <Image url="@client/images/delete.png" />
+            </image>
+         </ImageView>
+      </graphic></Button>
+    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+      <graphic>
+         <ImageView fitHeight="15.0" fitWidth="15.0">
+            <image>
+               <Image url="@client/images/change_text.png" />
             </image>
          </ImageView>
       </graphic></Button>
