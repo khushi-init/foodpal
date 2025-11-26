@@ -42,6 +42,7 @@ public class RecipesWindowCtrl {
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
+    private Recipe selectedRecipe;
 
     private ServerUtils serverUtils;
     private PrimaryCtrl primaryCtrl;
@@ -78,6 +79,7 @@ public class RecipesWindowCtrl {
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         openRecipe(newSelection);
+                        selectedRecipe = newSelection;
                     }
                 }
         );
@@ -198,7 +200,7 @@ public class RecipesWindowCtrl {
 
 
     }
-    
+
     /**
      * Fetches the current recipe data from the server and loads it in the local storage of the recipes
      */
@@ -212,6 +214,19 @@ public class RecipesWindowCtrl {
         try{
             List<Recipe> serverResponse = serverUtils.getRecipes();
             this.recipes.setAll(serverResponse);
+            //update the recipe UI to contain the new contents of the previously selected recipe:
+            if(selectedRecipe == null) return;
+            boolean recipeStillExists = false;
+            for(Recipe recipe: serverResponse){
+                if(recipe.getId() == selectedRecipe.getId()){
+                    selectedRecipe = recipe;
+                    openRecipe(recipe);
+                    break;
+                }
+            }
+            if(!recipeStillExists){
+                //TODO in another issue: make methods that clear the recipe view if there is no available recipe
+            }
         } catch (Exception e){
             primaryCtrl.showGenericError(e);
         }
