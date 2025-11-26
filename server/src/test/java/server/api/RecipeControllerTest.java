@@ -1,7 +1,6 @@
 package server.api;
 
 import commons.Recipe;
-import commons.RecipeIngredient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;

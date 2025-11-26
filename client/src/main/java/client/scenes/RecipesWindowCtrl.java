@@ -4,6 +4,7 @@ import client.Main;
 import client.RecipeListCell;
 import client.utils.RecipeIngredientUICtrl;
 import client.utils.RecipeInstructionUICtrl;
+import client.utils.ServerUtils;
 import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
@@ -29,6 +30,8 @@ public class RecipesWindowCtrl {
 
     // DUMMY DATA TO AID DEVELOPMENT DO NOT PUT ON RELEASE BRANCH
     private final Double debugDummyQuantity = 2.0;
+
+    private final ServerUtils server = new ServerUtils();
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -180,5 +183,33 @@ public class RecipesWindowCtrl {
 
 
 
+    }
+
+    /**
+     * Event handler for the '+' button in the sidebar
+     * Creates a new placeholder recipe object
+     * Sends the object to the serve via post to be saved
+     * Also selects the new recipe on the sidebar
+     */
+    @FXML
+    private void onAddRecipe() {
+        Recipe newRecipe = new Recipe(
+                "New Recipe",
+                new ArrayList<>(),
+                new ArrayList<>()
+        );
+        //calls the fixed ServerUtils method addRecipe
+        Recipe savedRecipe = server.addRecipe(newRecipe); // Assuming 'server' is initialized
+
+        if (savedRecipe != null) {
+            // add the server-returned object
+            recipes.add(savedRecipe);
+
+            // select and open the new recipe in the sidebar
+            sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
+        } else {
+            // error handling
+            System.err.println("Recipe creation failed. Check server console for details.");
+        }
     }
 }
