@@ -159,6 +159,7 @@ public class RecipesWindowCtrl {
      */
     public void clearRecipeView(){
         recipeView.getChildren().clear();
+        recipeNameLabel.setText("RECIPE NAME");
     }
 
     /**
