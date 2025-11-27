@@ -5,6 +5,7 @@ import client.RecipeListCell;
 import client.utils.RecipeIngredientUICtrl;
 import client.utils.RecipeInstructionUICtrl;
 import client.utils.ServerUtils;
+import client.utils.ServerUtils;
 import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
@@ -18,6 +19,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.util.Pair;
 
@@ -34,11 +37,16 @@ public class RecipesWindowCtrl {
     // DUMMY DATA TO AID DEVELOPMENT DO NOT PUT ON RELEASE BRANCH
     private final Double debugDummyQuantity = 2.0;
 
+    private final ServerUtils server = new ServerUtils();
+
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
 
     @FXML
     private VBox recipeView;
+
+    @FXML
+    private Label recipeNameLabel;
 
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
@@ -96,14 +104,18 @@ public class RecipesWindowCtrl {
         recipeView.getChildren().add(sep);
         VBox.setMargin(sep, lineMargin);
         loadSteps(recipe.getPreparationSteps());
-    }
 
+        recipeNameLabel.setText(recipe.getName());
+
+    }
+    private final int fontSize = 16;
     /**
      * Loads the ingredients within a list to the recipeView UI element
      * @param recipeIngredients - A list of RecipeIngredients
      */
     public void loadIngredients(List<RecipeIngredient> recipeIngredients){
         Label ingredientsLabel = new Label("Ingredients:");
+        ingredientsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(ingredientsLabel);
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
@@ -111,7 +123,7 @@ public class RecipesWindowCtrl {
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            ingCtrl.setText("- " + ri.getIngredient().getName() + " " + ri.getQuantity());
+            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity());
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
@@ -126,6 +138,7 @@ public class RecipesWindowCtrl {
     // This might look like code duplication now, but the way we handle ingredients and steps might change dramatically in the future
     public void loadSteps(List<String> recipeInstructions){
         Label stepsLabel = new Label("Steps:");
+        stepsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(stepsLabel);
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
@@ -133,7 +146,7 @@ public class RecipesWindowCtrl {
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            instCtrl.setText("- " + instruction);
+            instCtrl.setText("• " + instruction);
             instCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
@@ -208,6 +221,34 @@ public class RecipesWindowCtrl {
     }
 
     /**
+     * Event handler for the '+' button in the sidebar
+     * Creates a new placeholder recipe object
+     * Sends the object to the serve via post to be saved
+     * Also selects the new recipe on the sidebar
+     */
+    @FXML
+    private void onAddRecipe() {
+        Recipe newRecipe = new Recipe(
+                "New Recipe",
+                new ArrayList<>(),
+                new ArrayList<>()
+        );
+        //calls the fixed ServerUtils method addRecipe
+        Recipe savedRecipe = server.addRecipe(newRecipe); // Assuming 'server' is initialized
+
+        if (savedRecipe != null) {
+            // add the server-returned object
+            recipes.add(savedRecipe);
+
+            // select and open the new recipe in the sidebar
+            sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
+        } else {
+            // error handling
+            System.err.println("Recipe creation failed. Check server console for details.");
+        }
+    }
+
+    /**
      * Fetches the current recipe data from the server and loads it in the local storage of the recipes
      */
     @FXML
@@ -241,23 +282,6 @@ public class RecipesWindowCtrl {
         } catch (Exception e){
             primaryCtrl.showGenericError(e);
         }
-
-        // Recipe selectedRecipe = getSelectedRecipe();
-        // clearRecipeView();
-        // recipes.clear();
-        // initialize();
-        // if(selectedRecipe == null) return;
-        // boolean recipeStillExists = false;
-        // for(Recipe recipe: recipes){
-        //     if(recipe.getId() == selectedRecipe.getId()){
-        //         openRecipe(recipe);
-        //         selectedRecipe = recipe;
-        //         recipeStillExists = true;
-        //         break;
-        //     }
-        // }
-        // if(!recipeStillExists) return;
-        // setSelectedRecipe(selectedRecipe);
         
     }
 

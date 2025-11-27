@@ -1,11 +1,14 @@
 package server.api;
 
 import commons.Recipe;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.database.RecipeRepository;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +36,25 @@ public class RecipeController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> downloadRecipe(@PathVariable Long id) {
+        Optional<Recipe> recipe = recipeRepository.findById(id);
+
+        if (recipe.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String text = recipe.get().toMarkdown();
+        byte[] fileBytes = text.getBytes(StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=recipe-" +
+                                recipe.get().getName() + ".md")
+                .contentType(MediaType.TEXT_MARKDOWN)
+                .body(fileBytes);
+    }
+
     // POST ENDPOINT
     @PostMapping
     public ResponseEntity<Recipe> createRecipe(@RequestBody Recipe recipe) {
@@ -46,6 +68,25 @@ public class RecipeController {
 
         // returning the HTTPS code for created
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipe);
+    }
+
+    // PUT ENDPOINT
+    @PutMapping("/{id}")
+    public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe recipe) {
+        // checking if the recipe exists using its ID
+        if(!recipeRepository.existsById(id)){
+            return ResponseEntity.notFound().build();
+        }
+        // checking if the recipe has a valid name
+        if(recipe.getName() == null || recipe.getName().trim().isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        // the ID is the same of the object being stored
+        recipe.setId(id);
+        // save the updated recipe
+        Recipe changedRecipe = recipeRepository.save(recipe);
+
+        return ResponseEntity.ok(changedRecipe);
     }
 
 

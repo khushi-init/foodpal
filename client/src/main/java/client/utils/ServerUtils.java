@@ -23,12 +23,15 @@ import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import commons.Recipe;
+import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.client.ClientConfig;
 
-import commons.Quote;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -37,6 +40,8 @@ import jakarta.ws.rs.core.GenericType;
 public class ServerUtils {
 
     private static final String SERVER = "http://localhost:8080/";
+    private static final int statusOK = 200;
+    private static final int statusCreation = 201;
 
     /**
      * Returns true if a server is running on port 8080
@@ -76,10 +81,71 @@ public class ServerUtils {
                 .get(new GenericType<List<Recipe>>() {});
     }
 
-    public Quote addRecipe(Recipe recipe) {
-        return ClientBuilder.newClient(new ClientConfig()) //
-                .target(SERVER).path("api/quotes") //
-                .request(APPLICATION_JSON) //
-                .post(Entity.entity(recipe, APPLICATION_JSON), Quote.class);
+
+    /**
+     * Sends a POST request to the server to create a new recipe
+     * @param recipe the recipe object to be saved
+     * @return newly created recipe object returned by the server
+     */
+    public Recipe addRecipe(Recipe recipe) {
+
+        Response response = null; // Declare Response outside the try block if needed elsewhere
+        try {
+            response = ClientBuilder.newClient(new ClientConfig())
+                    .target(SERVER).path("api/recipes")
+                    .request(APPLICATION_JSON)
+                    // POST the entity and wait for the Response object
+                    .post(Entity.entity(recipe, APPLICATION_JSON));
+
+            // check for success (201 Created)
+            if (response.getStatus() == statusCreation) {
+                // read the JSON response body into a Recipe object
+                return response.readEntity(Recipe.class);
+            } else {
+                // log non-success status and return null
+                System.err.println("Failed to add recipe. Server returned status: " + response.getStatus());
+                // It's crucial to read the entity even on failure to avoid connection issues
+                response.readEntity(String.class); // Consume the body
+                return null;
+            }
+        } catch (ProcessingException e) {
+            // handle network/processing error
+            System.err.println("Network/Processing error while adding recipe: " + e.getMessage());
+            return null;
+        } finally {
+            // always close the response object to free up resources
+            if (response != null) {
+                response.close();
+            }
+        }
     }
+
+    /**
+     * Download a recipe markdown file.
+     * @param recipeId the id of the recipe to download.
+     */
+    public void downloadRecipe(Long recipeId) {
+        try {
+            Response response = ClientBuilder.newClient()
+                    .target(SERVER)
+                    .path("api/recipes/download/" + recipeId)
+                    .request()
+                    .get(Response.class);
+
+            if (response.getStatus() == statusOK) {
+                // The path to save the file to
+                String userDownloads = System.getProperty("user.home") + "/Downloads/";
+                String fileName = "recipe_" + recipeId + ".md";
+                Path filePath = Paths.get(userDownloads + fileName);
+
+                // Write the file to the path
+                Files.write(filePath, response.readEntity(byte[].class));
+                System.out.println("Downloaded recipe " + recipeId + " to " + filePath);
+            }
+
+        } catch (Exception e) {
+            System.out.println("An error has occurred!");
+        }
+    }
+
 }
