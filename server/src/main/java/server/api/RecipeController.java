@@ -70,6 +70,25 @@ public class RecipeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipe);
     }
 
+    // PUT ENDPOINT
+    @PutMapping("/{id}")
+    public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe recipe) {
+        // checking if the recipe exists using its ID
+        if(!recipeRepository.existsById(id)){
+            return ResponseEntity.notFound().build();
+        }
+        // checking if the recipe has a valid name
+        if(recipe.getName() == null || recipe.getName().trim().isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        // the ID is the same of the object being stored
+        recipe.setId(id);
+        // save the updated recipe
+        Recipe changedRecipe = recipeRepository.save(recipe);
+
+        return ResponseEntity.ok(changedRecipe);
+    }
+
 
     // DELETE ENDPOINT
     @DeleteMapping("/{id}")
