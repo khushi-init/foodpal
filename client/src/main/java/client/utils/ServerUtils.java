@@ -42,6 +42,7 @@ public class ServerUtils {
     private static final String SERVER = "http://localhost:8080/";
     private static final int statusOK = 200;
     private static final int statusCreation = 201;
+    private static final int statusNoContent = 204;
 
     /**
      * Returns true if a server is running on port 8080
@@ -146,6 +147,35 @@ public class ServerUtils {
         } catch (Exception e) {
             System.out.println("An error has occurred!");
         }
+    }
+
+    /**
+     * Sends a DELETE request to the server to delete the recipe of the provided id
+     * @param recipeId - The id of the recipe to destroy
+     * @return - A boolean indicating whether the deletion was successful or not
+     */
+    public boolean deleteRecipe(Long recipeId) {
+        Response response = null; // Declare Response outside the try block if needed elsewhere
+        try {
+            response = ClientBuilder.newClient()
+                    .target(SERVER)
+                    .path("api/recipes/" + recipeId)
+                    .request()
+                    .delete();
+            if (response.getStatus() != statusNoContent) {
+                System.err.println("Failed to delete recipe. Server returned status: " + response.getStatus());
+                return false;
+            }
+            return true;
+
+        } catch (ProcessingException e) {
+            System.err.println("Network/Processing error while deleting recipe: " + e.getMessage());
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+        return false;
     }
 
 }
