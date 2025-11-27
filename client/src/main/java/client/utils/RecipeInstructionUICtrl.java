@@ -53,7 +53,7 @@ public class RecipeInstructionUICtrl {
     }
 
     @FXML
-    private void handleEditButton() {
+    public void handleEditButton() {
         TextField textField = new TextField(instructionText.getText());
         HBox.setHgrow(textField, Priority.ALWAYS);
         textField.setPromptText(instructionText.getText());

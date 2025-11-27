@@ -12,9 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
@@ -37,6 +35,8 @@ public class RecipesWindowCtrl {
     private VBox recipeView;
 
     private Recipe currentRecipe;
+
+    private boolean newInstructionAdded = false;
 
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
@@ -126,6 +126,7 @@ public class RecipesWindowCtrl {
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
             int currentIndex = i;
+            // Delete logic
             instCtrl.setDeleteCheck(() -> {
                 // This code runs when .run() is called on click in deleteCheck runnable
                 // Not sure if this is a proper solution to the callback though
@@ -133,6 +134,7 @@ public class RecipesWindowCtrl {
                 openRecipe(currentRecipe);
                 System.out.println("Instruction removed");
             });
+            // Edit Logic
             instCtrl.setEditInstruction(newInstruction -> {
                 // This code is run when a string is passed into the editInstruction consumer
                 System.out.println("Instruction edit from " + recipeInstructions.get(currentIndex) + " to " + newInstruction);
@@ -143,7 +145,21 @@ public class RecipesWindowCtrl {
             instCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
+            // Check if an instruction was added, and if it we are in the new instruction
+            // To trigger immediate editing.
+            if(newInstructionAdded && (i == recipeInstructions.size() - 1)) {
+                instCtrl.handleEditButton();
+                newInstructionAdded = false;
+            }
         }
+        // Add logic
+        Button addButton = new Button("Add Instruction");
+        recipeView.getChildren().add(addButton);
+        addButton.setOnAction(e -> {
+            recipeInstructions.add("New Instruction");
+            newInstructionAdded = true;
+            openRecipe(currentRecipe);
+        });
         recipeView.requestLayout();
     }
 
