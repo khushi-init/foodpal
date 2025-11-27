@@ -5,7 +5,6 @@ import client.RecipeListCell;
 import client.utils.RecipeIngredientUICtrl;
 import client.utils.RecipeInstructionUICtrl;
 import client.utils.ServerUtils;
-import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import javafx.collections.FXCollections;
@@ -28,10 +27,7 @@ public class RecipesWindowCtrl {
 
     private final Insets lineMargin = new Insets(0, 15, 0, 15);
 
-    // DUMMY DATA TO AID DEVELOPMENT DO NOT PUT ON RELEASE BRANCH
-    private final Double debugDummyQuantity = 2.0;
-
-    private final ServerUtils server = new ServerUtils();
+    private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -48,32 +44,14 @@ public class RecipesWindowCtrl {
 
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
-    private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
+    private ObservableList<Recipe> recipes;
 
     /**
-     * Initializes the sidebar items (Recipe names) to track the ObervableList items
+     * Initializes the sidebar items (Recipe names) to track the ObservableList items
      */
     public void initialize() {
+        recipes = FXCollections.observableArrayList(server.getRecipes());
         sidebarRecipeNamesList.setItems(recipes);
-
-        // TEMPORARY DUMMY DATA TO AID DEVELOPMENT
-        Ingredient sample = new Ingredient("Carrot");
-        Ingredient sample2 = new Ingredient("Egg");
-        Recipe sampler = new Recipe("Eggs and Carrot", null, new ArrayList<>(List.of("Stirff", "fooo", "bar", "Hello World!", "Bruh")));
-        RecipeIngredient ri = new RecipeIngredient(sampler, sample, debugDummyQuantity);
-        RecipeIngredient ri2 = new RecipeIngredient(sampler, sample2, debugDummyQuantity);
-        sampler.setIngredients(List.of(ri, ri2));
-        recipes.add(sampler);
-        // SECOND RECIPE FOR TESTING
-        sample = new Ingredient("Carrot but better");
-        sample2 = new Ingredient("Egg but more awesome");
-        sampler = new Recipe("Eggs and Carrot+", null, new ArrayList<>(List.of("oops", "I", "dropped", "everything", "fuck")));
-        ri = new RecipeIngredient(sampler, sample, debugDummyQuantity);
-        ri2 = new RecipeIngredient(sampler, sample2, debugDummyQuantity);
-        sampler.setIngredients(List.of(ri, ri2));
-        recipes.add(sampler);
-        // TEMPORARY DUMMY DATA TO AID DEVELOPMENT
-
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
@@ -261,5 +239,26 @@ public class RecipesWindowCtrl {
             // error handling
             System.err.println("Recipe creation failed. Check server console for details.");
         }
+    }
+
+    /**
+     * Event handler for the "-" button on the recipes list
+     * Sends delete request to the server for the currently
+     * selected recipe. Upon successful deletion from the server
+     * it is deleted from the local client list as well.
+     */
+    @FXML
+    private void onDeleteRecipe() {
+        Recipe hit = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
+        if (hit == null) {
+            return;
+        }
+        boolean successful = server.deleteRecipe(hit.getId());
+        if (!successful) {
+            System.err.println("RecipesWindowCtrl: Failed to delete recipe from the server, aborting request!");
+            return;
+        }
+        sidebarRecipeNamesList.getSelectionModel().selectPrevious();
+        recipes.remove(hit);
     }
 }
