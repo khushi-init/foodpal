@@ -428,3 +428,7 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: C:/Users/luca/cs
 	at org.h2.mvstore.SingleFileStore.open(SingleFileStore.java:81)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:286)
 	... 58 more
+2025-11-27 17:47:24.414156+01:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "insert into recipe [*]name\000d\000avalues 'Eggs and bacon'"; expected "., (, OVERRIDING USER VALUE, OVERRIDING SYSTEM VALUE, DIRECT, DEFAULT VALUES, VALUES, SET, WITH, (, SELECT, TABLE, VALUES"; SQL statement:
+insert into recipe name
+values 'Eggs and bacon' [42001-232]
