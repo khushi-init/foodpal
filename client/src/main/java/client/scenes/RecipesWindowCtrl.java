@@ -18,6 +18,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -38,6 +40,9 @@ public class RecipesWindowCtrl {
 
     @FXML
     private VBox recipeView;
+
+    @FXML
+    private Label recipeNameLabel;
 
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
@@ -81,14 +86,18 @@ public class RecipesWindowCtrl {
         recipeView.getChildren().add(sep);
         VBox.setMargin(sep, lineMargin);
         loadSteps(recipe.getPreparationSteps());
-    }
 
+        recipeNameLabel.setText(recipe.getName());
+
+    }
+    private final int fontSize = 16;
     /**
      * Loads the ingredients within a list to the recipeView UI element
      * @param recipeIngredients - A list of RecipeIngredients
      */
     public void loadIngredients(List<RecipeIngredient> recipeIngredients){
         Label ingredientsLabel = new Label("Ingredients:");
+        ingredientsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(ingredientsLabel);
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
@@ -96,7 +105,7 @@ public class RecipesWindowCtrl {
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            ingCtrl.setText("- " + ri.getIngredient().getName() + " " + ri.getQuantity());
+            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity());
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
@@ -111,6 +120,7 @@ public class RecipesWindowCtrl {
     // This might look like code duplication now, but the way we handle ingredients and steps might change dramatically in the future
     public void loadSteps(List<String> recipeInstructions){
         Label stepsLabel = new Label("Steps:");
+        stepsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(stepsLabel);
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
@@ -118,7 +128,7 @@ public class RecipesWindowCtrl {
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            instCtrl.setText("- " + instruction);
+            instCtrl.setText("• " + instruction);
             instCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
