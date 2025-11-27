@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import server.database.RecipeRepository;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -139,6 +141,30 @@ public class RecipeControllerTest {
 
         // ASSERT: Verify the save method was never called due to validation failure
         verify(mockRepository, never()).save(badRecipe);
+    }
+
+    @Test
+    public void changeRecipeCorrectTest() {
+        // ARRANGE 1: Set up the mock to confirm the recipe exists
+        when(mockRepository.existsById(id)).thenReturn(true);
+
+        // ARRANGE 2: Create the recipe object containing updated details
+        Recipe savedRecipe = new Recipe("Updated Recipe Name", new ArrayList<>(), new ArrayList<>());
+
+        // ARRANGE 3: Tell the mock what the repository returns after saving
+        // The saved object should have the correct ID
+        savedRecipe.setId(id);
+        when(mockRepository.save(any(Recipe.class))).thenReturn(savedRecipe);
+
+        // ACT: Call the change method
+        ResponseEntity<Recipe> response = sut.changeRecipe(id, savedRecipe);
+
+        // ASSERT 1: Check HTTP status (200 OK)
+        assertEquals(OK, response.getStatusCode());
+
+        // Verify that the save method was called with the correct ID set
+        verify(mockRepository, times(1)).save(savedRecipe);
+
     }
 
     @Test
