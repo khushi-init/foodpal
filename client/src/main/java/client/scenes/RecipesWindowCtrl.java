@@ -18,6 +18,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -42,7 +43,6 @@ public class RecipesWindowCtrl {
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
-    private Recipe selectedRecipe;
 
     private ServerUtils serverUtils;
     private PrimaryCtrl primaryCtrl;
@@ -79,7 +79,6 @@ public class RecipesWindowCtrl {
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         openRecipe(newSelection);
-                        selectedRecipe = newSelection;
                     }
                 }
         );
@@ -140,6 +139,13 @@ public class RecipesWindowCtrl {
             recipeView.getChildren().add(ingNode);
         }
         recipeView.requestLayout();
+    }
+
+    /**
+     * Clears recipe view, making it look the same as when the app launches
+     */
+    public void clearRecipeView(){
+        recipeView.getChildren().clear();
     }
 
     /**
@@ -212,11 +218,15 @@ public class RecipesWindowCtrl {
             return;
         }
         try{
+            clearRecipeView();
             List<Recipe> serverResponse = serverUtils.getRecipes();
             this.recipes.setAll(serverResponse);
+            Recipe selectedRecipe = getSelectedRecipe();
+
             //update the recipe UI to contain the new contents of the previously selected recipe:
             if(selectedRecipe == null) return;
             boolean recipeStillExists = false;
+            //In the case that the selected recipe was deleted on the server by a different client, make sure nothing is selected after refreshing
             for(Recipe recipe: serverResponse){
                 if(recipe.getId() == selectedRecipe.getId()){
                     selectedRecipe = recipe;
@@ -225,12 +235,52 @@ public class RecipesWindowCtrl {
                     break;
                 }
             }
-            if(!recipeStillExists){
-                //TODO in another issue: make methods that clear the recipe view if there is no available recipe
-            }
+            if(!recipeStillExists) return;
+            setSelectedRecipe(selectedRecipe);
+            
         } catch (Exception e){
             primaryCtrl.showGenericError(e);
         }
+
+        // Recipe selectedRecipe = getSelectedRecipe();
+        // clearRecipeView();
+        // recipes.clear();
+        // initialize();
+        // if(selectedRecipe == null) return;
+        // boolean recipeStillExists = false;
+        // for(Recipe recipe: recipes){
+        //     if(recipe.getId() == selectedRecipe.getId()){
+        //         openRecipe(recipe);
+        //         selectedRecipe = recipe;
+        //         recipeStillExists = true;
+        //         break;
+        //     }
+        // }
+        // if(!recipeStillExists) return;
+        // setSelectedRecipe(selectedRecipe);
         
+    }
+
+    /**
+     * Retrieves the selected recipe
+     * @return The selected recipe item, null if no recipe is selected
+     */
+    public Recipe getSelectedRecipe(){
+        MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
+        ObservableList<Recipe> selectedRecipes = selectionModel.getSelectedItems();
+        if(selectedRecipes.size() == 0){
+            return null; //return null if there are no selected recipes (i.e. the list of selected recipes is empty)
+        }
+        return selectedRecipes.get(0);
+    }
+
+    /**
+     * Selects the specified recipe in the ListView (the left bar), does not do anything when recipe is null or not in the ListView
+     * @param recipe The recipe to be selected
+     */
+    public void setSelectedRecipe(Recipe recipe){
+        if(!recipes.contains(recipe)) return; //if the recipe is not in the list, do nothing
+        MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
+        selectionModel.select(recipe);
     }
 }
