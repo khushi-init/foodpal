@@ -5,7 +5,6 @@ import client.RecipeListCell;
 import client.utils.RecipeIngredientUICtrl;
 import client.utils.RecipeInstructionUICtrl;
 import client.utils.ServerUtils;
-import client.utils.ServerUtils;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import javafx.collections.FXCollections;
