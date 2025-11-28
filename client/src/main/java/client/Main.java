@@ -33,7 +33,7 @@ public class Main extends Application {
     // development. Set to false or remove altogether before finalizing.
     private final boolean debug = true;
 
-    private static final Injector INJECTOR = createInjector(new MyModule());
+    public static final Injector INJECTOR = createInjector(new MyModule());
     public static final MyFXML FXML = new MyFXML(INJECTOR);
 
 //    public static void main(String[] args) throws URISyntaxException, IOException {
