@@ -198,6 +198,15 @@ public class RecipesWindowCtrl {
     }
 
     /**
+     * Event handler for "Download" button.
+     * Downloads the currently selected recipe.
+     */
+    @FXML
+    public void onDownloadRecipe() {
+        server.downloadRecipe(currentRecipe.getId());
+    }
+
+    /**
      * Creates unique name for a recipe based on from which recipe its duplicated.
      * @param baseName the name of recipe that is being duplicated
      * @return a new unique name of the clone

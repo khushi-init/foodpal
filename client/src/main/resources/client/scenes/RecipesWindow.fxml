@@ -122,6 +122,19 @@
                                     </graphic>
                                 </Button>
 
+                                <Button fx:id="downloadBtn"
+                                        onAction="#onDownloadRecipe"
+                                        style="-fx-cursor: hand; -fx-background-color: transparent;">
+                                    <graphic>
+                                        <ImageView fitHeight="20"
+                                                   fitWidth="20">
+                                            <image>
+                                                <Image url="@/client/images/download.jpg"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
                             </children>
                         </HBox>
                     </top>
