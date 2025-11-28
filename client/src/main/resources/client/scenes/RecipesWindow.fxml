@@ -45,7 +45,7 @@
 
             <items>
 
-                <!-- 📌 Sidebar -->
+
                 <VBox fx:id="sidebarVBox"
                       maxWidth="300"
                       style="-fx-background-color: transparent;">
@@ -56,6 +56,9 @@
                             VBox.vgrow="ALWAYS">
                         <ListView fx:id="sidebarRecipeNamesList"
                                   prefWidth="200"/>
+                        <padding>
+                            <Insets top="8.0" right="5.0" bottom="8.0" left="5.0"/>
+                        </padding>
                     </ScrollPane>
 
 
@@ -97,7 +100,7 @@
 
                                 <Label fx:id="recipeNameLabel"
                                        style="-fx-padding: 4;"
-                                       text="RECIPE NAME"
+                                       text=""
                                        textFill="#111827">
                                     <font>
                                         <Font name="Papyrus" size="20"/>

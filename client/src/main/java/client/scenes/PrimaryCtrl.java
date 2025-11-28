@@ -16,11 +16,15 @@ public class PrimaryCtrl {
      * Initializes the primary control scene
      * @param primaryStage - The primary stage which gets injected
      * @param recipesWindow - The window containing the main recipe overview and sidebar list
-     * @param errorCtrl - The error controller which gets injected
      */
     public void init(Stage primaryStage, Pair<RecipesWindowCtrl, Parent> recipesWindow) {
         this.primaryStage = primaryStage;
         this.recipesWindowScene = new Scene(recipesWindow.getValue());
+
+        recipesWindowScene.getStylesheets().add(
+                getClass().getResource("/styles/styles.css").toExternalForm()
+        );
+
         showRecipesWindow();
         primaryStage.show();
     }
