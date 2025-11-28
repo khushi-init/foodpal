@@ -23,7 +23,7 @@
 
             <HBox alignment="CENTER" prefHeight="50.0" VBox.vgrow="ALWAYS">
                 <Button focusTraversable="false" maxHeight="Infinity" maxWidth="Infinity" onAction="#onAddRecipe" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="+" HBox.hgrow="ALWAYS" />
-                <Button focusTraversable="false" maxHeight="Infinity" maxWidth="Infinity" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="-" HBox.hgrow="ALWAYS" />
+                <Button focusTraversable="false" maxHeight="Infinity" maxWidth="Infinity" onAction="#onDeleteRecipe" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="-" HBox.hgrow="ALWAYS" />
                 <Button maxHeight="Infinity" maxWidth="Infinity" mnemonicParsing="false" onAction="#refreshLocalRecipes" prefHeight="Infinity" style="-fx-border-radius: 0; -fx-background-radius: 0;" text="Refresh" HBox.hgrow="ALWAYS" />
             </HBox>
         </VBox>
