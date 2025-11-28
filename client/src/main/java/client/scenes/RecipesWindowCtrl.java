@@ -47,17 +47,14 @@ public class RecipesWindowCtrl {
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private ObservableList<Recipe> recipes;
 
-    private ServerUtils serverUtils;
     private PrimaryCtrl primaryCtrl;
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     * @param u ServerUtils instance to be injected
      * @param p PrimaryCtrl instance to be injected
      */
     @Inject
-    public RecipesWindowCtrl(ServerUtils u, PrimaryCtrl p){
-        this.serverUtils = u;
+    public RecipesWindowCtrl(PrimaryCtrl p){
         this.primaryCtrl = p;
     }
 
@@ -261,14 +258,14 @@ public class RecipesWindowCtrl {
      */
     @FXML
     public void refreshLocalRecipes(){
-        boolean serverAvailable = serverUtils.isServerAvailable();
+        boolean serverAvailable = server.isServerAvailable();
         if(!serverAvailable){
             primaryCtrl.showServerUnavailableError();
             return;
         }
         try{
             clearRecipeView();
-            List<Recipe> serverResponse = serverUtils.getRecipes();
+            List<Recipe> serverResponse = server.getRecipes();
             this.recipes.setAll(serverResponse);
             Recipe selectedRecipe = getSelectedRecipe();
 
