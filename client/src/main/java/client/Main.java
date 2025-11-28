@@ -19,7 +19,6 @@ import static com.google.inject.Guice.createInjector;
 
 import client.scenes.*;
 import client.utils.ServerUtils;
-import client.utils.ErrorCtrl;
 import com.google.inject.Injector;
 
 import javafx.application.Application;
@@ -54,8 +53,7 @@ public class Main extends Application {
 
         // All scenes must be initialized here as such
         Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
-        ErrorCtrl ec = INJECTOR.getInstance(ErrorCtrl.class);
         PrimaryCtrl prime = INJECTOR.getInstance(PrimaryCtrl.class);
-        prime.init(primaryStage, recipesWindow, ec);
+        prime.init(primaryStage, recipesWindow);
     }
 }

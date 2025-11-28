@@ -58,8 +58,8 @@ public class ErrorCtrl {
     /**
      * Shows an error popup with the specified contents
      * @param title Title of the window
-     * @param headerText
-     * @param message
+     * @param headerText The text that comes left of the red cross (well technically it's a red box with a white cross in it)
+     * @param message The main message
      */
     public void showErrorPopup(String title, String headerText, String message){
         Alert alert = new Alert(AlertType.ERROR);

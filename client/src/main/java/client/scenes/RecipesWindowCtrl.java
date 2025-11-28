@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.Main;
 import client.RecipeListCell;
+import client.utils.ErrorCtrl;
 import client.utils.RecipeIngredientUICtrl;
 import client.utils.RecipeInstructionUICtrl;
 import client.utils.ServerUtils;
@@ -48,14 +49,16 @@ public class RecipesWindowCtrl {
     private ObservableList<Recipe> recipes;
 
     private PrimaryCtrl primaryCtrl;
+    private ErrorCtrl errorCtrl;
 
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param p PrimaryCtrl instance to be injected
      */
     @Inject
-    public RecipesWindowCtrl(PrimaryCtrl p){
+    public RecipesWindowCtrl(PrimaryCtrl p, ErrorCtrl c){
         this.primaryCtrl = p;
+        this.errorCtrl = c;
     }
 
     /**
@@ -142,7 +145,7 @@ public class RecipesWindowCtrl {
      */
     public void clearRecipeView(){
         recipeView.getChildren().clear();
-        recipeNameLabel.setText("RECIPE NAME");
+        recipeNameLabel.setText("");
     }
 
     /**
@@ -260,7 +263,7 @@ public class RecipesWindowCtrl {
     public void refreshLocalRecipes(){
         boolean serverAvailable = server.isServerAvailable();
         if(!serverAvailable){
-            primaryCtrl.showServerUnavailableError();
+            errorCtrl.showServerUnavailableError();
             return;
         }
         try{
@@ -285,7 +288,7 @@ public class RecipesWindowCtrl {
             setSelectedRecipe(selectedRecipe);
             
         } catch (Exception e){
-            primaryCtrl.showGenericError(e);
+            errorCtrl.showGenericError(e);
         }
         
     }
