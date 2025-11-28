@@ -192,9 +192,13 @@ public class RecipesWindowCtrl {
         String newName = createCopyName(selected.getName());
         Recipe clone = cloneRecipe(selected, newName);
 
-        recipes.add(clone);
-
-        sidebarRecipeNamesList.getSelectionModel().select(clone);
+        Recipe savedRecipe = server.addRecipe(clone); // Assuming 'server' is initialized
+        if (savedRecipe != null) {
+            recipes.add(savedRecipe);
+            sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
+        } else {
+            errorCtrl.showGenericError("No recipe selected to clone");
+        }
     }
 
     /**
@@ -242,8 +246,6 @@ public class RecipesWindowCtrl {
         clone.setIngredients(ingredientsCopy);
 
         return clone;
-
-
 
     }
 
