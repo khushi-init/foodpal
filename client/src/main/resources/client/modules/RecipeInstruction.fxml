@@ -7,12 +7,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox maxHeight="30.0" maxWidth="Infinity" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeInstructionUICtrl">
-    <Label fx:id="instructionText" prefHeight="Infinity" style="-fx-padding: 8 0 4 0;" text="Recipe Instruction" textFill="#111827" wrapText="true">
+<HBox fx:id="instructionBox" maxHeight="30.0" maxWidth="Infinity" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeInstructionUICtrl">
+    <Label fx:id="instructionText" prefHeight="Infinity" style="-fx-padding: 8 0 4 0;" text="Recipe Instruction" textFill="#111827" wrapText="true" >
       <font>
          <Font size="14.0" />
       </font></Label>
-    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+    <Button onAction="#handleDeleteButton" prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
       <graphic>
          <ImageView fitHeight="16" fitWidth="16" >
             <image>
@@ -20,7 +20,7 @@
             </image>
          </ImageView>
       </graphic></Button>
-    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+    <Button onAction="#handleEditButton" prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
       <graphic>
          <ImageView fitHeight="200.0" fitWidth="200.0" style="-fx-fit-width: 15; -fx-fit-height: 15;">
             <image>

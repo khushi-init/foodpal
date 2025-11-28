@@ -12,9 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -40,6 +38,10 @@ public class RecipesWindowCtrl {
     @FXML
     private Label recipeNameLabel;
 
+    private Recipe currentRecipe;
+
+    private boolean newInstructionAdded = false;
+
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private ObservableList<Recipe> recipes;
@@ -50,7 +52,6 @@ public class RecipesWindowCtrl {
     public void initialize() {
         recipes = FXCollections.observableArrayList(server.getRecipes());
         sidebarRecipeNamesList.setItems(recipes);
-
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
@@ -67,7 +68,8 @@ public class RecipesWindowCtrl {
      * @param recipe - The recipe to load
      */
     public void openRecipe(Recipe recipe) {
-        recipeView.getChildren().clear(); //cleaning - otherwise would duplicate all steps and ingredients for every child
+        this.currentRecipe = recipe;
+        recipeView.getChildren().clear();
         loadIngredients(recipe.getIngredients());
         Separator sep = new Separator();
         recipeView.getChildren().add(sep);
@@ -114,12 +116,41 @@ public class RecipesWindowCtrl {
             Pair<RecipeInstructionUICtrl, Node> ing = Main.FXML.loadNode(RecipeInstructionUICtrl.class,"client", "modules", "RecipeInstruction.fxml");
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
-
-            instCtrl.setText("• " + instruction);
+            int currentIndex = i;
+            // Delete logic
+            instCtrl.setDeleteCheck(() -> {
+                // This code runs when .run() is called on click in deleteCheck runnable
+                // Not sure if this is a proper solution to the callback though
+                recipeInstructions.remove(currentIndex);
+                openRecipe(currentRecipe);
+                System.out.println("Instruction removed");
+            });
+            // Edit Logic
+            instCtrl.setEditInstruction(newInstruction -> {
+                // This code is run when a string is passed into the editInstruction consumer
+                System.out.println("Instruction edit from " + recipeInstructions.get(currentIndex) + " to " + newInstruction);
+                recipeInstructions.set(currentIndex, newInstruction);
+                openRecipe(currentRecipe);
+            });
+            instCtrl.setText("- " + instruction);
             instCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
+            // Check if an instruction was added, and if it we are in the new instruction
+            // To trigger immediate editing.
+            if(newInstructionAdded && (i == recipeInstructions.size() - 1)) {
+                instCtrl.handleEditButton();
+                newInstructionAdded = false;
+            }
         }
+        // Add logic
+        Button addButton = new Button("Add Instruction");
+        recipeView.getChildren().add(addButton);
+        addButton.setOnAction(e -> {
+            recipeInstructions.add("New Instruction");
+            newInstructionAdded = true;
+            openRecipe(currentRecipe);
+        });
         recipeView.requestLayout();
     }
 
