@@ -139,6 +139,10 @@ public class RecipesWindowCtrl {
                 // This code runs when .run() is called on click in deleteCheck runnable
                 // Not sure if this is a proper solution to the callback though
                 recipeInstructions.remove(currentIndex);
+                boolean successful = server.updateRecipe(currentRecipe);
+                if(!successful){
+                    errorCtrl.showServerUnavailableError();
+                }
                 openRecipe(currentRecipe);
                 System.out.println("Instruction removed");
             });
@@ -147,13 +151,17 @@ public class RecipesWindowCtrl {
                 // This code is run when a string is passed into the editInstruction consumer
                 System.out.println("Instruction edit from " + recipeInstructions.get(currentIndex) + " to " + newInstruction);
                 recipeInstructions.set(currentIndex, newInstruction);
+                boolean successful = server.updateRecipe(currentRecipe);
+                if(!successful){
+                    errorCtrl.showServerUnavailableError();
+                }
                 openRecipe(currentRecipe);
             });
             instCtrl.setText("- " + instruction);
             instCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
-            // Check if an instruction was added, and if it we are in the new instruction
+            // Check if an instruction was added, and if we are in the new instruction
             // To trigger immediate editing.
             if(newInstructionAdded && (i == recipeInstructions.size() - 1)) {
                 instCtrl.handleEditButton();
