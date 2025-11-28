@@ -53,7 +53,6 @@ public class Main extends Application {
 
         // All scenes must be initialized here as such
         Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
-
         PrimaryCtrl prime = INJECTOR.getInstance(PrimaryCtrl.class);
         prime.init(primaryStage, recipesWindow);
     }
