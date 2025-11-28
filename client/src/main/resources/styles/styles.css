@@ -1,0 +1,30 @@
+/* Sidebar ListView */
+#sidebarRecipeNamesList {
+    -fx-background-color: #ffffff;       /* witte container */
+    -fx-background-radius: 20px;         /* ronde hoeken */
+    -fx-border-radius: 20px;
+    -fx-border-color: #dddddd;
+    -fx-border-width: 1px;
+    -fx-padding: 10 0;                   /* ruimte boven en onder de items */
+}
+
+/* Cells */
+#sidebarRecipeNamesList .list-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #bbbbbb transparent; /* donkerder grijs */
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 14;
+    -fx-font-weight: bold;
+    -fx-text-fill: #555555;
+}
+
+/* Hover effect */
+#sidebarRecipeNamesList .list-cell:hover {
+    -fx-background-color: rgba(0,0,0,0.03);
+}
+
+/* Selection */
+#sidebarRecipeNamesList .list-cell:filled:selected {
+    -fx-background-color: #e8e8e8; /* lichtgrijs/wit, past bij lichte achtergrond */
+    -fx-text-fill: #333333;        /* tekst blijft leesbaar */
+}
