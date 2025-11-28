@@ -178,4 +178,34 @@ public class ServerUtils {
         return false;
     }
 
+    /**
+     * Method for pushing the change made to a recipe's instructions
+     * @param recipe The recipe to be put
+     * @return a boolean to indicate whether put was successful or not
+     */
+    public boolean updateRecipe(Recipe recipe) {
+        Response response = null;
+        try {
+            response = ClientBuilder.newClient()
+                    .target(SERVER)
+                    .path("api/recipes/" + recipe.getId())
+                    .request()
+                    .put(Entity.entity(recipe, APPLICATION_JSON));
+            if (response.getStatus() != statusNoContent && response.getStatus() != statusOK) {
+                System.err.println("Failed to change recipe. Server returned status: " + response.getStatus());
+                return false;
+            }
+            return true;
+        }
+        catch (ProcessingException e) {
+            System.err.println("Network/Processing error while changing recipe: " + e.getMessage());
+        }
+        finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+        return false;
+    }
+
 }
