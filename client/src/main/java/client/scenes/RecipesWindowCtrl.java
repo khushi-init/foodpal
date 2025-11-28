@@ -197,7 +197,7 @@ public class RecipesWindowCtrl {
             recipes.add(savedRecipe);
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
         } else {
-            System.err.println("Recipe creation failed. Check server console for details.");
+            errorCtrl.showGenericError("No recipe selected to clone");
         }
     }
 
