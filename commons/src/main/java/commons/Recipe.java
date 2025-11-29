@@ -16,6 +16,7 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(unique = true)
     private String name;
 
     // One Recipe has MANY RecipeIngredients (the join entity)
