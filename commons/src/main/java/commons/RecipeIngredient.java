@@ -42,6 +42,7 @@ public class RecipeIngredient {
      * @param quantity quantity of the ingredient
      */
     public RecipeIngredient(Recipe recipe, Ingredient ingredient, Double quantity) {
+        this.id = new  RecipeIngredientKey();
         this.recipe = recipe;
         this.ingredient = ingredient;
         this.quantity = quantity;
