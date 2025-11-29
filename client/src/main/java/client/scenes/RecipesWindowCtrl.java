@@ -332,8 +332,7 @@ public class RecipesWindowCtrl {
             }
 
             else{
-                errorCtrl.showServerUnavailableError();
-                System.out.println("Recipe name update FAILED at the network layer");
+                errorCtrl.showGenericError("A recipe with this name already exists!");
                 recipeNameField.setText(currentRecipe.getName());
             }
         }

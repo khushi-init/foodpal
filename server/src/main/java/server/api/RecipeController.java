@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Recipe;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -99,5 +100,16 @@ public class RecipeController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Handles database errors related to unique constraints (like duplicate recipe names)
+     * and returns a 409 Conflict status.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT) // This is the key: maps the exception to HTTP 409
+    public void handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        // This message will appear in your server console log, helping you debug.
+        System.err.println("Attempted to violate data integrity (e.g., duplicate name): " + e.getMessage());
     }
 }
