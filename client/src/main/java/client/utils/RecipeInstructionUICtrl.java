@@ -54,7 +54,7 @@ public class RecipeInstructionUICtrl {
 
     @FXML
     public void handleEditButton() {
-        TextField textField = new TextField(instructionText.getText());
+        TextField textField = new TextField(instructionText.getText().replace("- ", ""));
         HBox.setHgrow(textField, Priority.ALWAYS);
         textField.setPromptText(instructionText.getText());
         textField.setFocusTraversable(false);
