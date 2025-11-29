@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.TextField?>
 <BorderPane
         prefWidth="600"
         prefHeight="400"
@@ -98,14 +99,15 @@
 
                             <children>
 
-                                <Label fx:id="recipeNameLabel"
-                                       style="-fx-padding: 4;"
-                                       text=""
-                                       textFill="#111827">
+                                <TextField
+                                        fx:id="recipeNameField"
+                                        promptText="Enter Recipe Name"
+                                        style="-fx-padding: 4; -fx-background-color: transparent;"
+                                        BorderPane.alignment="CENTER_LEFT">
                                     <font>
                                         <Font name="Papyrus" size="20"/>
                                     </font>
-                                </Label>
+                                </TextField>
 
                                 <Region HBox.hgrow="ALWAYS"/>
 
