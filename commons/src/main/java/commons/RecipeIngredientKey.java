@@ -1,52 +1,36 @@
 package commons;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Embeddable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.io.Serializable;
+
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
-@Entity
-public class Ingredient {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
-
-    @Column(unique = true)
-    private String name;
-
-    /**
-     * JPA required no argument constructor
-     */
-    public Ingredient () {
-    }
-
-    /**
-     * constructor for creation of new Ingredient
-     * @param name  name of ingredient
-     */
-    public Ingredient (String name) {
-        this.name = name;
-    }
+@Embeddable
+public class RecipeIngredientKey implements Serializable {
+    private Long recipeId;
+    private Long ingredientId;
 
     // GETTERS AND SETTERS MANDATORY
     // for frameworks (JPA/Jackson) to read and write object data from/to the database and JSON
 
-    public Long getId() {
-        return id;
+    public Long getIngredientId() {
+        return ingredientId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getRecipeId() {
+        return recipeId;
     }
 
-    public String getName() {
-        return name;
+    public void setIngredientId(Long ingredientId) {
+        this.ingredientId = ingredientId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRecipeId(Long recipeId) {
+        this.recipeId = recipeId;
     }
 
     @Override
@@ -63,5 +47,4 @@ public class Ingredient {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
     }
-
 }

@@ -179,7 +179,7 @@ public class ServerUtils {
     }
 
     /**
-     * Method for pushing the change made to a recipe's instructions
+     * Method for pushing changes to the recipe, including recipeIngredients and preparationSteps
      * @param recipe The recipe to be put
      * @return a boolean to indicate whether put was successful or not
      */

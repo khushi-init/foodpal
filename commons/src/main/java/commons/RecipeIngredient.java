@@ -10,11 +10,11 @@ import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 @Entity
 public class RecipeIngredient {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private RecipeIngredientKey id = new RecipeIngredientKey();
 
     @ManyToOne
+    @MapsId("recipeId")  // Maps the Recipe's ID to the 'recipeId' field in RecipeIngredientKey
     @JoinColumn(name = "recipe_id")
     @JsonBackReference
     private Recipe recipe;
@@ -22,6 +22,7 @@ public class RecipeIngredient {
     // CascadeTpe.PERSIST --> if you use a new Ingredient when trying to create an instance of RecipeIngredient,
     // it saves the new Ingredient first
     @ManyToOne(cascade = CascadeType.PERSIST)
+    @MapsId("ingredientId")  // Maps the Ingredient's ID to the 'ingredientId' field in RecipeIngredientKey
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
@@ -41,6 +42,7 @@ public class RecipeIngredient {
      * @param quantity quantity of the ingredient
      */
     public RecipeIngredient(Recipe recipe, Ingredient ingredient, Double quantity) {
+        this.id = new  RecipeIngredientKey();
         this.recipe = recipe;
         this.ingredient = ingredient;
         this.quantity = quantity;
@@ -50,11 +52,12 @@ public class RecipeIngredient {
     // GETTERS AND SETTERS MANDATORY
     // for frameworks (JPA/Jackson) to read and write object data from/to the database and JSON
 
-    public Long getId() {
+
+    public RecipeIngredientKey getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(RecipeIngredientKey id) {
         this.id = id;
     }
 

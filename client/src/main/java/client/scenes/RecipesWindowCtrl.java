@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -39,8 +40,9 @@ public class RecipesWindowCtrl {
     @FXML
     private VBox recipeView;
 
+    // The recipeName is an editable TextField
     @FXML
-    private Label recipeNameLabel;
+    private TextField recipeNameField;
 
     private Recipe currentRecipe;
 
@@ -78,6 +80,22 @@ public class RecipesWindowCtrl {
                 }
         );
 
+        // New listener for Recipe TextField
+        // Saves the new name of teh recipe once the enter key is pressed
+        recipeNameField.setOnKeyReleased(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                saveRecipeName();
+                recipeNameField.getParent().requestFocus();
+            }
+        });
+        // Focused Property Listener, saves when the TextField loses focus
+        recipeNameField.focusedProperty().addListener((obs,
+                                                       oldFocused, newFocused) -> {
+            if(oldFocused && !newFocused){
+                saveRecipeName();
+            }
+        });
+
     }
 
     /**
@@ -93,7 +111,7 @@ public class RecipesWindowCtrl {
         VBox.setMargin(sep, lineMargin);
         loadSteps(recipe.getPreparationSteps());
 
-        recipeNameLabel.setText(recipe.getName());
+        recipeNameField.setText(recipe.getName());
 
     }
     private final int fontSize = 16;
@@ -184,7 +202,7 @@ public class RecipesWindowCtrl {
      */
     public void clearRecipeView(){
         recipeView.getChildren().clear();
-        recipeNameLabel.setText("");
+        recipeNameField.setText("");
     }
 
     /**
@@ -283,6 +301,42 @@ public class RecipesWindowCtrl {
             // error handling
             System.err.println("Recipe creation failed. Check server console for details.");
         }
+    }
+
+    /**
+     * method to save a newly changed name of a recipe
+     */
+    public void saveRecipeName(){
+        if(currentRecipe != null){
+            String newName = recipeNameField.getText().trim();
+
+            // if the new name is empty, revert back to original name
+            if(newName.isEmpty()){
+                recipeNameField.setText(currentRecipe.getName());
+                return;
+            }
+
+            // if the new name is same, just return
+            if(newName.equals(currentRecipe.getName())){
+                return;
+            }
+
+            // setting the new name
+            currentRecipe.setName(newName);
+            // updating the recipe to store the new name
+            boolean successful = server.updateRecipe(currentRecipe);
+
+            if(successful){
+                sidebarRecipeNamesList.refresh();
+                System.out.println("Recipe saved successfully to: " + newName);
+            }
+
+            else{
+                errorCtrl.showGenericError("A recipe with this name already exists!");
+                recipeNameField.setText(currentRecipe.getName());
+            }
+        }
+
     }
 
     /**
