@@ -7,12 +7,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox maxHeight="30.0" minWidth="200.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeIngredientUICtrl">
-    <Label fx:id="ingredientText" prefHeight="Infinity" style="-fx-padding: 8 0 4 0;" text="Recipe Ingredient" textFill="#111827">
+<HBox fx:id="ingredientBox" maxHeight="30.0" minWidth="200.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeIngredientUICtrl">
+    <Label fx:id="ingredientText" prefHeight="Infinity" style="-fx-padding: 8 0 4 0;" textFill="#111827">
       <font>
          <Font size="14.0" />
       </font></Label>
-    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;" onAction="#handleDeleteButton">
       <graphic>
          <ImageView fitHeight="16.0" fitWidth="16.0">
             <image>
