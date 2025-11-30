@@ -2,17 +2,18 @@ package client.scenes;
 
 import client.Main;
 import client.RecipeListCell;
-import client.utils.ErrorCtrl;
-import client.utils.RecipeIngredientUICtrl;
-import client.utils.RecipeInstructionUICtrl;
-import client.utils.ServerUtils;
+import client.utils.*;
+import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Priority;
@@ -20,10 +21,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.control.MultipleSelectionModel;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 
@@ -129,11 +135,62 @@ public class RecipesWindowCtrl {
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity());
+            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity().toString());
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
+
+            Long ingredientId = (ri.getIngredient() != null) ? ri.getIngredient().getId() : null;
+            long recipeId = currentRecipe.getId();
+
+            ingCtrl.setDeleteIngredient(() -> { //remove ingredient from local recipe
+                currentRecipe.getIngredients().remove(ri);
+                openRecipe(currentRecipe);
+
+                if (ingredientId != null) { //if it also has id --> remove also from server
+                    boolean success = server.deleteIngredient(recipeId, ingredientId);
+                    if (!success) {
+                        if (errorCtrl != null) {
+                            errorCtrl.showGenericError("Failed to delete ingredient from server.");
+                        } else {
+                            System.err.println("Failed to delete ingredient from server.");
+                        }
+                        return;
+                    }
+                }
+                openRecipe(currentRecipe);
+            });
         }
+        //button for adding an ingredient --> pop up window will show
+        Button addButton = new Button("Add Ingredient");
+        recipeView.getChildren().add(addButton);
+        addButton.setOnAction(e -> {
+            showIngredientPopUp("Name", "0.0").ifPresent(pair -> {
+                String name = pair.getKey();
+                String quantityText = pair.getValue(); //extraction name and quantity
+
+                double quantity;
+                try {  //converting string value of quantity to double
+                    quantity = Double.parseDouble(quantityText);
+                } catch (NumberFormatException err) {
+                    if (errorCtrl != null) {
+                        errorCtrl.showGenericError("Quantity must be a number.");
+                    }
+                    return;
+                }
+
+                recipeIngredients.add(new RecipeIngredient(currentRecipe, new Ingredient(name), quantity));
+            });
+            //update server
+            Recipe updated = server.updateRecipe(currentRecipe);
+            if(updated == null){
+                errorCtrl.showServerUnavailableError();
+                return;
+            }
+            applyUpdatedRecipe(updated);
+            openRecipe(currentRecipe);
+        });
+
         recipeView.requestLayout();
     }
 
@@ -157,9 +214,11 @@ public class RecipesWindowCtrl {
                 // This code runs when .run() is called on click in deleteCheck runnable
                 // Not sure if this is a proper solution to the callback though
                 recipeInstructions.remove(currentIndex);
-                boolean successful = server.updateRecipe(currentRecipe);
-                if(!successful){
+                Recipe updated = server.updateRecipe(currentRecipe);
+                if (updated == null) {
                     errorCtrl.showServerUnavailableError();
+                }else{
+                    applyUpdatedRecipe(updated);
                 }
                 openRecipe(currentRecipe);
                 System.out.println("Instruction removed");
@@ -169,9 +228,11 @@ public class RecipesWindowCtrl {
                 // This code is run when a string is passed into the editInstruction consumer
                 System.out.println("Instruction edit from " + recipeInstructions.get(currentIndex) + " to " + newInstruction);
                 recipeInstructions.set(currentIndex, newInstruction);
-                boolean successful = server.updateRecipe(currentRecipe);
-                if(!successful){
+                Recipe updated = server.updateRecipe(currentRecipe);
+                if (updated == null) {
                     errorCtrl.showServerUnavailableError();
+                }else{
+                    applyUpdatedRecipe(updated);
                 }
                 openRecipe(currentRecipe);
             });
@@ -211,19 +272,21 @@ public class RecipesWindowCtrl {
      */
     @FXML
     public void onCloneRecipe(){
-        Recipe selected = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
+        Recipe recipe = currentRecipe;
+        if(recipe == null){
+            recipe = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
+        }
+        if(recipe == null){
             return;
         }
-        String newName = createCopyName(selected.getName());
-        Recipe clone = cloneRecipe(selected, newName);
-
-        Recipe savedRecipe = server.addRecipe(clone); // Assuming 'server' is initialized
-        if (savedRecipe != null) {
+        String newName = createCopyName(recipe.getName());
+        Recipe clone = cloneRecipe(recipe, newName);
+        Recipe savedRecipe = server.addRecipe(clone);
+        if(savedRecipe != null){
             recipes.add(savedRecipe);
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
-        } else {
-            errorCtrl.showGenericError("No recipe selected to clone");
+        }else{
+            errorCtrl.showGenericError("Recipe not selected to clone.");
         }
     }
 
@@ -266,7 +329,9 @@ public class RecipesWindowCtrl {
 
         List<RecipeIngredient>  ingredientsCopy = new ArrayList<>();
         for(RecipeIngredient ri : original.getIngredients()){
-            RecipeIngredient newRi = new RecipeIngredient(clone, ri.getIngredient(), ri.getQuantity());
+            Ingredient oldIng = ri.getIngredient();
+            Ingredient newIng = new Ingredient(oldIng.getName());
+            RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity());
             ingredientsCopy.add(newRi);
         }
         clone.setIngredients(ingredientsCopy);
@@ -324,13 +389,12 @@ public class RecipesWindowCtrl {
             // setting the new name
             currentRecipe.setName(newName);
             // updating the recipe to store the new name
-            boolean successful = server.updateRecipe(currentRecipe);
-
-            if(successful){
+            Recipe updated = server.updateRecipe(currentRecipe);
+            if (updated != null) {
+                applyUpdatedRecipe(updated);
                 sidebarRecipeNamesList.refresh();
                 System.out.println("Recipe saved successfully to: " + newName);
             }
-
             else{
                 errorCtrl.showGenericError("A recipe with this name already exists!");
                 recipeNameField.setText(currentRecipe.getName());
@@ -419,4 +483,55 @@ public class RecipesWindowCtrl {
         MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
         selectionModel.select(recipe);
     }
+
+
+    private Optional<Pair<String, String>> showIngredientPopUp(String initialName, String initialQuantity) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/client/modules/IngredientPopUp.fxml")
+            );
+            Parent root = loader.load();
+
+            IngredientPopUpCtrl ctrl = loader.getController();
+
+            Stage popUpStage = new Stage();
+            popUpStage.initModality(Modality.APPLICATION_MODAL);
+            popUpStage.setTitle("Edit Ingredient");
+            popUpStage.setScene(new Scene(root));
+
+            ctrl.setStage(popUpStage);
+            ctrl.setInitialValues(initialName, initialQuantity);
+
+            popUpStage.showAndWait();
+
+            if (ctrl.isOkClicked()) {
+                return Optional.of(new Pair<>(ctrl.getName(), ctrl.getQuantity()));
+            } else {
+                return Optional.empty();
+            }
+
+        } catch (IOException e) {
+            if (errorCtrl != null) {
+                errorCtrl.showGenericError(e);
+            } else {
+                e.printStackTrace();
+            }
+            return Optional.empty();
+        }
+    }
+
+
+    private void applyUpdatedRecipe(Recipe updated){
+        if(updated == null){
+            return;
+        }
+        currentRecipe = updated;
+        for (int i = 0; i < recipes.size(); i++) {
+            if (Objects.equals(recipes.get(i).getId(), updated.getId())) {
+                recipes.set(i, updated);
+                break;
+            }
+        }
+    }
+
 }

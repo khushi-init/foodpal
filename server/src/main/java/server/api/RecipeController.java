@@ -1,12 +1,15 @@
 package server.api;
 
+import commons.Ingredient;
 import commons.Recipe;
+import commons.RecipeIngredient;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
 import java.nio.charset.StandardCharsets;
@@ -17,9 +20,11 @@ import java.util.Optional;
 @RequestMapping("/api/recipes")
 public class RecipeController {
     private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
 
-    public RecipeController(RecipeRepository recipeRepository) {
+    public RecipeController(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.recipeRepository = recipeRepository;
+        this.ingredientRepository = ingredientRepository;
     }
 
     // GET ENDPOINTS
@@ -58,10 +63,36 @@ public class RecipeController {
 
     // POST ENDPOINT
     @PostMapping
-    public ResponseEntity<Recipe> createRecipe(@RequestBody Recipe recipe) {
+    public ResponseEntity<Recipe> createRecipe(@RequestBody Recipe incoming) {
         // checking if the recipe has a valid name
-        if(recipe.getName() == null || recipe.getName().trim().isEmpty()){
+        if(incoming.getName() == null || incoming.getName().trim().isEmpty()){
             return ResponseEntity.badRequest().build();
+        }
+
+        Recipe recipe = new Recipe();
+        recipe.setName(incoming.getName());
+        recipe.setPreparationSteps(incoming.getPreparationSteps());
+
+        List<RecipeIngredient> ingredients = new java.util.ArrayList<>();
+
+        if (incoming.getIngredients() != null) {
+            for (RecipeIngredient inRi : incoming.getIngredients()) {
+                String name = inRi.getIngredient() != null
+                        ? inRi.getIngredient().getName()
+                        : null;
+                Double quantity = inRi.getQuantity();
+
+                if (name == null || name.trim().isEmpty()) {
+                    continue;
+                }
+                Ingredient ing = ingredientRepository //if this ingredient exist --> use that one
+                        .findByName(name)
+                        .orElseGet(() -> new Ingredient(name)); //if not-->create a new one
+
+                RecipeIngredient newRi = new RecipeIngredient(recipe, ing, quantity);
+                ingredients.add(newRi);
+            }
+            recipe.setIngredients(ingredients);
         }
 
         // saving the new recipe
@@ -73,19 +104,47 @@ public class RecipeController {
 
     // PUT ENDPOINT
     @PutMapping("/{id}")
-    public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe recipe) {
-        // checking if the recipe exists using its ID
-        if(!recipeRepository.existsById(id)){
+    public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe incoming) {
+        Recipe existing = recipeRepository.findById(id).orElse(null);
+        if (existing == null) {
             return ResponseEntity.notFound().build();
         }
         // checking if the recipe has a valid name
-        if(recipe.getName() == null || recipe.getName().trim().isEmpty()){
+        if(incoming.getName() == null || incoming.getName().trim().isEmpty()){
             return ResponseEntity.badRequest().build();
         }
         // the ID is the same of the object being stored
-        recipe.setId(id);
-        // save the updated recipe
-        Recipe changedRecipe = recipeRepository.save(recipe);
+        existing.setName(incoming.getName());
+        existing.setPreparationSteps(incoming.getPreparationSteps());
+
+        if (incoming.getIngredients() != null) {
+            for (RecipeIngredient ingredient : incoming.getIngredients()) {
+                String name = ingredient.getIngredient() != null //if ingredient is not null --> use it name
+                        ? ingredient.getIngredient().getName()
+                        : ""; //else--> use empty string
+                Double quantity = ingredient.getQuantity();
+
+                if (name == null || name.trim().isEmpty()) {
+                    continue;
+                }
+
+                //finding ingredients with the same name or creating a new one
+                Ingredient ing = ingredientRepository
+                        .findByName(name)
+                        .orElseGet(() -> new Ingredient(name));
+
+                //checking if ingredient is already in the recipe
+                boolean alreadyExists = existing.getIngredients().stream()
+                        .anyMatch(ri -> ri.getIngredient().getName().equals(name));
+
+                if (!alreadyExists) {
+                    //adding only new ingredients
+                    RecipeIngredient newRi = new RecipeIngredient(existing, ing, quantity);
+                    existing.getIngredients().add(newRi);
+                }
+            }
+        }
+        Recipe changedRecipe = recipeRepository.save(existing);
 
         return ResponseEntity.ok(changedRecipe);
     }
@@ -111,5 +170,33 @@ public class RecipeController {
     public void handleDataIntegrityViolation(DataIntegrityViolationException e) {
         // This message will appear in your server console log, helping you debug.
         System.err.println("Attempted to violate data integrity (e.g., duplicate name): " + e.getMessage());
+    }
+
+    /**
+     * Handling removing ingredient form recipy
+     * @param recipeId which recipe will have removed ingredient
+     * @param ingredientId which ingredient will be removed
+     * @return
+     */
+    @DeleteMapping("/{recipeId}/ingredients/{ingredientId}")
+    public ResponseEntity<Void> deleteIngredientFromRecipe(
+            @PathVariable Long recipeId,
+            @PathVariable Long ingredientId) {
+
+        Recipe recipe = recipeRepository.findById(recipeId).orElse(null);
+        if (recipe == null) {
+            return ResponseEntity.notFound().build();
+        }
+        //remove matching ingredient
+        boolean removed = recipe.getIngredients().removeIf(ri ->
+                ri.getIngredient() != null &&
+                        ri.getIngredient().getId() != null &&
+                        ingredientId.equals(ri.getIngredient().getId())
+        );
+        if (!removed) {
+            return ResponseEntity.notFound().build();
+        }
+        recipeRepository.save(recipe);//saving changes on database
+        return ResponseEntity.noContent().build();
     }
 }

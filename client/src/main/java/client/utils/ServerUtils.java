@@ -183,7 +183,7 @@ public class ServerUtils {
      * @param recipe The recipe to be put
      * @return a boolean to indicate whether put was successful or not
      */
-    public boolean updateRecipe(Recipe recipe) {
+    public Recipe updateRecipe(Recipe recipe) {
         Response response = null;
         try {
             response = ClientBuilder.newClient()
@@ -191,21 +191,57 @@ public class ServerUtils {
                     .path("api/recipes/" + recipe.getId())
                     .request()
                     .put(Entity.entity(recipe, APPLICATION_JSON));
-            if (response.getStatus() != statusNoContent && response.getStatus() != statusOK) {
-                System.err.println("Failed to change recipe. Server returned status: " + response.getStatus());
-                return false;
+            int status = response.getStatus();
+            if(status == statusNoContent) {
+                return recipe; //return the same unchanged recipe
+            }else if(status == statusOK) {
+                return response.readEntity(Recipe.class); //return updated recipe
             }
-            return true;
+            else{
+                System.err.println("Failed to update recipe. Server returned status: " + status);
+                return null;
+            }
         }
         catch (ProcessingException e) {
             System.err.println("Network/Processing error while changing recipe: " + e.getMessage());
+            return null;
         }
         finally {
             if (response != null) {
                 response.close();
             }
         }
-        return false;
+
+    }
+
+    /**
+     * method for removing recipe ingredient form recipe
+     * @param recipeId which recipe is the ingredient from
+     * @param ingredientId which ingredient
+     * @return boolean to indicate if removal was success
+     */
+    public boolean deleteIngredient(long recipeId, long ingredientId) {
+        Response response = null;
+        try {
+            response = ClientBuilder.newClient()
+                    .target(SERVER)
+                    .path("api/recipes/" + recipeId + "/ingredients/" + ingredientId)
+                    .request()
+                    .delete();
+
+            if (response.getStatus() != statusNoContent && response.getStatus() != statusOK) {
+                System.err.println("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                return false;
+            }
+            return true;
+        } catch (ProcessingException e) {
+            System.err.println("Network/Processing error while deleting ingredient: " + e.getMessage());
+            return false;
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
     }
 
 }

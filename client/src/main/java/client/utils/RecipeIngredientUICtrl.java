@@ -1,9 +1,7 @@
 package client.utils;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-
 public class RecipeIngredientUICtrl {
 
     @FXML
@@ -13,7 +11,6 @@ public class RecipeIngredientUICtrl {
     private Label ingredientText;
 
     private long index; // Someone will probably need this to handle deletes
-
     public void setText(String text) {
         ingredientText.setText(text);
     }
@@ -24,5 +21,18 @@ public class RecipeIngredientUICtrl {
 
     public long getIndex() {
         return this.index;
+    }
+
+    private Runnable deleteIngredient;
+
+    public void setDeleteIngredient(Runnable deleteIngredient) {
+        this.deleteIngredient = deleteIngredient;
+    }
+
+    @FXML
+    private void handleDeleteButton() {
+        if(deleteIngredient != null) {
+            deleteIngredient.run();
+        }
     }
 }
