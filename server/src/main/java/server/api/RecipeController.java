@@ -92,8 +92,8 @@ public class RecipeController {
                 RecipeIngredient newRi = new RecipeIngredient(recipe, ing, quantity);
                 ingredients.add(newRi);
             }
+            recipe.setIngredients(ingredients);
         }
-        recipe.setIngredients(ingredients);
 
         // saving the new recipe
         Recipe savedRecipe = recipeRepository.save(recipe);
@@ -146,7 +146,6 @@ public class RecipeController {
         }
         Recipe changedRecipe = recipeRepository.save(existing);
 
-        System.out.println("updated recipe");
         return ResponseEntity.ok(changedRecipe);
     }
 

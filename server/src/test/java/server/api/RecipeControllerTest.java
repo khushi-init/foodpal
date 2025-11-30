@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Recipe;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -148,25 +149,29 @@ public class RecipeControllerTest {
 
     @Test
     public void changeRecipeCorrectTest() {
-        // ARRANGE 1: Set up the mock to confirm the recipe exists
-        when(mockRecipeRepository.existsById(id)).thenReturn(true);
+        // ARRANGE 1: Create the already existing recipe
+        Recipe existing = new Recipe("Old Name", new ArrayList<>(), new ArrayList<>());
+        existing.setId(id);
 
-        // ARRANGE 2: Create the recipe object containing updated details
-        Recipe savedRecipe = new Recipe("Updated Recipe Name", new ArrayList<>(), new ArrayList<>());
+        // ARRANGE 2: Set the mock to return the existing recipe on findById
+        when(mockRecipeRepository.findById(id)).thenReturn(Optional.of(existing));
 
-        // ARRANGE 3: Tell the mock what the repository returns after saving
-        // The saved object should have the correct ID
-        savedRecipe.setId(id);
-        when(mockRecipeRepository.save(any(Recipe.class))).thenReturn(savedRecipe);
+        // ARRANGE 3: Create a changed recipe and make save return it
+        Recipe updated = new Recipe("Updated Recipe Name", new ArrayList<>(), new ArrayList<>());
+        when(mockRecipeRepository.save(any(Recipe.class))).thenReturn(updated);
 
         // ACT: Call the change method
-        ResponseEntity<Recipe> response = sut.changeRecipe(id, savedRecipe);
+        ResponseEntity<Recipe> response = sut.changeRecipe(id, updated);
 
         // ASSERT 1: Check HTTP status (200 OK)
         assertEquals(OK, response.getStatusCode());
 
-        // Verify that the save method was called with the correct ID set
-        verify(mockRecipeRepository, times(1)).save(savedRecipe);
+        // ASSERT 2: Check that the name is the updated name
+        Assertions.assertNotNull(response.getBody());
+        assertEquals("Updated Recipe Name", response.getBody().getName());
+
+        // Verify that the save method was called with any recipe
+        verify(mockRecipeRepository, times(1)).save(any(Recipe.class));
 
     }
 
