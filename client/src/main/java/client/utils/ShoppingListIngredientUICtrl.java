@@ -13,7 +13,7 @@ public class ShoppingListIngredientUICtrl {
     @FXML
     private HBox ingredientBox;
 
-    private Runnable deleteCheck;
+    private Consumer<Long> deleteCheck;
 
     private Consumer<String> editInstruction;
 
@@ -31,7 +31,7 @@ public class ShoppingListIngredientUICtrl {
         return this.index;
     }
 
-    public void setDeleteCheck(Runnable deleteCheck){
+    public void setDeleteCheck(Consumer<Long> deleteCheck){
         this.deleteCheck = deleteCheck;
     }
 
@@ -42,7 +42,8 @@ public class ShoppingListIngredientUICtrl {
     @FXML
     private void handleDeleteButton(){
         if(deleteCheck != null){
-            deleteCheck.run();
+            deleteCheck.accept(index);
+            ingredientBox.getChildren().clear();
         }
     }
 
