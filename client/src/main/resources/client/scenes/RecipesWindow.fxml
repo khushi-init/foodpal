@@ -21,7 +21,7 @@
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #d9534f; -fx-padding: 10;">
             <children>
-                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
+                <Label prefHeight="38.0" prefWidth="202.0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
             <HBox alignment="CENTER_RIGHT" prefHeight="7.0" prefWidth="462.0">
                <HBox.margin>
                   <Insets left="10.0" />
