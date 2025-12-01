@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.control.TextField?>
+<BorderPane
+        prefWidth="600"
+        prefHeight="400"
+        xmlns="http://javafx.com/javafx/25"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="client.scenes.RecipesWindowCtrl">
+
+
+    <top>
+        <HBox alignment="CENTER_LEFT"
+              prefHeight="40"
+              style="-fx-background-color: #d9534f; -fx-padding: 10;">
+            <children>
+                <Label text="FoodPal"
+                       style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                <Region HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+    </top>
+
+
+    <center>
+        <SplitPane
+                dividerPositions="0.25"
+                prefWidth="600"
+                prefHeight="400"
+                style="-fx-background-color: #f5f5f5;"
+                stylesheets="@/client/scenes/scrollfix.css">
+
+            <items>
+
+
+                <VBox fx:id="sidebarVBox"
+                      maxWidth="300"
+                      style="-fx-background-color: transparent;">
+
+                    <ScrollPane
+                            fitToHeight="true"
+                            fitToWidth="true"
+                            VBox.vgrow="ALWAYS">
+                        <ListView fx:id="sidebarRecipeNamesList"
+                                  prefWidth="200"/>
+                        <padding>
+                            <Insets top="8.0" right="5.0" bottom="8.0" left="5.0"/>
+                        </padding>
+                    </ScrollPane>
+
+
+                    <HBox alignment="CENTER"
+                          prefHeight="50"
+                          spacing="5"
+                          style="-fx-background-color: transparent;">
+                        <padding>
+                            <Insets top="8.0" right="0.0" bottom="8.0" left="0.0"/>
+                        </padding>
+
+                        <Button fx:id="add"
+                                text="+"
+                                onAction="#onAddRecipe"
+                                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16;"/>
+
+                        <Button fx:id="remove"
+                                text="-"
+                                onAction="#onDeleteRecipe"
+                                style="-fx-background-color: #d9534f; -fx-text-fill: white; -fx-font-size: 16;"/>
+
+                        <Button fx:id="refresh"
+                                text="⟳"
+                                onAction="#refreshLocalRecipes"
+                                style="-fx-background-color: #0275d8; -fx-text-fill: white; -fx-font-size: 16;"/>
+                    </HBox>
+
+                </VBox>
+
+
+                <BorderPane style="-fx-background-color: #fafafa;">
+
+                    <top>
+                        <HBox prefHeight="30"
+                              style="-fx-background-color: transparent;"
+                              BorderPane.alignment="CENTER">
+
+                            <children>
+
+                                <TextField
+                                        fx:id="recipeNameField"
+                                        promptText="Enter Recipe Name"
+                                        style="-fx-padding: 4; -fx-background-color: transparent;"
+                                        BorderPane.alignment="CENTER_LEFT">
+                                    <font>
+                                        <Font name="Papyrus" size="20"/>
+                                    </font>
+                                </TextField>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <Button fx:id="duplicateBtn"
+                                        onAction="#onCloneRecipe"
+                                        style="-fx-cursor: hand; -fx-background-color: transparent;">
+                                    <graphic>
+                                        <ImageView fitHeight="20"
+                                                   fitWidth="20">
+                                            <image>
+                                                <Image url="@/client/images/duplicate.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Button fx:id="downloadBtn"
+                                        onAction="#onDownloadRecipe"
+                                        style="-fx-cursor: hand; -fx-background-color: transparent;">
+                                    <graphic>
+                                        <ImageView fitHeight="20"
+                                                   fitWidth="20">
+                                            <image>
+                                                <Image url="@/client/images/download.jpg"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                            </children>
+                        </HBox>
+                    </top>
+
+                    <center>
+                        <ScrollPane
+                                style="-fx-background-color: transparent; -fx-control-inner-background: transparent;">
+                            <VBox fx:id="recipeView"
+                                  spacing="6"
+                                  maxWidth="Infinity"
+                                  maxHeight="Infinity"
+                                  style="-fx-background-color: #fafafa;"/>
+
+                            <BorderPane.margin>
+                                <Insets left="12"/>
+                            </BorderPane.margin>
+                        </ScrollPane>
+                    </center>
+
+                </BorderPane>
+
+            </items>
+
+        </SplitPane>
+    </center>
+
+</BorderPane>
