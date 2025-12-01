@@ -19,7 +19,6 @@ import static com.google.inject.Guice.createInjector;
 
 import client.scenes.*;
 import client.utils.ServerUtils;
-import client.utils.ShoppingListIngredientUICtrl;
 import com.google.inject.Injector;
 
 import javafx.application.Application;
