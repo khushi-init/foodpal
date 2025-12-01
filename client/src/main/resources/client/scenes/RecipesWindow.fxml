@@ -29,7 +29,7 @@
                <children>
                   <ImageView id="shoppingListButton" fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../images/shoppingcart.png" />
+                        <Image url="@/client/images/shoppingcart.png" />
                      </image>
                   </ImageView>
                </children>
@@ -37,7 +37,7 @@
                 <Region HBox.hgrow="ALWAYS" />
             <ImageView id="ingredientsButton" fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../images/carrot.png" />
+                  <Image url="@/client/images/carrot.png" />
                </image>
             </ImageView>
             </children>
