@@ -30,41 +30,39 @@ public class ShoppingListCtrl {
     private ShoppingList shoppingList;
 
     /**
-     * Initialize the scene.
-     */
-    public void initialize() {
-        shoppingList = new ShoppingList();
-        showShoppingList();
-    }
-
-    /**
      * Show the shopping list.
      */
     public void showShoppingList() {
         shoppingListView.getChildren().clear();
         List<String> shoppingListIngredients = shoppingList.getIngredients();
 
-        for (int i = 0; i < shoppingListIngredients.size(); i++) {
-            Pair<ShoppingListIngredientUICtrl, Node> pair =
-                    Main.FXML.loadNode(
-                            ShoppingListIngredientUICtrl.class,
-                            "client", "modules", "ShoppingListIngredient.fxml"
-                    );
+        // Add label when the list is empty, otherwise fill the list.
+        if (shoppingListIngredients.isEmpty()) {
+            Label emptyList = new Label("You have added no ingredients to the shopping list yet!");
+            shoppingListView.getChildren().add(emptyList);
+        } else {
+            for (int i = 0; i < shoppingListIngredients.size(); i++) {
+                Pair<ShoppingListIngredientUICtrl, Node> pair =
+                        Main.FXML.loadNode(
+                                ShoppingListIngredientUICtrl.class,
+                                "client", "modules", "ShoppingListIngredient.fxml"
+                        );
 
-            ShoppingListIngredientUICtrl ctrl = pair.getKey();
-            Node node = pair.getValue();
+                ShoppingListIngredientUICtrl ctrl = pair.getKey();
+                Node node = pair.getValue();
 
-            ctrl.setText("- " + shoppingListIngredients.get(i));
-            ctrl.setIndex(i);
+                ctrl.setText("- " + shoppingListIngredients.get(i));
+                ctrl.setIndex(i);
 
-            VBox.setVgrow(node, Priority.NEVER);
-            shoppingListView.getChildren().add(node);
+                VBox.setVgrow(node, Priority.NEVER);
+                shoppingListView.getChildren().add(node);
 
-            ctrl.setDeleteCheck(index -> {
-                shoppingListView.getChildren().remove(node);
-                shoppingList.removeIngredient(index.intValue());
-            });
-            shoppingListView.requestLayout();
+                ctrl.setDeleteCheck(index -> {
+                    shoppingList.removeIngredient(index.intValue());
+                    showShoppingList();
+                });
+                shoppingListView.requestLayout();
+            }
         }
 
         Button addButton = new Button("Add Ingredient");
@@ -119,6 +117,24 @@ public class ShoppingListCtrl {
         } catch (IOException e) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Resets the list when rest button is pressed.
+     */
+    @FXML
+    private void onHandleReset() {
+        shoppingList.resetList();
+        showShoppingList();
+    }
+
+    /**
+     * Set the shopping list to the one created when starting the project.
+     * @param shoppingList - The shopping list to use.
+     */
+    public void setAndShowShoppingList(ShoppingList shoppingList) {
+        this.shoppingList = shoppingList;
+        showShoppingList();
     }
 
 }

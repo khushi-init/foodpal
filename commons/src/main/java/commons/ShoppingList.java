@@ -40,6 +40,13 @@ public class ShoppingList {
     }
 
     /**
+     * Reset the shopping list.
+     */
+    public void resetList() {
+        ingredients.clear();
+    }
+
+    /**
      * Turn the shopping list into Markdown format.
      * @return - A string containing the shopping list in Markdown format.
      */
