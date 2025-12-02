@@ -12,6 +12,7 @@ public class PrimaryCtrl {
     // All new scenes go here
     private Scene recipesWindowScene;
     private Scene shoppingListWindow;
+    private Scene ingredientsWindowScene;
 
     /**
      * Initializes the primary control scene
@@ -20,10 +21,12 @@ public class PrimaryCtrl {
      * @param shoppingList  - The window containing the shopping list
      */
     public void init(Stage primaryStage, Pair<RecipesWindowCtrl, Parent> recipesWindow,
-                     Pair<ShoppingListCtrl, Parent> shoppingList) {
+                     Pair<ShoppingListCtrl, Parent> shoppingList,
+                     Pair<IngredientsWindowCtrl, Parent> ingredientsWindow) {
         this.primaryStage = primaryStage;
         this.recipesWindowScene = new Scene(recipesWindow.getValue());
         this.shoppingListWindow = new Scene(shoppingList.getValue());
+        this.ingredientsWindowScene = new Scene(ingredientsWindow.getValue());
 
         recipesWindowScene.getStylesheets().add(
                 getClass().getResource("/styles/styles.css").toExternalForm()
@@ -50,6 +53,14 @@ public class PrimaryCtrl {
     public void showShoppingList() {
         primaryStage.setTitle("Shopping List"); // Subject to change
         primaryStage.setScene(shoppingListWindow);
+    }
+
+    /**
+     * Show method for Ingredient window scene
+     */
+    public void showIngredientsWindow() {
+        primaryStage.setTitle("Ingredients List");
+        primaryStage.setScene(ingredientsWindowScene);
     }
 
 }
