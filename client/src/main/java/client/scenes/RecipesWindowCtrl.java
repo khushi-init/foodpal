@@ -4,6 +4,7 @@ import client.Main;
 import client.RecipeListCell;
 import client.utils.*;
 import commons.Ingredient;
+import commons.NutritionalValue;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.ShoppingList;
@@ -65,6 +66,9 @@ public class RecipesWindowCtrl {
     private PrimaryCtrl primaryCtrl;
 
     private ErrorCtrl errorCtrl;
+
+    private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
+
 
     /**
      * Injectable constructor for RecipesWindowCtrl
@@ -183,8 +187,8 @@ public class RecipesWindowCtrl {
                     }
                     return;
                 }
-
-                recipeIngredients.add(new RecipeIngredient(currentRecipe, new Ingredient(name), quantity));
+                recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                        new Ingredient(name, defaultNutritionalValue), quantity));
             });
             //update server
             Recipe updated = server.updateRecipe(currentRecipe);
@@ -335,7 +339,7 @@ public class RecipesWindowCtrl {
         List<RecipeIngredient>  ingredientsCopy = new ArrayList<>();
         for(RecipeIngredient ri : original.getIngredients()){
             Ingredient oldIng = ri.getIngredient();
-            Ingredient newIng = new Ingredient(oldIng.getName());
+            Ingredient newIng = new Ingredient(oldIng.getName(), defaultNutritionalValue);
             RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity());
             ingredientsCopy.add(newRi);
         }
