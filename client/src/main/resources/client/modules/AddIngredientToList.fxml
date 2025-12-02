@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="225.0" prefWidth="351.0" spacing="10" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.IngredientPopUpCtrl">
+<VBox alignment="CENTER" prefHeight="200.0" prefWidth="351.0" spacing="10" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.ShoppingListIngredientPopUpCtrl">
 
     <children>
         <Label prefHeight="50.0" prefWidth="319.0" style="-fx-font-weight: bold;" text="Enter the ingredient information" textAlignment="CENTER" wrapText="true">
@@ -39,7 +39,7 @@
          </rowConstraints>
         </GridPane>
 
-        <HBox alignment="CENTER_RIGHT" spacing="10">
+        <HBox alignment="CENTER_RIGHT" prefHeight="53.0" prefWidth="321.0" spacing="10">
             <children>
                 <Button cancelButton="true" onAction="#handleCancel" style="-fx-background-color: #d9534f;" text="Cancel" textFill="WHITE" />
                 <Button defaultButton="true" onAction="#handleOk" style="-fx-background-color: #d9534f;" text="OK" textFill="WHITE" />

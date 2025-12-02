@@ -1,7 +1,7 @@
 package client.scenes;
 
 import client.Main;
-import client.utils.IngredientPopUpCtrl;
+import client.utils.ShoppingListIngredientPopUpCtrl;
 import client.utils.ShoppingListIngredientUICtrl;
 import commons.ShoppingList;
 import javafx.fxml.FXML;
@@ -34,7 +34,6 @@ public class ShoppingListCtrl {
      */
     public void initialize() {
         shoppingList = new ShoppingList();
-        shoppingList.addIngredient("TEST");
         showShoppingList();
     }
 
@@ -88,6 +87,11 @@ public class ShoppingListCtrl {
         });
     }
 
+    /**
+     * Show a new popup window for adding an ingredient to the shopping list.
+     * @return - An optional of a Pair of 2 strings,
+     * the first string containing the ingredient name and the second string containing the amount.
+     */
     private Optional<Pair<String, String>> showIngredientPopUp() {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -95,7 +99,7 @@ public class ShoppingListCtrl {
             );
             Parent root = loader.load();
 
-            IngredientPopUpCtrl ctrl = loader.getController();
+            ShoppingListIngredientPopUpCtrl ctrl = loader.getController();
 
             Stage popUpStage = new Stage();
             popUpStage.initModality(Modality.APPLICATION_MODAL);
@@ -113,7 +117,6 @@ public class ShoppingListCtrl {
             }
 
         } catch (IOException e) {
-            System.out.println(e.toString());
             return Optional.empty();
         }
     }
