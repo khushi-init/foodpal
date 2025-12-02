@@ -15,6 +15,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -50,6 +52,13 @@ public class RecipesWindowCtrl {
     @FXML
     private TextField recipeNameField;
 
+    // Favorite Injections
+    @FXML
+    private ImageView favoriteImage;
+
+    private final Image favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
+    private final Image unFavorite = new  Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
+
     private Recipe currentRecipe;
 
     private boolean newInstructionAdded = false;
@@ -57,6 +66,7 @@ public class RecipesWindowCtrl {
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private ObservableList<Recipe> recipes;
+    private List<Long> favoriteIds;
 
     private PrimaryCtrl primaryCtrl;
     private ErrorCtrl errorCtrl;
@@ -75,6 +85,7 @@ public class RecipesWindowCtrl {
      * Initializes the sidebar items (Recipe names) to track the ObservableList items
      */
     public void initialize() {
+        favoriteIds = new ArrayList<>();
         recipes = FXCollections.observableArrayList(server.getRecipes());
         sidebarRecipeNamesList.setItems(recipes);
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
@@ -116,6 +127,14 @@ public class RecipesWindowCtrl {
         recipeView.getChildren().add(sep);
         VBox.setMargin(sep, lineMargin);
         loadSteps(recipe.getPreparationSteps());
+        // Favorites
+        if(currentRecipe != null && favoriteIds != null) {
+            if(favoriteIds.contains(currentRecipe.getId())){
+                favoriteImage.setImage(favorite);
+            } else {
+                favoriteImage.setImage(unFavorite);
+            }
+        }
 
         recipeNameField.setText(recipe.getName());
 
@@ -530,6 +549,23 @@ public class RecipesWindowCtrl {
             if (Objects.equals(recipes.get(i).getId(), updated.getId())) {
                 recipes.set(i, updated);
                 break;
+            }
+        }
+    }
+
+    /**
+     * Adds or removes recipe ID to/from favorites list
+     */
+    public void toggleFavorite() {
+        if(favoriteIds != null){
+            if(favoriteIds.contains(currentRecipe.getId())) {
+                favoriteIds.remove(currentRecipe.getId());
+                favoriteImage.setImage(unFavorite);
+                System.out.println("Removed from favorites!");
+            } else {
+                favoriteIds.add(currentRecipe.getId());
+                favoriteImage.setImage(favorite);
+                System.out.println("Added to favorites!");
             }
         }
     }
