@@ -42,6 +42,7 @@ public class RecipesWindowCtrl {
 
     private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
 
+
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
 
@@ -56,10 +57,10 @@ public class RecipesWindowCtrl {
     @FXML
     private ImageView favoriteImage;
 
-    private final Image favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
-    private final Image unFavorite = new  Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
-
+    private Image favorite;
+    private Image unFavorite;
     private Recipe currentRecipe;
+    public CheckBox favoriteCheck;
 
     private boolean newInstructionAdded = false;
 
@@ -87,6 +88,8 @@ public class RecipesWindowCtrl {
     public void initialize() {
         favoriteIds = new ArrayList<>();
         recipes = FXCollections.observableArrayList(server.getRecipes());
+        favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
+        unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
         sidebarRecipeNamesList.setItems(recipes);
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
@@ -96,6 +99,9 @@ public class RecipesWindowCtrl {
                     }
                 }
         );
+        favoriteCheck.selectedProperty().addListener((obs, oldSelection, newSelection) -> {
+            updateToFav();
+        });
 
         // New listener for Recipe TextField
         // Saves the new name of teh recipe once the enter key is pressed
@@ -115,6 +121,25 @@ public class RecipesWindowCtrl {
 
     }
 
+    /**
+     * Updates the sidebar to display favorites.
+     */
+    public void updateToFav() {
+        // Load only favorites or nah
+        if(favoriteCheck.isSelected()){
+            List<Recipe>favRecipes = new ArrayList<>();
+            for(Recipe r : recipes){
+                if (favoriteIds.contains(r.getId())) {
+                    favRecipes.add(r);
+                }
+            }
+            sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
+            sidebarRecipeNamesList.getSelectionModel().select(0);
+        }
+        else {
+            sidebarRecipeNamesList.setItems(recipes);
+        }
+    }
     /**
      * Loads the contents of the provided recipe to the recipeView UI element
      * @param recipe - The recipe to load
