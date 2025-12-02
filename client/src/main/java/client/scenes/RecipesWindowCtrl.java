@@ -6,6 +6,7 @@ import client.utils.*;
 import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
+import commons.ShoppingList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -54,11 +55,15 @@ public class RecipesWindowCtrl {
 
     private boolean newInstructionAdded = false;
 
+    // This is the Shopping List data that is used in the session.
+    private final ShoppingList shoppingList = new ShoppingList();
+
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private ObservableList<Recipe> recipes;
 
     private PrimaryCtrl primaryCtrl;
+
     private ErrorCtrl errorCtrl;
 
     /**
@@ -424,6 +429,11 @@ public class RecipesWindowCtrl {
         recipes.remove(hit);
     }
 
+    @FXML
+    private void onShoppingList() {
+        showShoppingList();
+    }
+
     /**
      * Fetches the current recipe data from the server and loads it in the local storage of the recipes
      */
@@ -517,6 +527,31 @@ public class RecipesWindowCtrl {
                 e.printStackTrace();
             }
             return Optional.empty();
+        }
+    }
+
+    private void showShoppingList() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/client/scenes/ShoppingList.fxml")
+            );
+            Parent root = loader.load();
+
+            ShoppingListCtrl ctrl = loader.getController();
+            ctrl.setAndShowShoppingList(shoppingList);
+
+            Stage shoppingListStage = new Stage();
+            shoppingListStage.setTitle("Shopping List");
+            shoppingListStage.setScene(new Scene(root));
+
+            shoppingListStage.show();
+
+        } catch (IOException e) {
+            if (errorCtrl != null) {
+                errorCtrl.showGenericError(e);
+            } else {
+                e.printStackTrace();
+            }
         }
     }
 

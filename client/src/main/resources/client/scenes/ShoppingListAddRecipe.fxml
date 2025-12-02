@@ -10,13 +10,13 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.ShoppingListCtrl">
+<BorderPane prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.ShoppingListCtrl">
 
 
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #d9534f; -fx-padding: 10;">
             <children>
-                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="Shopping List" />
+                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="Add recipe ingredients" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>
         </HBox>
@@ -45,12 +45,12 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#onHandleReset" text="Reset">
+                              <Button mnemonicParsing="false" text="Add to shopping list">
                                  <HBox.margin>
                                     <Insets left="20.0" right="5.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" text="Download">
+                              <Button mnemonicParsing="false" text="Cancel">
                                  <HBox.margin>
                                     <Insets left="5.0" />
                                  </HBox.margin>

@@ -22,18 +22,23 @@
         <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #d9534f; -fx-padding: 10;">
             <children>
                 <Label prefHeight="38.0" prefWidth="202.0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
-            
+
                 <Region HBox.hgrow="ALWAYS" />
-            <ImageView id="shoppingListButton" fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
+
+                <Button fx:id="shoppingListButton" onAction="#onShoppingList" style="-fx-cursor: hand; -fx-background-color: transparent;">
+                    <graphic>
+                        <ImageView fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@/client/images/shoppingcart.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <ImageView id="ingredientsButton" fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
                     <image>
-                    <Image url="@/client/images/shoppingcart.png" />
+                        <Image url="@/client/images/carrot.png" />
                     </image>
                 </ImageView>
-            <ImageView id="ingredientsButton" fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@/client/images/carrot.png" />
-               </image>
-            </ImageView>
             </children>
         </HBox>
     </top>
