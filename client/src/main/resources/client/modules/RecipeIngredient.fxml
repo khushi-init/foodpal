@@ -12,7 +12,7 @@
       <font>
          <Font size="14.0" />
       </font></Label>
-    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;" onAction="#handleDeleteButton">
+    <Button onAction="#handleDeleteButton" prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
       <graphic>
          <ImageView fitHeight="16.0" fitWidth="16.0">
             <image>
@@ -20,7 +20,7 @@
             </image>
          </ImageView>
       </graphic></Button>
-    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+    <Button onAction="#handleEditButton" prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
       <graphic>
          <ImageView fitHeight="15.0" fitWidth="15.0">
             <image>

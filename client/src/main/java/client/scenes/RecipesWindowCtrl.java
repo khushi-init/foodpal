@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import com.google.inject.Inject;
 
@@ -63,20 +64,17 @@ public class RecipesWindowCtrl {
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private ObservableList<Recipe> recipes;
 
-    private PrimaryCtrl primaryCtrl;
-
-    private ErrorCtrl errorCtrl;
+    private final ErrorCtrl errorCtrl;
 
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     * @param p PrimaryCtrl instance to be injected
+     * @param c ErrorCtrl instance for erro
      */
     @Inject
-    public RecipesWindowCtrl(PrimaryCtrl p, ErrorCtrl c){
-        this.primaryCtrl = p;
+    public RecipesWindowCtrl(ErrorCtrl c){
         this.errorCtrl = c;
     }
 
@@ -159,15 +157,19 @@ public class RecipesWindowCtrl {
                 if (ingredientId != null) { //if it also has id --> remove also from server
                     boolean success = server.deleteIngredient(recipeId, ingredientId);
                     if (!success) {
-                        if (errorCtrl != null) {
-                            errorCtrl.showGenericError("Failed to delete ingredient from server.");
-                        } else {
-                            System.err.println("Failed to delete ingredient from server.");
-                        }
-                        return;
+                        errorCtrl.showGenericError("Failed to delete ingredient from server.");
                     }
+                    return;
                 }
                 openRecipe(currentRecipe);
+            });
+            // Editing ingredient Logic!
+            ingCtrl.setEditIngredient(() -> {
+                handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
+                    ri.setQuantity(newQty);
+                    ri.getIngredient().setName(newName);
+                    openRecipe(currentRecipe);
+                });
             });
         }
         //button for adding an ingredient --> pop up window will show
@@ -190,7 +192,6 @@ public class RecipesWindowCtrl {
                 recipeIngredients.add(new RecipeIngredient(currentRecipe,
                         new Ingredient(name, defaultNutritionalValue), quantity));
             });
-            //update server
             Recipe updated = server.updateRecipe(currentRecipe);
             if(updated == null){
                 errorCtrl.showServerUnavailableError();
@@ -203,6 +204,28 @@ public class RecipesWindowCtrl {
         recipeView.requestLayout();
     }
 
+    /**
+     * Handling input window for ingredient editing
+     * @param initName the initial name value to be displayed
+     * @param initQty the initial quantity value to be displayed
+     * @param handler the consumer that handles to call back to the value's usage
+     */
+    public void handleIngredientInput(String initName, double initQty, BiConsumer<String, Double> handler) {
+        showIngredientPopUp(initName, String.valueOf(initQty)).ifPresent(pair -> {
+            String name = pair.getKey();
+            String quantityText = pair.getValue();
+            double quantity;
+            try {
+                quantity = Double.parseDouble(quantityText);
+            } catch (NumberFormatException err) {
+                if (errorCtrl != null) {
+                    errorCtrl.showGenericError("Quantity must be a number.");
+                }
+                return;
+            }
+            handler.accept(name,quantity);
+        });
+    }
     /**
      * Loads the instructions within a list to the recipeView UI element
      * @param recipeInstructions - A list of Strings (The recipe instructions)
