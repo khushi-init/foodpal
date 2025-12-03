@@ -86,8 +86,8 @@ public class RecipesWindowCtrl {
      */
     public void initialize() {
         favoriteIds = new ArrayList<>();
-        loadFavs();
         recipes = FXCollections.observableArrayList(server.getRecipes());
+        loadFavs();
         favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
         unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
         sidebarRecipeNamesList.setItems(recipes);
@@ -144,19 +144,25 @@ public class RecipesWindowCtrl {
     /**
      * Saves saves the current favorites to the local persistent properties file.
      */
-    public void favToProperties() {
+    public void saveFave() {
         // Convert all favorite ID's to a single string that will be stored
         Properties prop = new Properties();
-        StringBuilder savedString = new StringBuilder();
+        // THIS TIME COMPLEXITY SUCKS ASS LMAO O(n^2) (But im lazy, will probably refactor later)
         for(Long  id : favoriteIds){
-            savedString.append(id).append(",");
+            String name = "Unknown";
+            for(Recipe r : recipes) {
+                if(Objects.equals(r.getId(), id)) {
+                    name = r.getName();
+                }
+            }
+            prop.setProperty(id.toString(), name);
         }
-        prop.setProperty("favorites", savedString.toString());
         try {
             prop.store(new FileOutputStream(properties), "Favorites");
         } catch (IOException e) {
             errorCtrl.showGenericError("Unable to store favorites, try again later!");
         }
+
     }
 
     /**
@@ -167,20 +173,33 @@ public class RecipesWindowCtrl {
         try {
             FileInputStream fis = new FileInputStream(properties);
             prop.load(fis);
-            String favString =  prop.getProperty("favorites", "");
-            if(!favString.isEmpty()){
-                String[] ids = favString.split(",");
-                favoriteIds.clear();
-                for (String id : ids) {
-                    favoriteIds.add(Long.parseLong(id));
+            favoriteIds.clear();
+            for(String key : prop.stringPropertyNames()){
+                Long id = Long.parseLong(key);
+                favoriteIds.add(id);
+            }
+            // Check if favorites still exist in the server
+            for(Long id : favoriteIds){
+                if(!getRecipeIDs().contains(id)) {
+                    errorCtrl.showGenericError("RIP: Recipe " + prop.getProperty(id.toString()) + " not found!");
                 }
             }
+
         }
         catch (Exception e) {
             errorCtrl.showGenericError("Unable to load favorites, try again later!");
             e.printStackTrace();
         }
     }
+
+    public List<Long> getRecipeIDs() {
+        List<Long> ids = new ArrayList<>();
+        for(Recipe r : recipes){
+            ids.add(r.getId());
+        }
+        return ids;
+    }
+
     /**
      * Loads the contents of the provided recipe to the recipeView UI element
      * @param recipe - The recipe to load
@@ -634,7 +653,7 @@ public class RecipesWindowCtrl {
                 System.out.println("Added to favorites!");
             }
             // Regardless of change, put new favorites to file.
-            favToProperties();
+            saveFave();
             loadFavs();
         }
     }
