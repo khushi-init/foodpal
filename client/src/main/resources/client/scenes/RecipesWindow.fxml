@@ -22,8 +22,24 @@
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #d9534f; -fx-padding: 10;">
             <children>
-                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
+                <Label prefHeight="38.0" prefWidth="202.0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
+
                 <Region HBox.hgrow="ALWAYS" />
+
+                <Button fx:id="shoppingListButton" onAction="#onShoppingList" style="-fx-cursor: hand; -fx-background-color: transparent;">
+                    <graphic>
+                        <ImageView fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@/client/images/shoppingcart.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <ImageView id="ingredientsButton" fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@/client/images/carrot.png" />
+                    </image>
+                </ImageView>
             </children>
         </HBox>
     </top>
@@ -54,12 +70,12 @@
                     </ScrollPane>
 
 
-                    <HBox alignment="CENTER" prefHeight="50.0" prefWidth="146.0" spacing="5" style="-fx-background-color: transparent;">
+                    <HBox alignment="CENTER" prefHeight="50" spacing="5" style="-fx-background-color: transparent;">
                         <padding>
                             <Insets bottom="8.0" left="0.0" right="0.0" top="8.0" />
                         </padding>
 
-                        <Button fx:id="add" onAction="#onAddRecipe" prefWidth="0.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16;" text="+" />
+                        <Button fx:id="add" onAction="#onAddRecipe" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16;" text="+" />
 
                         <Button fx:id="remove" onAction="#onDeleteRecipe" style="-fx-background-color: #d9534f; -fx-text-fill: white; -fx-font-size: 16;" text="-" />
 

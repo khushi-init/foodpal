@@ -4,8 +4,10 @@ import client.Main;
 import client.RecipeListCell;
 import client.utils.*;
 import commons.Ingredient;
+import commons.NutritionalValue;
 import commons.Recipe;
 import commons.RecipeIngredient;
+import commons.ShoppingList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -29,6 +31,7 @@ import javafx.util.Pair;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import com.google.inject.Inject;
 
@@ -63,21 +66,25 @@ public class RecipesWindowCtrl {
 
     private boolean newInstructionAdded = false;
 
+    // This is the Shopping List data that is used in the session.
+    private final ShoppingList shoppingList = new ShoppingList();
+
     // This list will store the recipe names, they're automatically displayed in the sidebar
     // A selection listener should be implemented to handle clicks + deletes of recipes later
     private ObservableList<Recipe> recipes;
     private List<Long> favoriteIds;
 
-    private PrimaryCtrl primaryCtrl;
-    private ErrorCtrl errorCtrl;
+    private final ErrorCtrl errorCtrl;
+
+    private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
+
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     * @param p PrimaryCtrl instance to be injected
+     * @param c ErrorCtrl instance for error
      */
     @Inject
-    public RecipesWindowCtrl(PrimaryCtrl p, ErrorCtrl c){
-        this.primaryCtrl = p;
+    public RecipesWindowCtrl(ErrorCtrl c){
         this.errorCtrl = c;
     }
 
@@ -142,7 +149,7 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * Saves saves the current favorites to the local persistent properties file.
+     * Saves the current favorites to the local persistent properties file.
      */
     public void saveFave() {
         // Convert all favorite ID's to a single string that will be stored
@@ -254,15 +261,19 @@ public class RecipesWindowCtrl {
                 if (ingredientId != null) { //if it also has id --> remove also from server
                     boolean success = server.deleteIngredient(recipeId, ingredientId);
                     if (!success) {
-                        if (errorCtrl != null) {
-                            errorCtrl.showGenericError("Failed to delete ingredient from server.");
-                        } else {
-                            System.err.println("Failed to delete ingredient from server.");
-                        }
-                        return;
+                        errorCtrl.showGenericError("Failed to delete ingredient from server.");
                     }
+                    return;
                 }
                 openRecipe(currentRecipe);
+            });
+            // Editing ingredient Logic!
+            ingCtrl.setEditIngredient(() -> {
+                handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
+                    ri.setQuantity(newQty);
+                    ri.getIngredient().setName(newName);
+                    openRecipe(currentRecipe);
+                });
             });
         }
         //button for adding an ingredient --> pop up window will show
@@ -282,10 +293,9 @@ public class RecipesWindowCtrl {
                     }
                     return;
                 }
-
-                recipeIngredients.add(new RecipeIngredient(currentRecipe, new Ingredient(name), quantity));
+                recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                        new Ingredient(name, defaultNutritionalValue), quantity));
             });
-            //update server
             Recipe updated = server.updateRecipe(currentRecipe);
             if(updated == null){
                 errorCtrl.showServerUnavailableError();
@@ -298,6 +308,28 @@ public class RecipesWindowCtrl {
         recipeView.requestLayout();
     }
 
+    /**
+     * Handling input window for ingredient editing
+     * @param initName the initial name value to be displayed
+     * @param initQty the initial quantity value to be displayed
+     * @param handler the consumer that handles to call back to the value's usage
+     */
+    public void handleIngredientInput(String initName, double initQty, BiConsumer<String, Double> handler) {
+        showIngredientPopUp(initName, String.valueOf(initQty)).ifPresent(pair -> {
+            String name = pair.getKey();
+            String quantityText = pair.getValue();
+            double quantity;
+            try {
+                quantity = Double.parseDouble(quantityText);
+            } catch (NumberFormatException err) {
+                if (errorCtrl != null) {
+                    errorCtrl.showGenericError("Quantity must be a number.");
+                }
+                return;
+            }
+            handler.accept(name,quantity);
+        });
+    }
     /**
      * Loads the instructions within a list to the recipeView UI element
      * @param recipeInstructions - A list of Strings (The recipe instructions)
@@ -434,7 +466,7 @@ public class RecipesWindowCtrl {
         List<RecipeIngredient>  ingredientsCopy = new ArrayList<>();
         for(RecipeIngredient ri : original.getIngredients()){
             Ingredient oldIng = ri.getIngredient();
-            Ingredient newIng = new Ingredient(oldIng.getName());
+            Ingredient newIng = new Ingredient(oldIng.getName(), defaultNutritionalValue);
             RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity());
             ingredientsCopy.add(newRi);
         }
@@ -526,6 +558,11 @@ public class RecipesWindowCtrl {
         }
         sidebarRecipeNamesList.getSelectionModel().selectPrevious();
         recipes.remove(hit);
+    }
+
+    @FXML
+    private void onShoppingList() {
+        showShoppingList();
     }
 
     /**
@@ -621,6 +658,31 @@ public class RecipesWindowCtrl {
                 e.printStackTrace();
             }
             return Optional.empty();
+        }
+    }
+
+    private void showShoppingList() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/client/scenes/ShoppingList.fxml")
+            );
+            Parent root = loader.load();
+
+            ShoppingListCtrl ctrl = loader.getController();
+            ctrl.setAndShowShoppingList(shoppingList);
+
+            Stage shoppingListStage = new Stage();
+            shoppingListStage.setTitle("Shopping List");
+            shoppingListStage.setScene(new Scene(root));
+
+            shoppingListStage.show();
+
+        } catch (IOException e) {
+            if (errorCtrl != null) {
+                errorCtrl.showGenericError(e);
+            } else {
+                e.printStackTrace();
+            }
         }
     }
 

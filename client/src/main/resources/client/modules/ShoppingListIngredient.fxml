@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="ingredientBox" maxHeight="30.0" minWidth="200.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.RecipeIngredientUICtrl">
+<HBox fx:id="ingredientBox" maxHeight="30.0" minWidth="200.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.ShoppingListIngredientUICtrl">
     <Label fx:id="ingredientText" prefHeight="Infinity" style="-fx-padding: 8 0 4 0;" textFill="#111827">
       <font>
          <Font size="14.0" />
@@ -20,7 +20,7 @@
             </image>
          </ImageView>
       </graphic></Button>
-    <Button onAction="#handleEditButton" prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
       <graphic>
          <ImageView fitHeight="15.0" fitWidth="15.0">
             <image>

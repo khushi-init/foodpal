@@ -25,14 +25,26 @@ public class RecipeIngredientUICtrl {
 
     private Runnable deleteIngredient;
 
+    private Runnable editIngredient;
+
     public void setDeleteIngredient(Runnable deleteIngredient) {
         this.deleteIngredient = deleteIngredient;
+    }
+
+    public void setEditIngredient(Runnable editIngredient) {
+        this.editIngredient = editIngredient;
     }
 
     @FXML
     private void handleDeleteButton() {
         if(deleteIngredient != null) {
             deleteIngredient.run();
+        }
+    }
+    @FXML
+    private void handleEditButton() {
+        if(editIngredient != null) {
+            editIngredient.run();
         }
     }
 }

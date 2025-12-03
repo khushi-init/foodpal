@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import commons.Ingredient;
 import commons.Recipe;
 import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.client.ClientConfig;
@@ -80,6 +81,13 @@ public class ServerUtils {
                 .target(SERVER).path("api/recipes") //
                 .request(APPLICATION_JSON) //
                 .get(new GenericType<List<Recipe>>() {});
+    }
+
+    public List<Ingredient> getIngredients() {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/ingredients")
+                .request(APPLICATION_JSON)
+                .get(new GenericType<List<Ingredient>>() {});
     }
 
 
@@ -243,5 +251,4 @@ public class ServerUtils {
             }
         }
     }
-
 }
