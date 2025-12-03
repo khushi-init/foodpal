@@ -24,18 +24,32 @@ public class RecipeController {
     private final IngredientRepository ingredientRepository;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
-
+    /**
+     * Creates controller for managing recipes.
+     * @param recipeRepository repository for recipes
+     * @param ingredientRepository repository for ingredients
+     */
     public RecipeController(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
     }
 
     // GET ENDPOINTS
+
+    /**
+     * Get all recipes in the database.
+     * @return list of all recipes
+     */
     @GetMapping
     public List<Recipe> findAllRecipes() {
         return recipeRepository.findAll();
     }
 
+    /**
+     * Gets id recipe by its ID.
+     * @param id recipe ID
+     * @return 200 OK with recipe or 404 NOt found
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Recipe> findRecipeById(@PathVariable Long id) {
         Optional<Recipe> recipe = recipeRepository.findById(id);
@@ -45,6 +59,11 @@ public class RecipeController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Downloads a recipe as a markdown file.
+     * @param id recipe Id
+     * @return markdown file or 404 if recipe doesn't exist
+     */
     @GetMapping("/download/{id}")
     public ResponseEntity<byte[]> downloadRecipe(@PathVariable Long id) {
         Optional<Recipe> recipe = recipeRepository.findById(id);
@@ -65,6 +84,12 @@ public class RecipeController {
     }
 
     // POST ENDPOINT
+
+    /**
+     * Creates a new recipe.
+     * @param incoming recipe data from client
+     * @return 201 created or 404 bad request
+     */
     @PostMapping
     public ResponseEntity<Recipe> createRecipe(@RequestBody Recipe incoming) {
         // checking if the recipe has a valid name
@@ -106,6 +131,13 @@ public class RecipeController {
     }
 
     // PUT ENDPOINT
+
+    /**
+     * Updates an existing recipe.
+     * @param id ID of the recipe to update
+     * @param incoming incoming new recipe data
+     * @return 200 OK with or 400 bad request or 404 not found
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe incoming) {
         Recipe existing = recipeRepository.findById(id).orElse(null);
@@ -154,6 +186,12 @@ public class RecipeController {
 
 
     // DELETE ENDPOINT
+
+    /**
+     * Deletes recipe.
+     * @param id recipe ID
+     * @return 204 no content(success) or 404 not found
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRecipeById(@PathVariable Long id) {
         if(recipeRepository.existsById(id)) {
@@ -176,10 +214,10 @@ public class RecipeController {
     }
 
     /**
-     * Handling removing ingredient form recipy
+     * Handling removing ingredient form recipy.
      * @param recipeId which recipe will have removed ingredient
      * @param ingredientId which ingredient will be removed
-     * @return
+     * @return ResponseEntity<Void> (204-success or 404-on fail)
      */
     @DeleteMapping("/{recipeId}/ingredients/{ingredientId}")
     public ResponseEntity<Void> deleteIngredientFromRecipe(
