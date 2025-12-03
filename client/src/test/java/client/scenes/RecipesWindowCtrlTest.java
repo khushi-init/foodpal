@@ -20,7 +20,7 @@ public class RecipesWindowCtrlTest {
 
     @BeforeEach
     public void setup() {
-        window = new RecipesWindowCtrl(primary, error);
+        window = new RecipesWindowCtrl(error);
     }
 
     private String invokeCreateCopyName(String baseName) throws Exception {

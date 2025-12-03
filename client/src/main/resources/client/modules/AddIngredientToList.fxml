@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" prefHeight="200.0" prefWidth="351.0" spacing="10" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.ShoppingListIngredientPopUpCtrl">
+
+    <children>
+        <Label prefHeight="50.0" prefWidth="319.0" style="-fx-font-weight: bold;" text="Enter the ingredient information" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font size="19.0" />
+         </font>
+      </Label>
+
+        <GridPane hgap="10" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="35" />
+                <ColumnConstraints percentWidth="65" />
+            </columnConstraints>
+
+            <children>
+                <Label text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Quantity:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="quantityField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            </children>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+
+        <HBox alignment="CENTER_RIGHT" prefHeight="53.0" prefWidth="321.0" spacing="10">
+            <children>
+                <Button cancelButton="true" onAction="#handleCancel" style="-fx-background-color: #d9534f;" text="Cancel" textFill="WHITE" />
+                <Button defaultButton="true" onAction="#handleOk" style="-fx-background-color: #d9534f;" text="OK" textFill="WHITE" />
+            </children>
+        </HBox>
+    </children>
+
+    <padding>
+        <Insets bottom="15" left="15" right="15" top="15" />
+    </padding>
+</VBox>

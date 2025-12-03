@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Ingredient;
+import commons.NutritionalValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,8 @@ public class IngredientControllerTest {
     private Long id = 1L;
     private Long id2 = 2L;
     private Long fakeId = 99L;
+    private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
+
 
     @BeforeEach
     public void setUp(){
@@ -29,7 +32,7 @@ public class IngredientControllerTest {
         sut = new IngredientController(mockRepository);
 
         // Setup test data
-        testIngredient = new Ingredient("Sugar");
+        testIngredient = new Ingredient("Sugar", defaultNutritionalValue);
         testIngredient.setId(id);
     }
 
@@ -76,8 +79,8 @@ public class IngredientControllerTest {
     @Test
     public void createIngredientCorrect() {
         // ARRANGE: Mock repository to return the saved object with a new ID
-        Ingredient inputIngredient = new Ingredient("Flour");
-        Ingredient savedIngredient = new Ingredient("Flour");
+        Ingredient inputIngredient = new Ingredient("Flour", defaultNutritionalValue);
+        Ingredient savedIngredient = new Ingredient("Flour",  defaultNutritionalValue);
         savedIngredient.setId(id2);
         when(mockRepository.save(inputIngredient)).thenReturn(savedIngredient);
 
@@ -92,7 +95,7 @@ public class IngredientControllerTest {
     @Test
     public void createIngredientBadRequest() {
         // ARRANGE: Ingredient that fails validation (empty name)
-        Ingredient badIngredient = new Ingredient("");
+        Ingredient badIngredient = new Ingredient("",  defaultNutritionalValue);
 
         // ACT
         ResponseEntity<Ingredient> response = sut.createIngredient(badIngredient);
