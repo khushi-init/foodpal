@@ -173,7 +173,7 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * Load the favorites from the properties file
+     * Load the favorites from the properties file, and displays a notification if the a favorite is GONE
      */
     public void loadFavs() {
         Properties prop = new Properties();
