@@ -46,6 +46,15 @@ public class IngredientController {
         // returning the HTTP code for created
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
+    // PUT ENDPOINT
+    @PutMapping
+    public ResponseEntity<Ingredient> updateIngredient(@RequestBody Ingredient ingredient) {
+        if(ingredient.getName() == null || ingredient.getName().trim().isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        Ingredient updated = ingredientRepository.save(ingredient);
+        return ResponseEntity.ok(updated);
+    }
 
     // DELETE ENDPOINT
     @DeleteMapping("/{id}")
