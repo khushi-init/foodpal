@@ -4,6 +4,7 @@ import client.Main;
 import client.RecipeListCell;
 import client.utils.*;
 import commons.Ingredient;
+import commons.NutritionalValue;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.ShoppingList;
@@ -64,6 +65,9 @@ public class RecipesWindowCtrl {
     private ObservableList<Recipe> recipes;
 
     private final ErrorCtrl errorCtrl;
+
+    private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
+
 
     /**
      * Injectable constructor for RecipesWindowCtrl
@@ -172,8 +176,21 @@ public class RecipesWindowCtrl {
         Button addButton = new Button("Add Ingredient");
         recipeView.getChildren().add(addButton);
         addButton.setOnAction(e -> {
-            handleIngredientInput("Name", 0.0, (newName, newQty) -> {
-                recipeIngredients.add(new RecipeIngredient(currentRecipe, new Ingredient(newName), newQty));
+            showIngredientPopUp("Name", "0.0").ifPresent(pair -> {
+                String name = pair.getKey();
+                String quantityText = pair.getValue(); //extraction name and quantity
+
+                double quantity;
+                try {  //converting string value of quantity to double
+                    quantity = Double.parseDouble(quantityText);
+                } catch (NumberFormatException err) {
+                    if (errorCtrl != null) {
+                        errorCtrl.showGenericError("Quantity must be a number.");
+                    }
+                    return;
+                }
+                recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                        new Ingredient(name, defaultNutritionalValue), quantity));
             });
             Recipe updated = server.updateRecipe(currentRecipe);
             if(updated == null){
@@ -345,7 +362,7 @@ public class RecipesWindowCtrl {
         List<RecipeIngredient>  ingredientsCopy = new ArrayList<>();
         for(RecipeIngredient ri : original.getIngredients()){
             Ingredient oldIng = ri.getIngredient();
-            Ingredient newIng = new Ingredient(oldIng.getName());
+            Ingredient newIng = new Ingredient(oldIng.getName(), defaultNutritionalValue);
             RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity());
             ingredientsCopy.add(newRi);
         }

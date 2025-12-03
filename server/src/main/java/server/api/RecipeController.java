@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Ingredient;
+import commons.NutritionalValue;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,6 +22,8 @@ import java.util.Optional;
 public class RecipeController {
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
+    private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
+
 
     public RecipeController(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.recipeRepository = recipeRepository;
@@ -87,7 +90,7 @@ public class RecipeController {
                 }
                 Ingredient ing = ingredientRepository //if this ingredient exist --> use that one
                         .findByName(name)
-                        .orElseGet(() -> new Ingredient(name)); //if not-->create a new one
+                        .orElseGet(() -> new Ingredient(name, defaultNutritionalValue)); //if not-->create a new one
 
                 RecipeIngredient newRi = new RecipeIngredient(recipe, ing, quantity);
                 ingredients.add(newRi);
@@ -131,7 +134,7 @@ public class RecipeController {
                 //finding ingredients with the same name or creating a new one
                 Ingredient ing = ingredientRepository
                         .findByName(name)
-                        .orElseGet(() -> new Ingredient(name));
+                        .orElseGet(() -> new Ingredient(name, defaultNutritionalValue));
 
                 //checking if ingredient is already in the recipe
                 boolean alreadyExists = existing.getIngredients().stream()

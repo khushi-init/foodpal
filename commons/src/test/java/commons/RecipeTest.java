@@ -18,11 +18,13 @@ public class RecipeTest {
     private double amount2 = 25.0;
     private List<RecipeIngredient> ingredientList;
     private List<String> preparationSteps;
+    private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
+
 
     @BeforeEach
     public void setUp() {
-        ingredient1 = new Ingredient("Sugar");
-        ingredient2 = new Ingredient("Butter");
+        ingredient1 = new Ingredient("Sugar", defaultNutritionalValue);
+        ingredient2 = new Ingredient("Butter", defaultNutritionalValue);
 
         recipeIngredient1 = new RecipeIngredient(recipe, ingredient1, amount1);
         recipeIngredient2 = new RecipeIngredient(recipe, ingredient2, amount2);
