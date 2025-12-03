@@ -27,11 +27,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 import com.google.inject.Inject;
 
@@ -56,11 +53,13 @@ public class RecipesWindowCtrl {
     // Favorite Injections
     @FXML
     private ImageView favoriteImage;
-
     private Image favorite;
     private Image unFavorite;
     private Recipe currentRecipe;
-    public CheckBox favoriteCheck;
+    @FXML
+    private CheckBox favoriteCheck;
+    // File used for storing favorite ID's. Add additional stuff for config as you wish
+    private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
 
     private boolean newInstructionAdded = false;
 
@@ -87,6 +86,7 @@ public class RecipesWindowCtrl {
      */
     public void initialize() {
         favoriteIds = new ArrayList<>();
+        loadFavs();
         recipes = FXCollections.observableArrayList(server.getRecipes());
         favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
         unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
@@ -138,6 +138,47 @@ public class RecipesWindowCtrl {
         }
         else {
             sidebarRecipeNamesList.setItems(recipes);
+        }
+    }
+
+    /**
+     * Saves saves the current favorites to the local persistent properties file.
+     */
+    public void favToProperties() {
+        // Convert all favorite ID's to a single string that will be stored
+        Properties prop = new Properties();
+        StringBuilder savedString = new StringBuilder();
+        for(Long  id : favoriteIds){
+            savedString.append(id).append(",");
+        }
+        prop.setProperty("favorites", savedString.toString());
+        try {
+            prop.store(new FileOutputStream(properties), "Favorites");
+        } catch (IOException e) {
+            errorCtrl.showGenericError("Unable to store favorites, try again later!");
+        }
+    }
+
+    /**
+     * Load the favorites from the properties file
+     */
+    public void loadFavs() {
+        Properties prop = new Properties();
+        try {
+            FileInputStream fis = new FileInputStream(properties);
+            prop.load(fis);
+            String favString =  prop.getProperty("favorites", "");
+            if(!favString.isEmpty()){
+                String[] ids = favString.split(",");
+                favoriteIds.clear();
+                for (String id : ids) {
+                    favoriteIds.add(Long.parseLong(id));
+                }
+            }
+        }
+        catch (Exception e) {
+            errorCtrl.showGenericError("Unable to load favorites, try again later!");
+            e.printStackTrace();
         }
     }
     /**
@@ -592,6 +633,9 @@ public class RecipesWindowCtrl {
                 favoriteImage.setImage(favorite);
                 System.out.println("Added to favorites!");
             }
+            // Regardless of change, put new favorites to file.
+            favToProperties();
+            loadFavs();
         }
     }
 
