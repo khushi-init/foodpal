@@ -6,6 +6,8 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -14,17 +16,26 @@
 
 <BorderPane prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsWindowCtrl">
     <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #0275d8; -fx-padding: 10;">
+        <HBox alignment="CENTER_LEFT" prefHeight="79.0" prefWidth="600.0" style="-fx-background-color: #d9534f; -fx-padding: 10;">
             <children>
-                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
+                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="Nutrional Value" />
                 <Region HBox.hgrow="ALWAYS" />
+
+                <Button fx:id="backButton" onAction="#onBackToRecipesClick" style="-fx-background-color: transparent; -fx-padding: 0;"> <graphic>
+                    <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@/client/images/back button.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+                </Button>
             </children>
         </HBox>
     </top>
 
 
     <center>
-        <SplitPane dividerPositions="0.25" prefHeight="400" prefWidth="600" style="-fx-background-color: #f5f5f5;" stylesheets="@/client/scenes/scrollfix.css">
+        <SplitPane dividerPositions="0.25" prefHeight="303.0" prefWidth="600" style="-fx-background-color: #f5f5f5;" stylesheets="@/client/scenes/scrollfix.css">
 
             <items>
                 <VBox fx:id="sidebarVBox" maxWidth="300" style="-fx-background-color: transparent;">
@@ -65,7 +76,7 @@
                         <ScrollPane style="-fx-background-color: transparent; -fx-control-inner-background: transparent;">
                             <VBox fx:id="ingredientDetailsView" maxHeight="Infinity" maxWidth="Infinity" spacing="6" style="-fx-background-color: #fafafa;">
 
-                                <Label style="-fx-font-weight: bold; -fx-font-size: 24; -fx-text-fill: #333;" text="Nutritional Value" VBox.vgrow="ALWAYS">
+                                <Label style="-fx-font-weight: bold; -fx-font-size: 24; -fx-text-fill: #333;" VBox.vgrow="ALWAYS">
                            <font>
                               <Font name="Papyrus" size="12.0" />
                            </font></Label>
