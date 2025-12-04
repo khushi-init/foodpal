@@ -125,6 +125,8 @@ public class IngredientsWindowCtrl {
 
         return Optional.of(createIngCtr.getParsedIngredient());
     }
+
+    /**
      * Event handler for the Back button.
      * Switches the application scene back to the Recipes Window.
      */
