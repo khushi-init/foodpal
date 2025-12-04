@@ -82,7 +82,6 @@ public class RecipesWindowCtrl {
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     *
      * @param c ErrorCtrl instance for error
      */
     @Inject
