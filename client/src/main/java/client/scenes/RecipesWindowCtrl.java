@@ -55,6 +55,9 @@ public class RecipesWindowCtrl {
     @FXML
     private TextField searchField;
 
+    @FXML
+    private Label cancelSearchButton;
+
     private Recipe currentRecipe;
 
     private boolean newInstructionAdded = false;
@@ -111,8 +114,38 @@ public class RecipesWindowCtrl {
             }
         });
 
+        initializeSceneEvents();
+        intializeSearchElements();
+    }
+
+    /**
+     * Title is self-explanatory.
+     */
+    public void initializeSceneEvents(){
+        searchField.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if(newScene != null){
+                newScene.setOnKeyPressed(event -> {
+                    if(event.getCode() == KeyCode.ESCAPE){
+                        cancelSearch();
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * intializes the search field and the cancel button
+     */
+    public void intializeSearchElements(){
+        cancelSearchButton.setDisable(true);
+
         searchField.setOnKeyReleased(event -> {
-            // System.out.println(event.getText());
+            if(searchField.getText().length() == 0){
+                cancelSearchButton.setDisable(true);
+            } else {
+                cancelSearchButton.setDisable(false);
+            }
+
             if(event.getCode() == KeyCode.ENTER){
                 ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                         searchCtrl.search(
@@ -128,7 +161,6 @@ public class RecipesWindowCtrl {
                 searchField.getParent().requestFocus();
             }
         });
-
     }
 
     /**
@@ -311,6 +343,7 @@ public class RecipesWindowCtrl {
      */
     @FXML
     public void onCloneRecipe(){
+        cancelSearch();
         Recipe recipe = currentRecipe;
         if(recipe == null){
             recipe = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
@@ -387,6 +420,7 @@ public class RecipesWindowCtrl {
      */
     @FXML
     private void onAddRecipe() {
+        cancelSearch();
         Recipe newRecipe = new Recipe(
                 "New Recipe",
                 new ArrayList<>(),
@@ -601,6 +635,27 @@ public class RecipesWindowCtrl {
                 break;
             }
         }
+    }
+
+    /**
+     * Clears the contents of the search bar and resets the side bar
+     */
+    private void cancelSearch(){
+        try {
+            searchField.clear();
+            cancelSearchButton.setDisable(true);
+            if(searchField.isFocused()){
+                searchField.getParent().requestFocus();
+            }
+            sidebarRecipeNamesList.setItems(recipes);
+        } catch (Exception e){
+            errorCtrl.showGenericError(e);
+        }
+    }
+
+    @FXML
+    private void onCancelSearch(){
+        cancelSearch();
     }
 
 }
