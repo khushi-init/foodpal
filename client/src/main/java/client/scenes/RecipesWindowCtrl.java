@@ -601,5 +601,4 @@ public class RecipesWindowCtrl {
     public void onIngredientWindowClick(){
         primaryCtrl.showIngredientsWindow();
     }
-
 }
