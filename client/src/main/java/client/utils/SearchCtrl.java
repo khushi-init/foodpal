@@ -22,7 +22,6 @@ public class SearchCtrl {
             List<RecipeIngredient> recipeIngredients = recipe.getIngredients();
             List<Ingredient> ingredients = recipeIngredients.stream()
                     .map(x -> x.getIngredient()).toList();
-            System.out.println(ingredients.toString());
             for(Ingredient ingredient : ingredients){
                 if(ingredient.getName().toLowerCase().contains(query)){
                     filteredRecipes.add(recipe);

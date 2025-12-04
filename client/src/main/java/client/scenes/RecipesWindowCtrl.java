@@ -120,6 +120,7 @@ public class RecipesWindowCtrl {
                         recipes
                     ).toString()
                 );
+                searchField.getParent().requestFocus();
             }
         });
 
