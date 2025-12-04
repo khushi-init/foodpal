@@ -61,4 +61,13 @@ public class ShoppingList {
     public List<String> getIngredients() {
         return List.copyOf(ingredients);
     }
+
+    /**
+     * Update shopping list after editing one of the ingredients
+     * @param index which ingredient in list it is
+     * @param newValue new item in the shopping list
+     */
+    public void updateIngredients(int index, String newValue) {
+        ingredients.set(index, newValue);
+    }
 }

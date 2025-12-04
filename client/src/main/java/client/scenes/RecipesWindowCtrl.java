@@ -78,14 +78,15 @@ public class RecipesWindowCtrl {
 
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
-
+    private final PrimaryCtrl primaryCtrl;
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param c ErrorCtrl instance for error
      */
     @Inject
-    public RecipesWindowCtrl(ErrorCtrl c){
+    public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p) {
         this.errorCtrl = c;
+        this.primaryCtrl = p;
     }
 
     /**
@@ -720,4 +721,7 @@ public class RecipesWindowCtrl {
         }
     }
 
-}
+    @FXML
+    public void onIngredientWindowClick(){
+        primaryCtrl.showIngredientsWindow();
+    }

@@ -27,8 +27,9 @@ public class Ingredient {
     }
 
     /**
-     * constructor for creation of new Ingredient
-     * @param name  name of ingredient
+     * Constructor for creation of new Ingredient.
+     * @param name name of ingredient
+     * @param nutritionalValue nutritional value of ingredient
      */
     public Ingredient (String name,  NutritionalValue nutritionalValue) {
         this.name = name;

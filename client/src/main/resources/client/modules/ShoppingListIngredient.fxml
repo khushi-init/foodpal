@@ -20,7 +20,7 @@
             </image>
          </ImageView>
       </graphic></Button>
-    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+    <Button prefHeight="Infinity" prefWidth="30.0" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;" onAction="#handleEditButton">
       <graphic>
          <ImageView fitHeight="15.0" fitWidth="15.0">
             <image>
