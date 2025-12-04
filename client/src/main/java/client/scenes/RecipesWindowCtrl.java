@@ -114,12 +114,17 @@ public class RecipesWindowCtrl {
         searchField.setOnKeyReleased(event -> {
             // System.out.println(event.getText());
             if(event.getCode() == KeyCode.ENTER){
-                System.out.println(
+                ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                         searchCtrl.search(
-                        searchField.getText(),
-                        recipes
-                    ).toString()
+                        searchField.getText(), recipes
+                    )
                 );
+                sidebarRecipeNamesList.setItems(searchResults);
+                searchField.getParent().requestFocus();
+            }
+
+            if(event.getCode() == KeyCode.BACK_SLASH){
+                sidebarRecipeNamesList.setItems(recipes);
                 searchField.getParent().requestFocus();
             }
         });
