@@ -50,6 +50,9 @@ public class IngredientsWindowCtrl {
         this.errorCtrl = c;
     }
 
+    /**
+     * Initializes the ingredient window UI.
+     */
     public void initialize(){
         ingredients = FXCollections.observableArrayList(server.getIngredients());
         sidebarIngredientNamesList.setItems(ingredients);
@@ -63,6 +66,10 @@ public class IngredientsWindowCtrl {
                 });
     }
 
+    /**
+     * Opens the detail view for the selected ingredient.
+     * @param ingredient the ingredient to display details for
+     */
     public void openIngredient(Ingredient ingredient){
 
     }
