@@ -45,6 +45,9 @@ public class IngredientsWindowCtrl {
     @FXML
     private Button refresh;
 
+    @FXML
+    private Button backButton;
+
     private ObservableList<Ingredient> ingredients;
 
     /**
@@ -58,8 +61,15 @@ public class IngredientsWindowCtrl {
         this.errorCtrl = c;
     }
 
+    /**
+     * Initializes the ingredient window UI.
+     */
     public void initialize(){
         ingredients = FXCollections.observableArrayList(server.getIngredients());
+
+        // logic to sort ingredients by name
+        FXCollections.sort(ingredients, (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
+
         sidebarIngredientNamesList.setItems(ingredients);
         sidebarIngredientNamesList.setCellFactory(icl -> new IngredientListCell());
         sidebarIngredientNamesList.getSelectionModel().selectedItemProperty()
@@ -71,6 +81,10 @@ public class IngredientsWindowCtrl {
                 });
     }
 
+    /**
+     * Opens the detail view for the selected ingredient.
+     * @param ingredient the ingredient to display details for
+     */
     public void openIngredient(Ingredient ingredient){
 
     }
@@ -110,5 +124,12 @@ public class IngredientsWindowCtrl {
         if (createIngCtr.getParsedIngredient() == null) return Optional.empty();
 
         return Optional.of(createIngCtr.getParsedIngredient());
+    }
+     * Event handler for the Back button.
+     * Switches the application scene back to the Recipes Window.
+     */
+    @FXML
+    public void onBackToRecipesClick() {
+        primaryCtrl.showRecipesWindow();
     }
 }
