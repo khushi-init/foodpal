@@ -53,9 +53,6 @@ public class RecipesWindowCtrl {
     @FXML
     private TextField recipeNameField;
 
-    @Inject
-    private PrimaryCtrl prime;
-
     private Recipe currentRecipe;
 
     private boolean newInstructionAdded = false;
@@ -597,10 +594,5 @@ public class RecipesWindowCtrl {
                 break;
             }
         }
-    }
-
-    @FXML
-    private void onSwitchToIngredients() {
-        prime.showIngredientsWindow();
     }
 }
