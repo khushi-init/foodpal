@@ -52,6 +52,9 @@ public class RecipesWindowCtrl {
     @FXML
     private TextField recipeNameField;
 
+    @FXML
+    private TextField searchField;
+
     private Recipe currentRecipe;
 
     private boolean newInstructionAdded = false;
@@ -64,14 +67,17 @@ public class RecipesWindowCtrl {
     private ObservableList<Recipe> recipes;
 
     private final ErrorCtrl errorCtrl;
+    private final SearchCtrl searchCtrl;
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     * @param c ErrorCtrl instance for erro
+     * @param c ErrorCtrl instance for error
+     * @param s SearchCtrl instance for performing searches
      */
     @Inject
-    public RecipesWindowCtrl(ErrorCtrl c){
+    public RecipesWindowCtrl(ErrorCtrl c, SearchCtrl s){
         this.errorCtrl = c;
+        this.searchCtrl = s;
     }
 
     /**
@@ -102,6 +108,18 @@ public class RecipesWindowCtrl {
                                                        oldFocused, newFocused) -> {
             if(oldFocused && !newFocused){
                 saveRecipeName();
+            }
+        });
+
+        searchField.setOnKeyReleased(event -> {
+            // System.out.println(event.getText());
+            if(event.getCode() == KeyCode.ENTER){
+                System.out.println(
+                        searchCtrl.search(
+                        searchField.getText(),
+                        recipes
+                    ).toString()
+                );
             }
         });
 

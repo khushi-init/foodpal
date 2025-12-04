@@ -51,6 +51,11 @@
 
 
                 <VBox fx:id="sidebarVBox" maxWidth="300" style="-fx-background-color: transparent;">
+               <TextField id="searchField" fx:id="searchField" promptText="🔎">
+                  <VBox.margin>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </VBox.margin>
+               </TextField>
 
                     <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
                         <ListView fx:id="sidebarRecipeNamesList" prefWidth="200" />

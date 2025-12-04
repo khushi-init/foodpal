@@ -56,15 +56,9 @@
             <property name="max" value="8"/>
         </module>
         <module name="CyclomaticComplexity">
-            <property name="severity" value="warning"/>
-            <property name="switchBlockAsSingleDecisionPoint" value="true"/>
-            <property name="max" value="5"/>
-            <property name="tokens" value="LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, QUESTION"/>
-        </module>
-        <module name="CyclomaticComplexity">
             <property name="severity" value="error"/>
             <property name="switchBlockAsSingleDecisionPoint" value="true"/>
-            <property name="max" value="10"/>
+            <property name="max" value="8"/>
             <property name="tokens" value="LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, QUESTION"/>
         </module>
         <module name="NestedIfDepth">

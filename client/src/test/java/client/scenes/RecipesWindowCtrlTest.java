@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.utils.ErrorCtrl;
+import client.utils.SearchCtrl;
 import commons.Recipe;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,7 +21,7 @@ public class RecipesWindowCtrlTest {
 
     @BeforeEach
     public void setup() {
-        window = new RecipesWindowCtrl(error);
+        window = new RecipesWindowCtrl(error, new SearchCtrl());
     }
 
     private String invokeCreateCopyName(String baseName) throws Exception {
