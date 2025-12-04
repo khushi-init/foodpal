@@ -58,6 +58,10 @@ public class IngredientsWindowCtrl {
      */
     public void initialize(){
         ingredients = FXCollections.observableArrayList(server.getIngredients());
+
+        // logic to sort ingredients by name
+        FXCollections.sort(ingredients, (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
+
         sidebarIngredientNamesList.setItems(ingredients);
         sidebarIngredientNamesList.setCellFactory(icl -> new IngredientListCell());
         sidebarIngredientNamesList.getSelectionModel().selectedItemProperty()
