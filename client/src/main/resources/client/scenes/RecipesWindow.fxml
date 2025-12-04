@@ -35,11 +35,17 @@
                         </ImageView>
                     </graphic>
                 </Button>
-                <ImageView id="ingredientsButton" fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
-                    <image>
-                        <Image url="@/client/images/carrot.png" />
-                    </image>
-                </ImageView>
+                <Button fx:id="ingredientsButton"
+                        onAction="#onIngredientWindowClick"
+                        style="-fx-cursor: hand; -fx-background-color: transparent;">
+                    <graphic>
+                        <ImageView fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@/client/images/carrot.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
             </children>
         </HBox>
     </top>

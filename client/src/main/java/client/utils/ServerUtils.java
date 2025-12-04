@@ -27,7 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
+import client.Main;
 import commons.Ingredient;
 import commons.Recipe;
 import jakarta.ws.rs.core.Response;
@@ -44,6 +46,8 @@ public class ServerUtils {
     private static final int statusOK = 200;
     private static final int statusCreation = 201;
     private static final int statusNoContent = 204;
+
+    private final ErrorCtrl err = Main.INJECTOR.getInstance(ErrorCtrl.class);
 
     /**
      * Returns true if a server is running on port 8080
@@ -126,6 +130,28 @@ public class ServerUtils {
             if (response != null) {
                 response.close();
             }
+        }
+    }
+
+    /**
+     * Adds provided ingredient to the server. If unsuccessful alerts user and returns empty optional.
+     * @param ingredient - Ingredient to Post
+     * @return - The response entity ingredient or empty optional if creation failed.
+     */
+    public Optional<Ingredient> addIngredient(Ingredient ingredient) {
+        try (Response response = ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/ingredients")
+                .request(APPLICATION_JSON)
+                .post(Entity.entity(ingredient, APPLICATION_JSON))) {
+            if (response.getStatus() == statusCreation) {
+                return Optional.of(response.readEntity(Ingredient.class));
+            }
+            err.showErrorPopup("Server error handler", "Failed to create ingredient", "Server returned status " +
+                    response.getStatus());
+            return Optional.empty();
+        } catch (ProcessingException e) {
+            err.showErrorPopup("Server error handler", "Failed to create ingredient", "Failed to connect to server");
+            return Optional.empty();
         }
     }
 
