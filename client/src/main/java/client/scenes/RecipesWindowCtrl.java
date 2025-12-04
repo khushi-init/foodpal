@@ -147,17 +147,16 @@ public class RecipesWindowCtrl {
             }
 
             if(event.getCode() == KeyCode.ENTER){
+                if(searchField.getText().equals("")){
+                    cancelSearch(); //if query is empty, return to the normal side bar.
+                    return;
+                }
                 ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                         searchCtrl.search(
                         searchField.getText(), recipes
                     )
                 );
                 sidebarRecipeNamesList.setItems(searchResults);
-                searchField.getParent().requestFocus();
-            }
-
-            if(event.getCode() == KeyCode.BACK_SLASH){
-                sidebarRecipeNamesList.setItems(recipes);
                 searchField.getParent().requestFocus();
             }
         });
