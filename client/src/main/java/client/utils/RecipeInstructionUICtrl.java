@@ -52,6 +52,9 @@ public class RecipeInstructionUICtrl {
         }
     }
 
+    /**
+     * Handles the edit action for instruction.
+     */
     @FXML
     public void handleEditButton() {
         TextField textField = new TextField(instructionText.getText().replace("- ", ""));

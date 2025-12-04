@@ -16,18 +16,24 @@ public class Ingredient {
     @Column(unique = true)
     private String name;
 
+    @Embedded
+    private NutritionalValue nutritionalValue;
+
     /**
      * JPA required no argument constructor
      */
     public Ingredient () {
+        this.nutritionalValue = new NutritionalValue(0, 0, 0);
     }
 
     /**
-     * constructor for creation of new Ingredient
-     * @param name  name of ingredient
+     * Constructor for creation of new Ingredient.
+     * @param name name of ingredient
+     * @param nutritionalValue nutritional value of ingredient
      */
-    public Ingredient (String name) {
+    public Ingredient (String name,  NutritionalValue nutritionalValue) {
         this.name = name;
+        this.nutritionalValue = nutritionalValue;
     }
 
     // GETTERS AND SETTERS MANDATORY
@@ -47,6 +53,14 @@ public class Ingredient {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public NutritionalValue getNutritionalValue() {
+        return nutritionalValue;
+    }
+
+    public void setNutritionalValue(NutritionalValue nutritionalValue) {
+        this.nutritionalValue = nutritionalValue;
     }
 
     @Override

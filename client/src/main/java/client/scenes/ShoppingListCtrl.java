@@ -61,6 +61,11 @@ public class ShoppingListCtrl {
                     shoppingList.removeIngredient(index.intValue());
                     showShoppingList();
                 });
+
+                ctrl.setEditInstruction(newText ->{
+                    shoppingList.updateIngredients((int) ctrl.getIndex(), newText);
+                    showShoppingList();
+                });
                 shoppingListView.requestLayout();
             }
         }

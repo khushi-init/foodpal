@@ -21,7 +21,7 @@ public class RecipesWindowCtrlTest {
 
     @BeforeEach
     public void setup() {
-        window = new RecipesWindowCtrl(error, new SearchCtrl());
+        window = new RecipesWindowCtrl(error, new PrimaryCtrl(), new SearchCtrl());
     }
 
     private String invokeCreateCopyName(String baseName) throws Exception {

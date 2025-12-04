@@ -30,5 +30,6 @@ public class MyModule implements Module {
         binder.bind(RecipesWindowCtrl.class).in(Scopes.SINGLETON);
         binder.bind(ErrorCtrl.class).in(Scopes.SINGLETON);
         binder.bind(ShoppingListCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(IngredientsWindowCtrl.class).in(Scopes.SINGLETON);
     }
 }

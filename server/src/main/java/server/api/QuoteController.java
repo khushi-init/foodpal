@@ -70,6 +70,10 @@ public class QuoteController {
         return s == null || s.isEmpty();
     }
 
+    /**
+     * Returns a quote from database.
+     * @return 200 ok with quote
+     */
     @GetMapping("rnd")
     public ResponseEntity<Quote> getRandom() {
         List<Quote> quotes = repo.findAll();

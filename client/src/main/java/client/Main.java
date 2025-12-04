@@ -28,12 +28,10 @@ import javafx.util.Pair;
 
 public class Main extends Application {
 
-    // Debug variable to disable checking for an active server when launching client. Will be useful for early
-    // development. Set to false or remove altogether before finalizing.
-    private final boolean debug = true;
-
     public static final Injector INJECTOR = createInjector(new MyModule());
     public static final MyFXML FXML = new MyFXML(INJECTOR);
+
+
 
 //    public static void main(String[] args) throws URISyntaxException, IOException {
 //        launch();
@@ -45,7 +43,7 @@ public class Main extends Application {
         System.out.println("Opening very cool amazing recipe app!");
 
         ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
-        if (!serverUtils.isServerAvailable() && !debug) {
+        if (!serverUtils.isServerAvailable()) {
             String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             return;
@@ -54,7 +52,8 @@ public class Main extends Application {
         // All scenes must be initialized here as such
         Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
         Pair<ShoppingListCtrl, Parent> shoppingList = FXML.load(ShoppingListCtrl.class, "client", "scenes", "ShoppingList.fxml");
+        Pair<IngredientsWindowCtrl, Parent> ingredientsWindow = FXML.load(IngredientsWindowCtrl.class, "client", "scenes", "IngredientsWindow.fxml");
         PrimaryCtrl prime = INJECTOR.getInstance(PrimaryCtrl.class);
-        prime.init(primaryStage, recipesWindow, shoppingList);
+        prime.init(primaryStage, recipesWindow, shoppingList, ingredientsWindow);
     }
 }
