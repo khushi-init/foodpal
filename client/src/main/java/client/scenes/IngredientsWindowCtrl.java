@@ -37,6 +37,9 @@ public class IngredientsWindowCtrl {
     @FXML
     private Button refresh;
 
+    @FXML
+    private Button backButton;
+
     private ObservableList<Ingredient> ingredients;
 
     /**
@@ -72,5 +75,14 @@ public class IngredientsWindowCtrl {
      */
     public void openIngredient(Ingredient ingredient){
 
+    }
+
+    /**
+     * Event handler for the Back button.
+     * Switches the application scene back to the Recipes Window.
+     */
+    @FXML
+    public void onBackToRecipesClick() {
+        primaryCtrl.showRecipesWindow();
     }
 }
