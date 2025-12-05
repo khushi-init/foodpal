@@ -53,6 +53,12 @@ public class RecipesWindowCtrl {
     @FXML
     private TextField recipeNameField;
 
+    @FXML
+    private TextField searchField;
+
+    @FXML
+    private Label cancelSearchButton;
+
     // Favorite Injections
     @FXML
     private ImageView favoriteImage;
@@ -75,6 +81,7 @@ public class RecipesWindowCtrl {
     private List<Long> favoriteIds;
 
     private final ErrorCtrl errorCtrl;
+    private final SearchCtrl searchCtrl;
 
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
@@ -83,11 +90,14 @@ public class RecipesWindowCtrl {
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param c ErrorCtrl instance for error
+     * @param p PrimaryCtrl instance 
+     * @param s SearchCtrl instance for performing searches
      */
     @Inject
-    public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p) {
+    public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, SearchCtrl s){
         this.errorCtrl = c;
         this.primaryCtrl = p;
+        this.searchCtrl = s;
     }
 
     /**
@@ -128,6 +138,54 @@ public class RecipesWindowCtrl {
             }
         });
 
+        initializeSceneEvents();
+        intializeSearchElements();
+    }
+
+    /**
+     * Sets event handlers for the whole window
+     */
+    public void initializeSceneEvents(){
+        searchField.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if(newScene != null){
+                //when ESCAPE is pressed anywhere in the window, the search is canceled:
+                newScene.setOnKeyPressed(event -> {
+                    if(event.getCode() == KeyCode.ESCAPE){
+                        cancelSearch();
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * intializes the search field and the cancel button
+     */
+    public void intializeSearchElements(){
+        cancelSearchButton.setDisable(true);
+
+        searchField.setOnKeyReleased(event -> {
+            if(searchField.getText().length() == 0){
+                cancelSearchButton.setDisable(true);
+            } else {
+                cancelSearchButton.setDisable(false);
+            }
+
+            //the query is executed iff the user presses enter:
+            if(event.getCode() == KeyCode.ENTER){
+                if(searchField.getText().equals("")){
+                    cancelSearch(); //if query is empty, return to the normal side bar.
+                    return;
+                }
+                ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
+                        searchCtrl.search(
+                        searchField.getText(), recipes
+                    )
+                );
+                sidebarRecipeNamesList.setItems(searchResults); //show results in the side bar
+                searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+            }
+        });
     }
 
     /**
@@ -415,6 +473,7 @@ public class RecipesWindowCtrl {
      */
     @FXML
     public void onCloneRecipe() {
+        cancelSearch();
         Recipe recipe = currentRecipe;
         if (recipe == null) {
             recipe = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
@@ -493,6 +552,7 @@ public class RecipesWindowCtrl {
      */
     @FXML
     private void onAddRecipe() {
+        cancelSearch();
         Recipe newRecipe = new Recipe(
                 "New Recipe",
                 new ArrayList<>(),
@@ -734,4 +794,26 @@ public class RecipesWindowCtrl {
     public void onIngredientWindowClick() {
         primaryCtrl.showIngredientsWindow();
     }
+    
+    /**
+     * Clears the contents of the search bar and resets the side bar
+     */
+    private void cancelSearch(){
+        try {
+            searchField.clear();
+            cancelSearchButton.setDisable(true);
+            if(searchField.isFocused()){
+                searchField.getParent().requestFocus();
+            }
+            sidebarRecipeNamesList.setItems(recipes); //display all recipes again
+        } catch (Exception e){
+            errorCtrl.showGenericError(e);
+        }
+    }
+
+    @FXML
+    private void onCancelSearch(){
+        cancelSearch();
+    }
+
 }
