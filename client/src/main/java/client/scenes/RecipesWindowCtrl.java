@@ -143,11 +143,12 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * Title is self-explanatory.
+     * Sets event handlers for the whole window
      */
     public void initializeSceneEvents(){
         searchField.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if(newScene != null){
+                //when ESCAPE is pressed anywhere in the window, the search is canceled:
                 newScene.setOnKeyPressed(event -> {
                     if(event.getCode() == KeyCode.ESCAPE){
                         cancelSearch();
@@ -170,6 +171,7 @@ public class RecipesWindowCtrl {
                 cancelSearchButton.setDisable(false);
             }
 
+            //the query is executed iff the user presses enter:
             if(event.getCode() == KeyCode.ENTER){
                 if(searchField.getText().equals("")){
                     cancelSearch(); //if query is empty, return to the normal side bar.
@@ -180,8 +182,8 @@ public class RecipesWindowCtrl {
                         searchField.getText(), recipes
                     )
                 );
-                sidebarRecipeNamesList.setItems(searchResults);
-                searchField.getParent().requestFocus();
+                sidebarRecipeNamesList.setItems(searchResults); //show results in the side bar
+                searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
             }
         });
     }
@@ -803,7 +805,7 @@ public class RecipesWindowCtrl {
             if(searchField.isFocused()){
                 searchField.getParent().requestFocus();
             }
-            sidebarRecipeNamesList.setItems(recipes);
+            sidebarRecipeNamesList.setItems(recipes); //display all recipes again
         } catch (Exception e){
             errorCtrl.showGenericError(e);
         }
