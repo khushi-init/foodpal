@@ -35,9 +35,7 @@
                         </ImageView>
                     </graphic>
                 </Button>
-                <Button fx:id="ingredientsButton"
-                        onAction="#onIngredientWindowClick"
-                        style="-fx-cursor: hand; -fx-background-color: transparent;">
+                <Button fx:id="ingredientsButton" onAction="#onIngredientWindowClick" style="-fx-cursor: hand; -fx-background-color: transparent;">
                     <graphic>
                         <ImageView fitHeight="49.0" fitWidth="49.0" pickOnBounds="true" preserveRatio="true">
                             <image>
@@ -58,7 +56,7 @@
 
 
                 <VBox fx:id="sidebarVBox" maxWidth="300" prefWidth="146.0" style="-fx-background-color: transparent;">
-               <HBox prefHeight="100.0" prefWidth="200.0">
+               <HBox prefHeight="14.0" prefWidth="146.0">
                   <children>
                      <TextField id="searchField" fx:id="searchField" promptText="🔎" />
                      <Label fx:id="cancelSearchButton" alignment="BASELINE_CENTER" onMouseClicked="#onCancelSearch" prefHeight="26.0" prefWidth="35.0" text="✖">
