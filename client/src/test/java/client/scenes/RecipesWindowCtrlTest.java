@@ -1,14 +1,16 @@
 package client.scenes;
 
+import client.data.DataManipulator;
+import client.data.LocalStorage;
 import client.utils.ErrorCtrl;
 import client.utils.SearchCtrl;
+import client.utils.ServerUtils;
 import commons.Recipe;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -18,10 +20,17 @@ public class RecipesWindowCtrlTest {
     private RecipesWindowCtrl window;
     private PrimaryCtrl primary;
     private ErrorCtrl error;
+    private LocalStorage storage;
+    private DataManipulator dataManipulator;
+    private ServerUtils server;
 
     @BeforeEach
     public void setup() {
-        window = new RecipesWindowCtrl(error, new PrimaryCtrl(), new SearchCtrl());
+        error = new ErrorCtrl();
+        server = new ServerUtils(error);
+        storage = new LocalStorage(null);
+        dataManipulator = new DataManipulator(storage, server, error);
+        window = new RecipesWindowCtrl(error, primary, storage, dataManipulator, new SearchCtrl());
     }
 
     private String invokeCreateCopyName(String baseName) throws Exception {
@@ -31,9 +40,7 @@ public class RecipesWindowCtrlTest {
     }
 
     private void setRecipes(ObservableList<Recipe> recipes) throws Exception {
-        Field field = RecipesWindowCtrl.class.getDeclaredField("recipes");
-        field.setAccessible(true);
-        field.set(window, recipes);
+        storage.setRecipes(recipes);
     }
 
 

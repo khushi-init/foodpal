@@ -4,11 +4,15 @@ import client.Main;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 
 public class CreateIngredientCtrl {
+
+    @FXML
+    private Label descLabel;
 
     @FXML
     private TextField nameField;
@@ -64,5 +68,9 @@ public class CreateIngredientCtrl {
 
     public Ingredient getParsedIngredient() {
         return parsed;
+    }
+
+    public void setDescLabelText(String text) {
+        descLabel.setText(text);
     }
 }

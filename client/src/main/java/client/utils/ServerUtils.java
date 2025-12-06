@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import client.Main;
+import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;
 import jakarta.ws.rs.core.Response;
@@ -42,12 +43,24 @@ import jakarta.ws.rs.core.GenericType;
 
 public class ServerUtils {
 
-    private static final String SERVER = "http://localhost:8080/";
-    private static final int statusOK = 200;
-    private static final int statusCreation = 201;
-    private static final int statusNoContent = 204;
+    private  final String server = "http://localhost:8080/";
+    private  final int statusOK = 200;
+    private  final int statusCreation = 201;
+    private  final int statusNoContent = 204;
+    private  final int statusSameName = 409;
 
     private final ErrorCtrl err = Main.INJECTOR.getInstance(ErrorCtrl.class);
+
+    private ErrorCtrl errorCtrl;
+
+    /**
+     * Constructor for server utils. Just look at it
+     * @param errorCtrl - Injected error ctrl
+     */
+    @Inject
+    public ServerUtils(ErrorCtrl errorCtrl) {
+        this.errorCtrl = errorCtrl;
+    }
 
     /**
      * Returns true if a server is running on port 8080
@@ -56,7 +69,7 @@ public class ServerUtils {
     public boolean isServerAvailable() {
         try {
             ClientBuilder.newClient(new ClientConfig()) //
-                    .target(SERVER) //
+                    .target(server) //
                     .request(APPLICATION_JSON) //
                     .get();
         } catch (ProcessingException e) {
@@ -82,14 +95,14 @@ public class ServerUtils {
 
     public List<Recipe> getRecipes() {
         return ClientBuilder.newClient(new ClientConfig()) //
-                .target(SERVER).path("api/recipes") //
+                .target(server).path("api/recipes") //
                 .request(APPLICATION_JSON) //
                 .get(new GenericType<List<Recipe>>() {});
     }
 
     public List<Ingredient> getIngredients() {
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/ingredients")
+                .target(server).path("api/ingredients")
                 .request(APPLICATION_JSON)
                 .get(new GenericType<List<Ingredient>>() {});
     }
@@ -105,7 +118,7 @@ public class ServerUtils {
         Response response = null; // Declare Response outside the try block if needed elsewhere
         try {
             response = ClientBuilder.newClient(new ClientConfig())
-                    .target(SERVER).path("api/recipes")
+                    .target(server).path("api/recipes")
                     .request(APPLICATION_JSON)
                     // POST the entity and wait for the Response object
                     .post(Entity.entity(recipe, APPLICATION_JSON));
@@ -114,6 +127,10 @@ public class ServerUtils {
             if (response.getStatus() == statusCreation) {
                 // read the JSON response body into a Recipe object
                 return response.readEntity(Recipe.class);
+            } else if (response.getStatus() == statusSameName){
+                errorCtrl.showErrorPopup("Error adding recipe", "You can't add a recipe with the same name!",
+                        "Make sure that you rename any recipes called 'New Recipe' before adding a new one!");
+                return null;
             } else {
                 // log non-success status and return null
                 System.err.println("Failed to add recipe. Server returned status: " + response.getStatus());
@@ -140,7 +157,7 @@ public class ServerUtils {
      */
     public Optional<Ingredient> addIngredient(Ingredient ingredient) {
         try (Response response = ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/ingredients")
+                .target(server).path("api/ingredients")
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(ingredient, APPLICATION_JSON))) {
             if (response.getStatus() == statusCreation) {
@@ -162,7 +179,7 @@ public class ServerUtils {
     public void downloadRecipe(Long recipeId) {
         try {
             Response response = ClientBuilder.newClient()
-                    .target(SERVER)
+                    .target(server)
                     .path("api/recipes/download/" + recipeId)
                     .request()
                     .get(Response.class);
@@ -192,7 +209,7 @@ public class ServerUtils {
         Response response = null; // Declare Response outside the try block if needed elsewhere
         try {
             response = ClientBuilder.newClient()
-                    .target(SERVER)
+                    .target(server)
                     .path("api/recipes/" + recipeId)
                     .request()
                     .delete();
@@ -221,7 +238,7 @@ public class ServerUtils {
         Response response = null;
         try {
             response = ClientBuilder.newClient()
-                    .target(SERVER)
+                    .target(server)
                     .path("api/recipes/" + recipe.getId())
                     .request()
                     .put(Entity.entity(recipe, APPLICATION_JSON));
@@ -258,7 +275,7 @@ public class ServerUtils {
         Response response = null;
         try {
             response = ClientBuilder.newClient()
-                    .target(SERVER)
+                    .target(server)
                     .path("api/recipes/" + recipeId + "/ingredients/" + ingredientId)
                     .request()
                     .delete();

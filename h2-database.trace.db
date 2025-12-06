@@ -1,0 +1,3 @@
+2025-12-05 16:38:36.583220+01:00 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "RECIPES" not found; SQL statement:
+select * from recipes [42102-232]

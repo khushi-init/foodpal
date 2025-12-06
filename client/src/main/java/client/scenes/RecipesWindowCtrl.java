@@ -2,6 +2,8 @@ package client.scenes;
 
 import client.Main;
 import client.RecipeListCell;
+import client.data.DataManipulator;
+import client.data.LocalStorage;
 import client.utils.*;
 import commons.Ingredient;
 import commons.NutritionalValue;
@@ -75,28 +77,31 @@ public class RecipesWindowCtrl {
     // This is the Shopping List data that is used in the session.
     private final ShoppingList shoppingList = new ShoppingList();
 
-    // This list will store the recipe names, they're automatically displayed in the sidebar
-    // A selection listener should be implemented to handle clicks + deletes of recipes later
-    private ObservableList<Recipe> recipes;
     private List<Long> favoriteIds;
+
+    private LocalStorage storage;
+    private DataManipulator dataManipulator;
 
     private final ErrorCtrl errorCtrl;
     private final SearchCtrl searchCtrl;
 
-    private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
+    private final NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
     private final PrimaryCtrl primaryCtrl;
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     * @param c ErrorCtrl instance for error
-     * @param p PrimaryCtrl instance 
-     * @param s SearchCtrl instance for performing searches
+     * @param c ErrorCtrl instance for erro
+     * @param storage - The local storage storing recipes and ingredients
+     * @param dataManipulator - The data manipulator
+     * @param s - The injected searchctrl
      */
     @Inject
-    public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, SearchCtrl s){
+    public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
         this.errorCtrl = c;
         this.primaryCtrl = p;
+        this.storage = storage;
+        this.dataManipulator = dataManipulator;
         this.searchCtrl = s;
     }
 
@@ -105,11 +110,10 @@ public class RecipesWindowCtrl {
      */
     public void initialize() {
         favoriteIds = new ArrayList<>();
-        recipes = FXCollections.observableArrayList(server.getRecipes());
         loadFavs();
         favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
         unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
-        sidebarRecipeNamesList.setItems(recipes);
+        sidebarRecipeNamesList.setItems(storage.getRecipes());
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
@@ -174,15 +178,15 @@ public class RecipesWindowCtrl {
             //the query is executed iff the user presses enter:
             if(event.getCode() == KeyCode.ENTER){
                 if(searchField.getText().equals("")){
-                    cancelSearch(); //if query is empty, return to the normal side bar.
+                    cancelSearch(); //if query is empty, return to the normal sidebar.
                     return;
                 }
                 ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                         searchCtrl.search(
-                        searchField.getText(), recipes
+                        searchField.getText(), storage.getRecipes()
                     )
                 );
-                sidebarRecipeNamesList.setItems(searchResults); //show results in the side bar
+                sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                 searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
             }
         });
@@ -195,7 +199,7 @@ public class RecipesWindowCtrl {
         // Load only favorites or nah
         if (favoriteCheck.isSelected()) {
             List<Recipe> favRecipes = new ArrayList<>();
-            for (Recipe r : recipes) {
+            for (Recipe r : storage.getRecipes()) {
                 if (favoriteIds.contains(r.getId())) {
                     favRecipes.add(r);
                 }
@@ -203,7 +207,7 @@ public class RecipesWindowCtrl {
             sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
             sidebarRecipeNamesList.getSelectionModel().select(0);
         } else {
-            sidebarRecipeNamesList.setItems(recipes);
+            sidebarRecipeNamesList.setItems(storage.getRecipes());
         }
     }
 
@@ -216,7 +220,7 @@ public class RecipesWindowCtrl {
         // THIS TIME COMPLEXITY SUCKS ASS LMAO O(n^2) (But im lazy, will probably refactor later)
         for (Long id : favoriteIds) {
             String name = "Unknown";
-            for (Recipe r : recipes) {
+            for (Recipe r : storage.getRecipes()) {
                 if (Objects.equals(r.getId(), id)) {
                     name = r.getName();
                 }
@@ -232,7 +236,7 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * Load the favorites from the properties file, and displays a notification if the a favorite is GONE
+     * Load the favorites from the properties file, and displays a notification if the favorite is GONE
      */
     public void loadFavs() {
         Properties prop = new Properties();
@@ -259,7 +263,7 @@ public class RecipesWindowCtrl {
 
     public List<Long> getRecipeIDs() {
         List<Long> ids = new ArrayList<>();
-        for (Recipe r : recipes) {
+        for (Recipe r : storage.getRecipes()) {
             ids.add(r.getId());
         }
         return ids;
@@ -484,8 +488,8 @@ public class RecipesWindowCtrl {
         String newName = createCopyName(recipe.getName());
         Recipe clone = cloneRecipe(recipe, newName);
         Recipe savedRecipe = server.addRecipe(clone);
-        if (savedRecipe != null) {
-            recipes.add(savedRecipe);
+        if(savedRecipe != null){
+            storage.getRecipes().add(savedRecipe);
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
         } else {
             errorCtrl.showGenericError("Recipe not selected to clone.");
@@ -509,10 +513,10 @@ public class RecipesWindowCtrl {
      */
     private String createCopyName(String baseName) {
         int i = 1;
-        while (true) {
-            String candidate = baseName + "(" + i + ")";
-            boolean exists = recipes.stream().anyMatch(r -> r.getName().equals(candidate));
-            if (!exists) {
+        while(true){
+            String candidate = baseName + "(" + i +")";
+            boolean exists = storage.getRecipes().stream().anyMatch(r -> r.getName().equals(candidate));
+            if(!exists){
                 return candidate;
             }
             i++;
@@ -559,18 +563,8 @@ public class RecipesWindowCtrl {
                 new ArrayList<>()
         );
         //calls the fixed ServerUtils method addRecipe
-        Recipe savedRecipe = server.addRecipe(newRecipe); // Assuming 'server' is initialized
-
-        if (savedRecipe != null) {
-            // add the server-returned object
-            recipes.add(savedRecipe);
-
-            // select and open the new recipe in the sidebar
-            sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
-        } else {
-            // error handling
-            System.err.println("Recipe creation failed. Check server console for details.");
-        }
+        Optional<Recipe> savedRecipe = dataManipulator.addRecipe(newRecipe);
+        savedRecipe.ifPresent(recipe -> sidebarRecipeNamesList.getSelectionModel().select(recipe));
     }
 
     /**
@@ -591,18 +585,12 @@ public class RecipesWindowCtrl {
                 return;
             }
 
-            // setting the new name
-            currentRecipe.setName(newName);
-            // updating the recipe to store the new name
-            Recipe updated = server.updateRecipe(currentRecipe);
-            if (updated != null) {
-                applyUpdatedRecipe(updated);
+            Optional<Recipe> updated = dataManipulator.editRecipeName(currentRecipe, newName);
+            if (updated.isPresent()) {
+                applyUpdatedRecipe(updated.get());
                 sidebarRecipeNamesList.refresh();
-                System.out.println("Recipe saved successfully to: " + newName);
-            } else {
-                errorCtrl.showGenericError("A recipe with this name already exists!");
-                recipeNameField.setText(currentRecipe.getName());
             }
+            else recipeNameField.setText(currentRecipe.getName());
         }
 
     }
@@ -619,13 +607,7 @@ public class RecipesWindowCtrl {
         if (hit == null) {
             return;
         }
-        boolean successful = server.deleteRecipe(hit.getId());
-        if (!successful) {
-            System.err.println("RecipesWindowCtrl: Failed to delete recipe from the server, aborting request!");
-            return;
-        }
-        sidebarRecipeNamesList.getSelectionModel().selectPrevious();
-        recipes.remove(hit);
+        dataManipulator.deleteRecipe(hit);
     }
 
     @FXML
@@ -637,24 +619,20 @@ public class RecipesWindowCtrl {
      * Fetches the current recipe data from the server and loads it in the local storage of the recipes
      */
     @FXML
-    public void refreshLocalRecipes() {
-        boolean serverAvailable = server.isServerAvailable();
-        if (!serverAvailable) {
-            errorCtrl.showServerUnavailableError();
-            return;
-        }
-        try {
+    public void refreshLocalRecipes(){
+        try{
             clearRecipeView();
-            List<Recipe> serverResponse = server.getRecipes();
-            this.recipes.setAll(serverResponse);
+
             Recipe selectedRecipe = getSelectedRecipe();
+
+            dataManipulator.refreshRecipes();
 
             //update the recipe UI to contain the new contents of the previously selected recipe:
             if (selectedRecipe == null) return;
             boolean recipeStillExists = false;
             //In the case that the selected recipe was deleted on the server by a different client, make sure nothing is selected after refreshing
-            for (Recipe recipe : serverResponse) {
-                if (recipe.getId() == selectedRecipe.getId()) {
+            for(Recipe recipe: storage.getRecipes()){
+                if(Objects.equals(recipe.getId(), selectedRecipe.getId())){
                     selectedRecipe = recipe;
                     openRecipe(recipe);
                     recipeStillExists = true;
@@ -689,8 +667,9 @@ public class RecipesWindowCtrl {
      *
      * @param recipe The recipe to be selected
      */
-    public void setSelectedRecipe(Recipe recipe) {
-        if (!recipes.contains(recipe)) return; //if the recipe is not in the list, do nothing
+
+    public void setSelectedRecipe(Recipe recipe){
+        if(!storage.getRecipes().contains(recipe)) return; //if the recipe is not in the list, do nothing
         MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
         selectionModel.select(recipe);
     }
@@ -762,12 +741,6 @@ public class RecipesWindowCtrl {
             return;
         }
         currentRecipe = updated;
-        for (int i = 0; i < recipes.size(); i++) {
-            if (Objects.equals(recipes.get(i).getId(), updated.getId())) {
-                recipes.set(i, updated);
-                break;
-            }
-        }
     }
 
     /**
@@ -796,7 +769,7 @@ public class RecipesWindowCtrl {
     }
     
     /**
-     * Clears the contents of the search bar and resets the side bar
+     * Clears the contents of the search bar and resets the sidebar
      */
     private void cancelSearch(){
         try {
@@ -805,7 +778,7 @@ public class RecipesWindowCtrl {
             if(searchField.isFocused()){
                 searchField.getParent().requestFocus();
             }
-            sidebarRecipeNamesList.setItems(recipes); //display all recipes again
+            sidebarRecipeNamesList.setItems(storage.getRecipes()); //display all recipes again
         } catch (Exception e){
             errorCtrl.showGenericError(e);
         }

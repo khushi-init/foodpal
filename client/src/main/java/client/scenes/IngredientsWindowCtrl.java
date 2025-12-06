@@ -2,13 +2,14 @@ package client.scenes;
 
 import client.IngredientListCell;
 import client.Main;
+import client.data.DataManipulator;
+import client.data.LocalStorage;
 import client.utils.CreateIngredientCtrl;
 import client.utils.ErrorCtrl;
 import client.utils.ServerUtils;
 import commons.Ingredient;
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -48,29 +49,34 @@ public class IngredientsWindowCtrl {
     @FXML
     private Button backButton;
 
-    private ObservableList<Ingredient> ingredients;
+    private LocalStorage storage;
+
+    private DataManipulator dataManipulator;
 
     /**
      * Injectable constructor is REQUIRED for Guice to provide dependencies.
      * @param p PrimaryCtrl instance for scene switching.
      * @param c ErrorCtrl instance for displaying errors.
+     * @param storage - The local storage injected.
+     * @param dataManipulator - The injected data Manipulator
      */
     @Inject
-    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c) {
+    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator) {
         this.primaryCtrl = p;
         this.errorCtrl = c;
+        this.storage = storage;
+        this.dataManipulator = dataManipulator;
     }
 
     /**
      * Initializes the ingredient window UI.
      */
     public void initialize(){
-        ingredients = FXCollections.observableArrayList(server.getIngredients());
 
         // logic to sort ingredients by name
-        FXCollections.sort(ingredients, (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
+        FXCollections.sort(storage.getIngredients(), (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
 
-        sidebarIngredientNamesList.setItems(ingredients);
+        sidebarIngredientNamesList.setItems(storage.getIngredients());
         sidebarIngredientNamesList.setCellFactory(icl -> new IngredientListCell());
         sidebarIngredientNamesList.getSelectionModel().selectedItemProperty()
                 .addListener((observable, oldValue,
@@ -94,19 +100,18 @@ public class IngredientsWindowCtrl {
      * If added to the server successfully, it is also added to the client-side local list.
      */
     public void handlePlusButtonPress() {
-        Optional<Ingredient> parsed = addIngredientPrompt();
+        Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:");
         if (parsed.isEmpty()) return;
-        Optional<Ingredient> response = server.addIngredient(parsed.get());
-        if (response.isEmpty()) return;
-        ingredients.add(response.get());
-
+        dataManipulator.addIngredient(parsed.get());
     }
 
     /**
-     * Opens a popup window where the user is prompted to create an ingredient
+     * Opens a popup window where the user is prompted to create / edit an ingredient
+     * @param title - Window title
+     * @param descText - Description text
      * @return - The parsed ingredient or an empty optional if parsing failed / was cancelled
      */
-    public Optional<Ingredient> addIngredientPrompt() {
+    public Optional<Ingredient> ingredientDataPrompt(String title, String descText) {
         Pair<CreateIngredientCtrl, Parent> addIngPair = Main.FXML.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
 
         Parent root = addIngPair.getValue();
@@ -114,16 +119,24 @@ public class IngredientsWindowCtrl {
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);
-        popUpStage.setTitle("Create Ingredient"); // Will change to language thing later
+        popUpStage.setTitle(title); // Will change to language thing later
         popUpStage.setScene(new Scene(root));
 
         createIngCtr.setStage(popUpStage);
+        createIngCtr.setDescLabelText(descText);
 
         popUpStage.showAndWait();
 
         if (createIngCtr.getParsedIngredient() == null) return Optional.empty();
 
         return Optional.of(createIngCtr.getParsedIngredient());
+    }
+
+    /**
+     * Runs when edit ingredient button is pressed
+     */
+    public void handleEditButtonPress() {
+
     }
 
     /**
@@ -134,4 +147,6 @@ public class IngredientsWindowCtrl {
     public void onBackToRecipesClick() {
         primaryCtrl.showRecipesWindow();
     }
+
+    // We need an update method to re-sort the ingredients list on updates
 }

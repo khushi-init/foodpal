@@ -15,9 +15,12 @@
  */
 package client;
 
+import client.data.DataManipulator;
+import client.data.LocalStorage;
 import client.scenes.*;
 import client.utils.ErrorCtrl;
 
+import client.utils.ServerUtils;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -31,5 +34,8 @@ public class MyModule implements Module {
         binder.bind(ErrorCtrl.class).in(Scopes.SINGLETON);
         binder.bind(ShoppingListCtrl.class).in(Scopes.SINGLETON);
         binder.bind(IngredientsWindowCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(LocalStorage.class).in(Scopes.SINGLETON);
+        binder.bind(DataManipulator.class).in(Scopes.SINGLETON);
+        binder.bind(ServerUtils.class).in(Scopes.SINGLETON);
     }
 }
