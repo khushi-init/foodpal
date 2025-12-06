@@ -1,53 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?import javafx.geometry.Insets?>
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="client.utils.CreateIngredientCtrl"
-      alignment="CENTER"
-      spacing="10"
-      prefWidth="320"
-      prefHeight="180">
+<VBox alignment="CENTER" prefHeight="180" prefWidth="320" spacing="10" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.CreateIngredientCtrl">
 
     <children>
-        <Label text="Edit Ingredient"/>
+        <Label fx:id="descLabel" text="Edit Ingredient" />
 
         <GridPane hgap="10" vgap="10">
             <columnConstraints>
-                <ColumnConstraints percentWidth="35"/>
-                <ColumnConstraints percentWidth="65"/>
+                <ColumnConstraints percentWidth="35" />
+                <ColumnConstraints percentWidth="65" />
             </columnConstraints>
 
             <children>
-                <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="nameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Fat:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <TextField fx:id="fatField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Grams per 100g"/>
+                <Label text="Fat:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="fatField" promptText="Grams per 100g" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Protein:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="proteinField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Grams per 100g"/>
+                <Label text="Protein:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="proteinField" promptText="Grams per 100g" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                <Label text="Carbohydrates:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="carbField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="Grams per 100g"/>
+                <Label text="Carbohydrates:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <TextField fx:id="carbField" promptText="Grams per 100g" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             </children>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
         </GridPane>
 
-        <HBox spacing="10" alignment="CENTER_RIGHT">
+        <HBox alignment="CENTER_RIGHT" spacing="10">
             <children>
-                <Button text="Cancel" onAction="#handleCancel" cancelButton="true"/>
-                <Button text="OK" onAction="#handleOk" defaultButton="true"/>
+                <Button cancelButton="true" onAction="#handleCancel" text="Cancel" />
+                <Button defaultButton="true" onAction="#handleOk" text="OK" />
             </children>
         </HBox>
     </children>
 
     <padding>
-        <Insets top="15" right="15" bottom="15" left="15"/>
+        <Insets bottom="15" left="15" right="15" top="15" />
     </padding>
 </VBox>
