@@ -183,7 +183,7 @@ public class RecipesWindowCtrl {
                 }
                 ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                         searchCtrl.search(
-                        searchField.getText(), storage.getRecipes()
+                        searchField.getText(), storage.getRecipes(), favoriteIds
                     )
                 );
                 sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
@@ -198,6 +198,7 @@ public class RecipesWindowCtrl {
     public void updateToFav() {
         // Load only favorites or nah
         if (favoriteCheck.isSelected()) {
+            searchCtrl.setFavToggle(true);
             List<Recipe> favRecipes = new ArrayList<>();
             for (Recipe r : storage.getRecipes()) {
                 if (favoriteIds.contains(r.getId())) {
@@ -207,6 +208,7 @@ public class RecipesWindowCtrl {
             sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
             sidebarRecipeNamesList.getSelectionModel().select(0);
         } else {
+            searchCtrl.setFavToggle(false);
             sidebarRecipeNamesList.setItems(storage.getRecipes());
         }
     }
@@ -252,7 +254,14 @@ public class RecipesWindowCtrl {
             for (Long id : favoriteIds) {
                 if (!getRecipeIDs().contains(id)) {
                     errorCtrl.showGenericError("RIP: Recipe " + prop.getProperty(id.toString()) + " not found!");
+                    System.out.println(id + prop.getProperty(id.toString()));
+                    prop.remove(id.toString());
                 }
+            }
+            try {
+                prop.store(new FileOutputStream(properties), "Favorites Updated");
+            } catch (IOException e) {
+                errorCtrl.showGenericError("Can not update favorites, yikes...");
             }
 
         } catch (Exception e) {
