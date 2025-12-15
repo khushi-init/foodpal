@@ -91,7 +91,8 @@ public class RecipesWindowCtrl {
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     * @param c ErrorCtrl instance for erro
+     * @param c ErrorCtrl instance for error
+     * @param p Primary Ctrl instance
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
      * @param s - The injected searchctrl
@@ -114,7 +115,7 @@ public class RecipesWindowCtrl {
         favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
         unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
         sidebarRecipeNamesList.setItems(storage.getRecipes());
-        sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
+        sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell(favoriteIds, favorite));
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
@@ -769,6 +770,8 @@ public class RecipesWindowCtrl {
             // Regardless of change, put new favorites to file.
             saveFave();
             loadFavs();
+            // Refresh for sidebar look
+            sidebarRecipeNamesList.refresh();
         }
     }
 
