@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import server.database.IngredientRepository;
+import server.database.RecipeIngredientRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,7 @@ public class IngredientControllerTest {
 
     private IngredientController sut;
     private IngredientRepository mockRepository;
+    private RecipeIngredientRepository mockRecipeIngredientRepository;
     private Ingredient testIngredient;
     private Long id = 1L;
     private Long id2 = 2L;
@@ -29,7 +31,8 @@ public class IngredientControllerTest {
     public void setUp(){
         // Setup mock repository and controller
         mockRepository = mock(IngredientRepository.class);
-        sut = new IngredientController(mockRepository);
+        mockRecipeIngredientRepository = mock(RecipeIngredientRepository.class);
+        sut = new IngredientController(mockRepository, mockRecipeIngredientRepository);
 
         // Setup test data
         testIngredient = new Ingredient("Sugar", defaultNutritionalValue);

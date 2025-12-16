@@ -30,6 +30,8 @@ public class Main extends Application {
 
     public static final Injector INJECTOR = createInjector(new MyModule());
     public static final MyFXML FXML = new MyFXML(INJECTOR);
+    public static final int maxRetries = 5;
+    public static final int waitTimeMs = 1000;
 
 
 
@@ -39,19 +41,14 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
         System.out.println("Opening very cool amazing recipe app!");
         ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
-
-        int maxRetries = 5;
-        long waitTimeMs = 1000;
 
         for (int i = 0; i < maxRetries; i++) {
             if (serverUtils.isServerAvailable()) {
                 System.out.println("Server connection successful.");
                 break; // Exit the loop if connection succeeds
             }
-
             // Only print an error message after the first failed attempt
             if (i < maxRetries - 1) {
                 System.out.println("Server not available. Retrying in " + waitTimeMs + "ms...");

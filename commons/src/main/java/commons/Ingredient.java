@@ -27,6 +27,7 @@ public class Ingredient {
             cascade = CascadeType.ALL, // Apply the DELETE operation to linked RecipeIngredient records
             orphanRemoval = true,      // Ensures link records are removed from the database
             fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RecipeIngredient> recipeLinks;
     /**
      * JPA required no argument constructor
