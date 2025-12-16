@@ -70,4 +70,28 @@ public class ShoppingList {
     public void updateIngredients(int index, String newValue) {
         ingredients.set(index, newValue);
     }
+
+    /**
+     * Turn the shopping list into a Markdown format.
+     * @return the string with the Markdown format.
+     */
+    public String toMarkdown() {
+        StringBuilder output = new StringBuilder();
+
+        // Header 1 with the name of the recipe
+        output.append("# Shopping List");
+        // List of all ingredients in a table
+        output.append("## Ingredients\n");
+        output.append("| Name |\n");
+        output.append("|------|\n");
+
+        // Add all ingredients to the table.
+        for (String ingredient : ingredients) {
+            output.append("| ")
+                    .append(ingredient)
+                    .append(" |\n");
+        }
+
+        return output.toString();
+    }
 }
