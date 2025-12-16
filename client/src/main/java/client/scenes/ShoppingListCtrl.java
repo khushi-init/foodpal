@@ -125,6 +125,14 @@ public class ShoppingListCtrl {
     }
 
     /**
+     * Downloads a file of the shopping list.
+     */
+    @FXML
+    private void onHandleDownload() {
+
+    }
+
+    /**
      * Resets the list when rest button is pressed.
      */
     @FXML
