@@ -1,8 +1,8 @@
 /* Sidebar ListView */
 #sidebarRecipeNamesList {
     -fx-background-color: #ffffff;       /* witte container */
-    -fx-background-radius: 20px;         /* ronde hoeken */
-    -fx-border-radius: 20px;
+    -fx-background-radius: 8px;         /* ronde hoeken */
+    -fx-border-radius: 8px;
     -fx-border-color: #dddddd;
     -fx-border-width: 1px;
     -fx-padding: 10 0;                   /* ruimte boven en onder de items */

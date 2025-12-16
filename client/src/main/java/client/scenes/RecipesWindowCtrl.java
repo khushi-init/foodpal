@@ -306,6 +306,11 @@ public class RecipesWindowCtrl {
         Label ingredientsLabel = new Label("Ingredients:");
         ingredientsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(ingredientsLabel);
+
+        if (recipeIngredients.isEmpty()) {
+            recipeView.getChildren().add(new Label("This recipe does not have any ingredients yet!"));
+        }
+
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
             Pair<RecipeIngredientUICtrl, Node> ing = Main.FXML.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
@@ -408,6 +413,11 @@ public class RecipesWindowCtrl {
         Label stepsLabel = new Label("Steps:");
         stepsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(stepsLabel);
+
+        if (recipeInstructions.isEmpty()) {
+            recipeView.getChildren().add(new Label("This recipe does not have any preparation steps yet!"));
+        }
+
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
             Pair<RecipeInstructionUICtrl, Node> ing = Main.FXML.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
