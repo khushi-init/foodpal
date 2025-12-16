@@ -16,7 +16,7 @@
 
 <BorderPane prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsWindowCtrl">
     <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="79.0" prefWidth="600.0" style="-fx-background-color: #d9534f; -fx-padding: 10;">
+        <HBox alignment="CENTER_LEFT" prefHeight="79.0" prefWidth="600.0" style="-fx-background-color: #0275d8; -fx-padding: 10;">
             <children>
                 <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="Nutrional Value" />
                 <Region HBox.hgrow="ALWAYS" />
