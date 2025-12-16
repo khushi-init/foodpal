@@ -61,6 +61,14 @@ public class RecipesWindowCtrl {
     @FXML
     private Label cancelSearchButton;
 
+    @FXML
+    private Button downloadButton;
+
+    @FXML
+    private Button duplicateButton;
+
+    @FXML Button favoriteButton;
+
     // Favorite Injections
     @FXML
     private ImageView favoriteImage;
@@ -119,6 +127,9 @@ public class RecipesWindowCtrl {
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         openRecipe(newSelection);
+                    } else {
+                        clearRecipeView();
+                        updateRecipeSelectionState(false);
                     }
                 }
         );
@@ -141,6 +152,9 @@ public class RecipesWindowCtrl {
                 saveRecipeName();
             }
         });
+
+        // Deactivate recipe specific buttons, since nothing is selected at the start.
+        updateRecipeSelectionState(false);
 
         initializeSceneEvents();
         intializeSearchElements();
@@ -183,8 +197,8 @@ public class RecipesWindowCtrl {
                 }
                 ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                         searchCtrl.search(
-                        searchField.getText(), storage.getRecipes()
-                    )
+                                searchField.getText(), storage.getRecipes()
+                        )
                 );
                 sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                 searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
@@ -261,6 +275,43 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * Enables or disables all recipe-specific UI controls.
+     * When inactive, buttons related to the currently selected recipe
+     * (download, duplicate, favorite) and the recipe name field are
+     * hidden and disabled. When active, they become visible and usable
+     * and an informational message is shown.
+     *
+     * @param active - True if you want them active, false otherwise.
+     */
+    private void updateRecipeSelectionState(boolean active) {
+
+        downloadButton.setDisable(!active);
+        downloadButton.setVisible(active);
+
+        duplicateButton.setDisable(!active);
+        duplicateButton.setVisible(active);
+
+        favoriteButton.setDisable(!active);
+        favoriteButton.setVisible(active);
+
+        recipeNameField.setDisable(!active);
+        recipeNameField.setVisible(active);
+
+        if (!active) {
+            Label noRecipeSelectedLabel = new Label("You have not selected any recipe yet!\n" +
+                    "Select one in the list on the right or create your very own.");
+            noRecipeSelectedLabel.setStyle(
+                            "-fx-text-fill: #6b7280; " +
+                            "-fx-font-size: 14; " +
+                            "-fx-padding: 12;"
+            );
+            noRecipeSelectedLabel.setWrapText(true);
+
+            recipeView.getChildren().add(noRecipeSelectedLabel);
+        }
+    }
+
     public List<Long> getRecipeIDs() {
         List<Long> ids = new ArrayList<>();
         for (Recipe r : storage.getRecipes()) {
@@ -292,6 +343,9 @@ public class RecipesWindowCtrl {
         }
 
         recipeNameField.setText(recipe.getName());
+
+        // Activate recipe specific buttons
+        updateRecipeSelectionState(true);
 
     }
 
@@ -777,7 +831,7 @@ public class RecipesWindowCtrl {
     public void onIngredientWindowClick() {
         primaryCtrl.showIngredientsWindow();
     }
-    
+
     /**
      * Clears the contents of the search bar and resets the sidebar
      */
