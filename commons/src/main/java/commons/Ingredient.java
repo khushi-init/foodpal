@@ -5,6 +5,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.Set;
+
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 @Entity
@@ -19,6 +21,11 @@ public class Ingredient {
     @Embedded
     private NutritionalValue nutritionalValue;
 
+    @OneToMany(mappedBy = "ingredient",
+            cascade = CascadeType.ALL, // Apply the DELETE operation to linked RecipeIngredient records
+            orphanRemoval = true,      // Ensures link records are removed from the database
+            fetch = FetchType.LAZY)
+    private Set<RecipeIngredient> recipeLinks;
     /**
      * JPA required no argument constructor
      */
