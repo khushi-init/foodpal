@@ -62,11 +62,9 @@ public class ShoppingListTest {
                 # Shopping List
                 
                 ## Ingredients
-                | Name |
-                |------|
-                | Box of Cereal |
-                | Sugar (50g) |
-                | Milk (1.5L) |
+                * Box of Cereal
+                * Sugar (50g)
+                * Milk (1.5L)
                 """;
 
         String actual = shoppingList.toMarkdown();

@@ -78,16 +78,12 @@ public class ShoppingList {
         if (ingredients.isEmpty()) {
             output.append("This shopping list is empty.");
         } else {
-            // List of all ingredients in a table
             output.append("## Ingredients\n");
-            output.append("| Name |\n");
-            output.append("|------|\n");
 
-            // Add all ingredients to the table.
             for (String ingredient : ingredients) {
-                output.append("| ")
+                output.append("* ")
                         .append(ingredient)
-                        .append(" |\n");
+                        .append("\n");
             }
         }
         return output.toString();
