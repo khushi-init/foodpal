@@ -43,7 +43,7 @@ import jakarta.ws.rs.core.GenericType;
 
 public class ServerUtils {
 
-    private  final String server = "http://localhost:8080/";
+    private  final String server = "http://localhost:8080";
     private  final int statusOK = 200;
     private  final int statusCreation = 201;
     private  final int statusNoContent = 204;

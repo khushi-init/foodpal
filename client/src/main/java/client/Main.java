@@ -41,12 +41,31 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
 
         System.out.println("Opening very cool amazing recipe app!");
-
         ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
-        if (!serverUtils.isServerAvailable()) {
-            String msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
-            System.err.println(msg);
-            return;
+
+        int maxRetries = 5;
+        long waitTimeMs = 1000;
+
+        for (int i = 0; i < maxRetries; i++) {
+            if (serverUtils.isServerAvailable()) {
+                System.out.println("Server connection successful.");
+                break; // Exit the loop if connection succeeds
+            }
+
+            // Only print an error message after the first failed attempt
+            if (i < maxRetries - 1) {
+                System.out.println("Server not available. Retrying in " + waitTimeMs + "ms...");
+                try {
+                    Thread.sleep(waitTimeMs);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            } else {
+                // This is the final failure message
+                String msg = "Server needs to be started before the client, but it does not seem to be available after multiple retries. Shutting down.";
+                System.err.println(msg);
+                return; // Shut down after final failure
+            }
         }
 
         // All scenes must be initialized here as such
