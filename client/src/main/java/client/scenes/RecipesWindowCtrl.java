@@ -789,4 +789,27 @@ public class RecipesWindowCtrl {
         cancelSearch();
     }
 
+    /**
+     * handles button for to be added window
+     */
+    public void toggleToBeAdded() throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/client/modules/ToBeAdded.fxml")
+        );
+        Parent root = loader.load();
+
+        ToBeAddedCtrl ctrl = loader.getController();
+
+        Stage popUpStage = new Stage();
+        popUpStage.initModality(Modality.APPLICATION_MODAL);
+        popUpStage.setTitle("To Be Added");
+        popUpStage.setScene(new Scene(root));
+
+        popUpStage.initOwner(recipeView.getScene().getWindow());
+
+        popUpStage.showAndWait();
+
+        }
+
+
 }
