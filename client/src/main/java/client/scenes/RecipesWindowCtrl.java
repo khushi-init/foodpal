@@ -99,10 +99,11 @@ public class RecipesWindowCtrl {
 
     /**
      * Injectable constructor for RecipesWindowCtrl
-     * @param c ErrorCtrl instance for erro
+     * @param c ErrorCtrl instance for error
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
-     * @param s - The injected searchctrl
+     * @param s - The injected search control
+     * @param p - The injected primary control
      */
     @Inject
     public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
@@ -133,9 +134,8 @@ public class RecipesWindowCtrl {
                     }
                 }
         );
-        favoriteCheck.selectedProperty().addListener((obs, oldSelection, newSelection) -> {
-            updateToFav();
-        });
+        favoriteCheck.selectedProperty().addListener(
+                (obs, oldSelection, newSelection) -> updateToFav());
 
         // New listener for Recipe TextField
         // Saves the new name of teh recipe once the enter key is pressed
@@ -177,21 +177,17 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * intializes the search field and the cancel button
+     * Initializes the search field and the cancel button.
      */
     public void intializeSearchElements(){
         cancelSearchButton.setDisable(true);
 
         searchField.setOnKeyReleased(event -> {
-            if(searchField.getText().length() == 0){
-                cancelSearchButton.setDisable(true);
-            } else {
-                cancelSearchButton.setDisable(false);
-            }
+            cancelSearchButton.setDisable(searchField.getText().isEmpty());
 
             //the query is executed iff the user presses enter:
             if(event.getCode() == KeyCode.ENTER){
-                if(searchField.getText().equals("")){
+                if(searchField.getText().isEmpty()){
                     cancelSearch(); //if query is empty, return to the normal sidebar.
                     return;
                 }
@@ -429,7 +425,6 @@ public class RecipesWindowCtrl {
             applyUpdatedRecipe(updated);
             openRecipe(currentRecipe);
         });
-
         recipeView.requestLayout();
     }
 
@@ -720,7 +715,7 @@ public class RecipesWindowCtrl {
     public Recipe getSelectedRecipe() {
         MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
         ObservableList<Recipe> selectedRecipes = selectionModel.getSelectedItems();
-        if (selectedRecipes.size() == 0) {
+        if (selectedRecipes.isEmpty()) {
             return null; //return null if there are no selected recipes (i.e. the list of selected recipes is empty)
         }
         return selectedRecipes.get(0);
@@ -827,6 +822,9 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * Show the ingredient window when the button is clicked.
+     */
     @FXML
     public void onIngredientWindowClick() {
         primaryCtrl.showIngredientsWindow();
