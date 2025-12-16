@@ -20,7 +20,7 @@
 
 
     <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #d9534f; -fx-padding: 10;">
+        <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="661.0" style="-fx-background-color: #d9534f; -fx-padding: 10;">
             <children>
                 <Label prefHeight="38.0" prefWidth="202.0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
 
@@ -56,12 +56,17 @@
 
 
                 <VBox fx:id="sidebarVBox" maxWidth="300" prefWidth="146.0" style="-fx-background-color: transparent;">
-               <HBox prefHeight="14.0" prefWidth="146.0">
+               <HBox prefHeight="14.0">
                   <children>
-                     <TextField id="searchField" fx:id="searchField" promptText="🔎" />
-                     <Label fx:id="cancelSearchButton" alignment="BASELINE_CENTER" onMouseClicked="#onCancelSearch" prefHeight="26.0" prefWidth="35.0" text="✖">
+                     <TextField id="searchField" fx:id="searchField" promptText="🔎" HBox.hgrow="ALWAYS" />
+                     <Label fx:id="advancedSearchButton" alignment="BASELINE_CENTER" maxWidth="41.0" minWidth="20.0" onMouseClicked="#onAdvancedSearch" prefHeight="26.0" prefWidth="41.0" text="⚙">
                         <font>
                            <Font size="15.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="cancelSearchButton" alignment="BASELINE_CENTER" maxWidth="41.0" minWidth="20.0" onMouseClicked="#onCancelSearch" prefHeight="26.0" prefWidth="41.0" text="✖">
+                        <font>
+                           <Font name="System Bold" size="15.0" />
                         </font>
                      </Label>
                   </children>

@@ -5,6 +5,10 @@ import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.*;
+import client.utils.searchUtils.Proposition;
+// import client.utils.searchUtils.AtomicProposition;
+// import client.utils.searchUtils.Proposition;
+// import client.utils.searchUtils.SearchFunctions;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import commons.Recipe;
@@ -61,6 +65,9 @@ public class RecipesWindowCtrl {
     @FXML
     private Label cancelSearchButton;
 
+    @FXML
+    private Label advancedSearchButton;
+
     // Favorite Injections
     @FXML
     private ImageView favoriteImage;
@@ -92,6 +99,7 @@ public class RecipesWindowCtrl {
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param c ErrorCtrl instance for erro
+     * @param p PrimaryCtrl instance to inject
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
      * @param s - The injected searchctrl
@@ -177,19 +185,46 @@ public class RecipesWindowCtrl {
 
             //the query is executed iff the user presses enter:
             if(event.getCode() == KeyCode.ENTER){
+                // AtomicProposition prop = new AtomicProposition(SearchFunctions.MAXING, new ArrayList<String>(List.of("kaas", "0.2")));
+                // Proposition prop2 = searchCtrl.parseComplexQuery("/AND(/MAXING(kaas, 0.5), /AND(kaas, /MAXSTEPS(1)))");
+                // // System.out.println();
+                // System.out.println(prop2.toString());
+                // try {
+                //     System.out.println(prop.evaluate(storage.getRecipes().get(0)));
+                //     System.out.println(prop2.evaluate(storage.getRecipes().get(0)));
+                    
+                // } catch (Exception e){
+                //     errorCtrl.showGenericError(e);
+                // }
                 if(searchField.getText().equals("")){
                     cancelSearch(); //if query is empty, return to the normal sidebar.
                     return;
                 }
-                ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                        searchCtrl.search(
-                        searchField.getText(), storage.getRecipes()
-                    )
-                );
-                sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
-                searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                try{
+                    ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
+                            searchCtrl.query(
+                            searchField.getText(), storage.getRecipes()
+                        )
+                    );
+                    sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
+                    searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                } catch (Exception e){
+                    errorCtrl.showGenericError(e);
+                }
+
             }
         });
+    }
+
+    public void applyExternalSearch(Proposition prop){
+        try{
+            ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
+                    searchCtrl.performComplexQuery(prop, storage.getRecipes())
+            );
+            sidebarRecipeNamesList.setItems(searchResults);
+        } catch (Exception e){
+            errorCtrl.showGenericError(e);
+        }
     }
 
     /**
@@ -787,6 +822,11 @@ public class RecipesWindowCtrl {
     @FXML
     private void onCancelSearch(){
         cancelSearch();
+    }
+
+    @FXML
+    private void onAdvancedSearch(){
+        primaryCtrl.showSearchWindow();
     }
 
 }

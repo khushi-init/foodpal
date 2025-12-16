@@ -1,0 +1,62 @@
+package client.searchUI;
+
+import client.scenes.SearchWindowCtrl;
+import client.utils.ErrorCtrl;
+import client.utils.searchUtils.Proposition;
+import client.utils.searchUtils.SearchFunctions;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+
+public class RootPropositionUI implements ParentPropositionUI{
+    private PropositionUI child;
+    private SearchWindowCtrl sceneCtrl;
+
+    /**
+     * Constructor...
+     * @param s the scene controller
+     */
+    public RootPropositionUI(SearchWindowCtrl s){
+        // this.child = null;
+        this.child = new CombinedPropositionUI(this);
+        this.child.setSelectedFunction(SearchFunctions.AND);
+        sceneCtrl = s;
+    }
+
+    public void setChild(PropositionUI child){
+        this.child = child;
+    }
+
+    /**
+     * Here for compatibility, it only shows an error and does not actually delete the child.
+     * @param child Dummy, here for compatibility
+     */
+    public void deleteChild(PropositionUI child){
+        // this.child = null;
+        ErrorCtrl errorCtrl = new ErrorCtrl();
+        errorCtrl.showGenericError("Cannot delete root proposition!");
+    }
+
+    /**
+     * Calls the scene controller to update the tree visualisation
+     */
+    public void updateView(){
+        sceneCtrl.updateView();
+    }
+
+    public Pane getView(){
+        if(child == null) return getEmptyView();
+        return child.getView();
+    }
+
+    public VBox getEmptyView(){
+        return new VBox();
+    }
+
+    /**
+     * Extracts a Proposition from the UI
+     * @return Proposition as constructed by the user in the UI
+     */
+    public Proposition mapToProposition(){
+        return this.child.mapToProposition();
+    }
+}
