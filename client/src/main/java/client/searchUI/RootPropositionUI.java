@@ -31,7 +31,6 @@ public class RootPropositionUI implements ParentPropositionUI{
      * @param child Dummy, here for compatibility
      */
     public void deleteChild(PropositionUI child){
-        // this.child = null;
         ErrorCtrl errorCtrl = new ErrorCtrl();
         errorCtrl.showGenericError("Cannot delete root proposition!");
     }
@@ -44,16 +43,12 @@ public class RootPropositionUI implements ParentPropositionUI{
     }
 
     public Pane getView(){
-        if(child == null) return getEmptyView();
+        if(child == null) return new VBox(); //return an emtpy container
         return child.getView();
     }
 
-    public VBox getEmptyView(){
-        return new VBox();
-    }
-
     /**
-     * Extracts a Proposition from the UI
+     * Extracts a Proposition from this UI instance
      * @return Proposition as constructed by the user in the UI
      */
     public Proposition mapToProposition(){

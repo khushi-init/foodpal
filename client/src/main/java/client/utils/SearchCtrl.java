@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import client.utils.searchUtils.AtomicProposition;
 import client.utils.searchUtils.CombinedProposition;
-// import client.utils.searchUtils.CombinedProposition;
 import client.utils.searchUtils.Proposition;
 import client.utils.searchUtils.SearchFunctions;
 import commons.Recipe;
@@ -26,7 +25,7 @@ public class SearchCtrl {
         ArrayList<Recipe> filteredRecipes = new ArrayList<>();
 
         for(Recipe recipe : recipes){
-            //check if this recipe satisfies all queries
+            //check if this recipe satisfies all conditions (i.e. contains all keywords)
             if(queries.stream().allMatch(x -> checkIfRecipeSatisfiesQuery(x, recipe))){
                 filteredRecipes.add(recipe);
             }
@@ -41,6 +40,7 @@ public class SearchCtrl {
      * @return boolean indicating if the recipe satisfies the String query
      */
     public boolean checkIfRecipeSatisfiesQuery(String query, Recipe recipe){
+        //check for ingredients, instructions and the recipe name
         List<RecipeIngredient> recipeIngredients = recipe.getIngredients();
         List<Ingredient> ingredients = recipeIngredients.stream()
                 .map(x -> x.getIngredient()).toList();
@@ -78,8 +78,9 @@ public class SearchCtrl {
                     new ArrayList<String>(List.of(scanner.next()))
             );
         } else {
+            //parse the function
             scanner.skip("/");
-            scanner.useDelimiter("\\(");
+            scanner.useDelimiter("\\("); //read until the opening parenthesis
             String functionName = scanner.next();
             SearchFunctions function;
             try {
@@ -89,14 +90,17 @@ public class SearchCtrl {
                 throw new IllegalArgumentException("Function " + functionName + " does not exist.");
             }
             if(function.isAtomic){
-                scanner.useDelimiter("\\)");
+                //if the function is atomic, extract the arguments by splitting on commas
+                scanner.useDelimiter("\\)"); //read until the closing parenthesis
                 ArrayList<String> arguments = new ArrayList<>(List.of(scanner.next().replace("(", "").split(",")));
                 result = new AtomicProposition(function, arguments);
             } else {
+                //parse combined function
                 scanner.useDelimiter("");
                 int opening = 0;
                 int closing = 0;
                 String argumentList = "";
+                //put everything from the opening parenthesis until the corresponding closing parenthisis in argumentList
                 do {
                     String nextChar = scanner.next();
                     switch(nextChar){
@@ -105,6 +109,7 @@ public class SearchCtrl {
                     }
                     argumentList += nextChar;
                 } while (opening != closing);
+                //recursively parse the arguments
                 ArrayList<Proposition> arguments = parsePropositionalArguments(argumentList);
                 result = new CombinedProposition(function, arguments);
             }
@@ -155,6 +160,12 @@ public class SearchCtrl {
         return recipes.stream().filter(x -> prop.evaluate(x)).toList();
     }
 
+    /**
+     * Applies a complex query on a List of recipes
+     * @param query The complex query as a Proposition
+     * @param recipes The recipes to search through
+     * @return List of recipes satisfying the search conditions
+     */
     public List<Recipe> performComplexQuery(Proposition prop, List<Recipe> recipes){
         return recipes.stream().filter(x -> prop.evaluate(x)).toList();
     }

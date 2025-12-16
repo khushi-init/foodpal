@@ -2,7 +2,6 @@ package client.searchUI;
 import java.util.ArrayList;
 
 import client.utils.searchUtils.Proposition;
-// import client.utils.searchUtils.Proposition;
 import client.utils.searchUtils.SearchFunctions;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -10,20 +9,20 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-// import javafx.scene.layout.HBox;
-// import javafx.scene.layout.VBox;
 import javafx.scene.layout.Pane;
 
 public abstract class PropositionUI {
     public ComboBox<SearchFunctions> dropdown;
     public ParentPropositionUI parent;
+    //define some UI values:
     public final double indentation = 25.0;
     public final double topMargin = 5.0;
     public final int cancelButtonFitSize = 17;
     public Button deleteButton;
     public final Insets boxInsets = new Insets(5,5,5,5);
+
     /**
-     * Constructor...
+     * Constructor, intialize dropdown and delete button
      * @param functions the functions that are available in the dropdown
      * @param parent the parent...
      */
@@ -44,7 +43,7 @@ public abstract class PropositionUI {
     }
 
     public Pane getView(){
-        return null;
+        return null; //this method should be overridden by the child classes
     }
 
     /**
@@ -55,7 +54,7 @@ public abstract class PropositionUI {
     }
 
     /**
-     * Passes the update signal to the top of the tree and rerenders it.
+     * Passes the update signal to the top of the tree and rerenders the tree.
      */
     public void updateView(){
         parent.updateView();
@@ -66,7 +65,7 @@ public abstract class PropositionUI {
      * @return corresponding Proposition
      */
     public Proposition mapToProposition() throws IllegalArgumentException{
-        return null;
+        return null; //this method is only here to be overridden by child classes
     }
 
     /**

@@ -6,33 +6,23 @@ import client.utils.searchUtils.AtomicProposition;
 import client.utils.searchUtils.Proposition;
 import client.utils.searchUtils.SearchFunctions;
 import javafx.geometry.Insets;
-// import javafx.collections.FXCollections;
-// import javafx.collections.ObservableList;
-// import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-// import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
 public class AtomicPropositionUI extends PropositionUI {
-    // private ComboBox<SearchFunctions> dropdown;
-    private ArrayList<TextField> argsInput;
+    private ArrayList<TextField> argsInput; //an ArrayList of text inputs, one input for each argument
     
     /**
-     * Constructor...
+     * Constructor, initialize the TextField argument inputs
      * @param parent ...
      */
     public AtomicPropositionUI(ParentPropositionUI parent){
         super(parent, SearchFunctions.getAtomicFunctions());
-        // ObservableList<SearchFunctions> functions = FXCollections.observableArrayList(SearchFunctions.getAtomicFunctions());
-        // this.dropdown = new ComboBox<SearchFunctions>();
         dropdown.setOnAction((event) -> {
             setArgumentsInput();
             updateView();
-            // System.out.println("Changed atomic function");
         });
-        // dropdown.setCellFactory(lc -> new FunctionListCell());
-        // dropdown.setItems(functions);
         this.argsInput = new ArrayList<>();
         setSelectedFunction(SearchFunctions.HAS);
         setArgumentsInput();
@@ -55,6 +45,7 @@ public class AtomicPropositionUI extends PropositionUI {
      * Converts this propositionUI to an actual executable proposition.
      * @return corresponding proposition
      */
+    @Override
     public Proposition mapToProposition() throws IllegalArgumentException{
         ArrayList<String> args = new ArrayList<>(this.argsInput.stream().map(x -> x.getText()).toList());
         SearchFunctions function = getSelectedFunction();
@@ -65,6 +56,7 @@ public class AtomicPropositionUI extends PropositionUI {
         this.argsInput.clear();
         SearchFunctions function = getSelectedFunction();
         for(int i = 0; i < function.amountOfArguments; i++){
+            //create a TextField for every argument, with placeholder representing the expected type
             TextField x = new TextField();
             String type = function.paramTypes[i].getSimpleName();
             x.setPromptText(type);

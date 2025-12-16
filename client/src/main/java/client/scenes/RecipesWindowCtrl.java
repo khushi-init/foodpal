@@ -6,9 +6,6 @@ import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.*;
 import client.utils.searchUtils.Proposition;
-// import client.utils.searchUtils.AtomicProposition;
-// import client.utils.searchUtils.Proposition;
-// import client.utils.searchUtils.SearchFunctions;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import commons.Recipe;
@@ -216,6 +213,10 @@ public class RecipesWindowCtrl {
         });
     }
 
+    /**
+     * Takes a Proposition that was created in another window and performs a search with it.
+     * @param prop
+     */
     public void applyExternalSearch(Proposition prop){
         try{
             ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
@@ -798,6 +799,9 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * UI wrapper for the showIngredientsWindow method
+     */
     @FXML
     public void onIngredientWindowClick() {
         primaryCtrl.showIngredientsWindow();

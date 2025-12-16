@@ -12,10 +12,9 @@ public class CombinedPropositionUI extends PropositionUI implements ParentPropos
     private ArrayList<PropositionUI> children;
     private Button addAtomicButton;
     private Button addCombinedButton;
-    // private ComboBox<SearchFunctions> dropdown;
 
     /**
-     * Constructor...
+     * Constructor, initialize add buttons
      * @param parent ...
      */
     public CombinedPropositionUI(ParentPropositionUI parent){
@@ -24,11 +23,13 @@ public class CombinedPropositionUI extends PropositionUI implements ParentPropos
         setSelectedFunction(SearchFunctions.AND);
         this.addAtomicButton = new Button("+ Atomic");
         this.addAtomicButton.setOnAction((event) -> {
+            //on click, add a new atomic proposition (with this as its parent) to children and rerender the tree
             this.children.add(new AtomicPropositionUI(this));
             updateView();
         });
         this.addCombinedButton = new Button("+ Combined");
         this.addCombinedButton.setOnAction((event) -> {
+            //on click, add a new combined proposition (with this as its parent) to children and rerender the tree
             this.children.add(new CombinedPropositionUI(this));
             updateView();
         });
@@ -36,7 +37,7 @@ public class CombinedPropositionUI extends PropositionUI implements ParentPropos
     
     @Override
     public VBox getView() {
-        // System.out.println(indent);
+        
         VBox view = new VBox(1);
         view.setPadding(boxInsets);
         view.setPadding(new Insets(topMargin, 0, 0, indentation));
@@ -56,6 +57,7 @@ public class CombinedPropositionUI extends PropositionUI implements ParentPropos
      * Converts this object to an executable proposition.
      * @return Proposition
      */
+    @Override
     public Proposition mapToProposition() throws IllegalArgumentException{
         ArrayList<Proposition> props = new ArrayList<>(this.children.stream().map(x -> x.mapToProposition()).toList());
         SearchFunctions function = getSelectedFunction();

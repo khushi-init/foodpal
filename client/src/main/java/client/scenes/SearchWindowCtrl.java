@@ -19,7 +19,7 @@ public class SearchWindowCtrl {
     
     /**
      * Constructor...
-     * @param p .
+     * @param p primaryCtrl instance
      */
     @Inject
     public SearchWindowCtrl(PrimaryCtrl p){

@@ -27,7 +27,7 @@ public enum SearchFunctions {
                     if(x.getIngredient().getName().toLowerCase().contains(ingName.toLowerCase())){
                         return amount >= x.getQuantity();
                     }
-                    return true;
+                    return true; //if the ingredient is not in the recipe, it satisfies this condition
                 });  
             }),
     MINING  ("mining", true, 2, new Class<?>[]{String.class, Double.class},
@@ -39,7 +39,7 @@ public enum SearchFunctions {
                     if(x.getIngredient().getName().toLowerCase().contains(ingName.toLowerCase())){
                         return amount <= x.getQuantity();
                     }
-                    return true;
+                    return false; //if the ingredient is not in the recipe to begin with, the recipe does not satisfy this condition.
                 });  
             }),
     MAXSTEPS("maxsteps", true, 1, new Class<?>[]{Integer.class},
@@ -107,6 +107,11 @@ public enum SearchFunctions {
         this.evaluate = evaluate;
     }
 
+    /**
+     * Maps all objects in an ArrayList to a Proposition
+     * @param input The ArrayList of Objects
+     * @return An ArrayList of Propositions
+     */
     private static ArrayList<Proposition> mapToPropositionList(ArrayList<Object> input){
         return new ArrayList<>(
                 input.stream()
@@ -115,10 +120,18 @@ public enum SearchFunctions {
         );
     }
 
+    /**
+     * Retrieves all atomic entries of this enum
+     * @return ArrayList of SearchFunctions
+     */
     public static ArrayList<SearchFunctions> getAtomicFunctions(){
         return new ArrayList<>(List.of(SearchFunctions.values()).stream().filter(x -> x.isAtomic).toList());
     }
 
+    /**
+     * Retrieves all non-atomic entries of this enum
+     * @return ArrayList of SearchFunctions
+     */
     public static ArrayList<SearchFunctions> getCombinedFunctions(){
         return new ArrayList<>(List.of(SearchFunctions.values()).stream().filter(x -> !x.isAtomic).toList());
     }
