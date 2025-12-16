@@ -148,5 +148,17 @@ public class IngredientsWindowCtrl {
         primaryCtrl.showRecipesWindow();
     }
 
+    /**
+     * Event handler for delete button
+     */
+    @FXML
+    public void deleteIngredientButtonHandler() {
+        Ingredient selected = sidebarIngredientNamesList.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+        dataManipulator.deleteIngredient(selected);
+    }
+
     // We need an update method to re-sort the ingredients list on updates
 }

@@ -230,6 +230,37 @@ public class ServerUtils {
     }
 
     /**
+     * Sends a DELETE request to the server to delete the ingredient of the provided id.
+     * This will trigger the server-side cascading deletion to remove it from all recipes.
+     * * @param ingredientId - The id of the ingredient to destroy
+     * @return - A boolean indicating whether the deletion was successful or not
+     */
+    public boolean deleteIngredient(Long ingredientId) {
+        Response response = null;
+        try {
+            response = ClientBuilder.newClient()
+                    .target(server)
+                    .path("api/ingredients/" + ingredientId)
+                    .request()
+                    .delete();
+
+            if (response.getStatus() != statusNoContent) {
+                System.err.println("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                return false;
+            }
+            return true;
+
+        } catch (ProcessingException e) {
+            System.err.println("Network/Processing error while deleting ingredient: " + e.getMessage());
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Method for pushing changes to the recipe, including recipeIngredients and preparationSteps
      * @param recipe The recipe to be put
      * @return a boolean to indicate whether put was successful or not
