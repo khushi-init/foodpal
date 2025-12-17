@@ -43,7 +43,7 @@ import jakarta.ws.rs.core.GenericType;
 
 public class ServerUtils {
 
-    private  final String server = "http://localhost:8080/";
+    private  final String server = "http://localhost:8080";
     private  final int statusOK = 200;
     private  final int statusCreation = 201;
     private  final int statusNoContent = 204;
@@ -230,6 +230,37 @@ public class ServerUtils {
     }
 
     /**
+     * Sends a DELETE request to the server to delete the ingredient of the provided id.
+     * This will trigger the server-side cascading deletion to remove it from all recipes.
+     * * @param ingredientId - The id of the ingredient to destroy
+     * @return - A boolean indicating whether the deletion was successful or not
+     */
+    public boolean deleteIngredient(Long ingredientId) {
+        Response response = null;
+        try {
+            response = ClientBuilder.newClient()
+                    .target(server)
+                    .path("api/ingredients/" + ingredientId)
+                    .request()
+                    .delete();
+
+            if (response.getStatus() != statusNoContent) {
+                errorCtrl.showGenericError("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                return false;
+            }
+            return true;
+
+        } catch (ProcessingException e) {
+            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Method for pushing changes to the recipe, including recipeIngredients and preparationSteps
      * @param recipe The recipe to be put
      * @return a boolean to indicate whether put was successful or not
@@ -281,17 +312,35 @@ public class ServerUtils {
                     .delete();
 
             if (response.getStatus() != statusNoContent && response.getStatus() != statusOK) {
-                System.err.println("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                errorCtrl.showGenericError("Failed to delete ingredient. Server returned status: " + response.getStatus());
                 return false;
             }
             return true;
         } catch (ProcessingException e) {
-            System.err.println("Network/Processing error while deleting ingredient: " + e.getMessage());
+            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
             return false;
         } finally {
             if (response != null) {
                 response.close();
             }
+        }
+    }
+
+    public Optional<Integer> getIngredientUsage(long ingredientId) {
+        try (Response response = ClientBuilder.newClient()
+                .target(server)
+                .path("api/ingredients/recipecount/" + ingredientId)
+                .request()
+                .get()) {
+
+            if (response.getStatus() != statusOK) {
+                errorCtrl.showGenericError("Failed to fetch recipes in which the ingredient is used in. Server returned status: " + response.getStatus());
+                return Optional.empty();
+            }
+            return Optional.of(response.readEntity(Integer.class));
+        } catch (ProcessingException e) {
+            errorCtrl.showGenericError("Network/Processing error while counting recipe usage: " + e.getMessage());
+            return Optional.empty();
         }
     }
 }

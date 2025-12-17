@@ -1,10 +1,12 @@
 package server.api;
 
 import commons.Ingredient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.database.IngredientRepository;
+import server.database.RecipeIngredientRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,13 +15,18 @@ import java.util.Optional;
 @RequestMapping("/api/ingredients")
 public class IngredientController {
     private final IngredientRepository ingredientRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
 
     /**
      * Creates controller for ingredient actions.
      * @param ingredientRepository repository to access ingredient data
+     * @param recipeIngredientRepository new repository to access recipe ingredient links
      */
-    public IngredientController(IngredientRepository ingredientRepository) {
+    @Autowired
+    public IngredientController(IngredientRepository ingredientRepository,
+                                RecipeIngredientRepository recipeIngredientRepository) {
         this.ingredientRepository = ingredientRepository;
+        this.recipeIngredientRepository = recipeIngredientRepository;
     }
 
     // GET ENDPOINTS
@@ -44,6 +51,18 @@ public class IngredientController {
 
         // if the ingredient is found return 200 OK or else return 404 not found
         return ingredient.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Returns the amount of recipes in which an ingredient is part of given an ingredient id
+     * @param id - The ingredient id to search with
+     * @return - The amount of recipes the ingredient was found in
+     */
+    @GetMapping("/recipecount/{id}")
+    public ResponseEntity<Integer> getIngredientUsageNum(@PathVariable Long id) {
+        int uses = recipeIngredientRepository.getRecipeUsageNumber(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(uses);
     }
 
     // POST ENDPOINT
@@ -83,18 +102,23 @@ public class IngredientController {
 
     // DELETE ENDPOINT
     /**
-     * Deletes an ingredient based on id.S
+     * Deletes an ingredient based on id.
+     * Manually removes all RecipeIngredient links first to avoid foreign key violation.
      * @param id ID of the ingredient to delete
      * @return 204 success deletion or 404 not found
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteIngredient(@PathVariable Long id) {
-        if(ingredientRepository.existsById(id)){
-            ingredientRepository.deleteById(id);
-            // returns 204 no content signal to explicitly state that no message body will be returned
-            return ResponseEntity.noContent().build();
+        if (!ingredientRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
-    }
 
+        //Manually delete all RecipeIngredient link entities associated with this ingredient
+        recipeIngredientRepository.deleteByIngredientId(id);
+
+        //Now the constraint is satisfied, delete the parent ingredient
+        ingredientRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }
