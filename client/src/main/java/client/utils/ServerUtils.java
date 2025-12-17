@@ -325,4 +325,22 @@ public class ServerUtils {
             }
         }
     }
+
+    public Optional<Integer> getIngredientUsage(long ingredientId) {
+        try (Response response = ClientBuilder.newClient()
+                .target(server)
+                .path("api/ingredients/recipecount/" + ingredientId)
+                .request()
+                .get()) {
+
+            if (response.getStatus() != statusOK) {
+                errorCtrl.showGenericError("Failed to fetch recipes in which the ingredient is used in. Server returned status: " + response.getStatus());
+                return Optional.empty();
+            }
+            return Optional.of(response.readEntity(Integer.class));
+        } catch (ProcessingException e) {
+            errorCtrl.showGenericError("Network/Processing error while counting recipe usage: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
 }

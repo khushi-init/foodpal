@@ -53,6 +53,18 @@ public class IngredientController {
         return ingredient.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Returns the amount of recipes in which an ingredient is part of given an ingredient id
+     * @param id - The ingredient id to search with
+     * @return - The amount of recipes the ingredient was found in
+     */
+    @GetMapping("/recipecount/{id}")
+    public ResponseEntity<Integer> getIngredientUsageNum(@PathVariable Long id) {
+        int uses = recipeIngredientRepository.getRecipeUsageNumber(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(uses);
+    }
+
     // POST ENDPOINT
     /**
      * Creates a new ingredient.
