@@ -29,6 +29,10 @@ public class RecipeIngredient {
 
     private Double quantity;
 
+    // the @Embedded annotation to include the wrapper
+    @Embedded
+    private RecipeIngredientUnit unit;
+
     /**
      * JPA required no argument constructor
      */
