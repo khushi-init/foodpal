@@ -2,6 +2,7 @@ package commons;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ShoppingList {
 
@@ -47,14 +48,6 @@ public class ShoppingList {
     }
 
     /**
-     * Turn the shopping list into Markdown format.
-     * @return - A string containing the shopping list in Markdown format.
-     */
-    public String toMarkDown() {
-        return "todo";
-    }
-
-    /**
      * Get the shopping list.
      * @return - A new list containing the ingredients in the shopping list.
      */
@@ -69,5 +62,42 @@ public class ShoppingList {
      */
     public void updateIngredients(int index, String newValue) {
         ingredients.set(index, newValue);
+    }
+
+    /**
+     * Turn the shopping list into a Markdown format.
+     * @return the string with the Markdown format.
+     */
+    public String toMarkdown() {
+        StringBuilder output = new StringBuilder();
+
+        // Header 1 with the name of the recipe
+        output.append("# Shopping List")
+                .append("\n\n");
+
+        if (ingredients.isEmpty()) {
+            output.append("This shopping list is empty.");
+        } else {
+            output.append("## Ingredients\n");
+
+            for (String ingredient : ingredients) {
+                output.append("* ")
+                        .append(ingredient)
+                        .append("\n");
+            }
+        }
+        return output.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ShoppingList that = (ShoppingList) o;
+        return Objects.equals(ingredients, that.ingredients);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(ingredients);
     }
 }

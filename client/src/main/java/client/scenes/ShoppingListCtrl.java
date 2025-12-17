@@ -19,6 +19,9 @@ import javafx.util.Pair;
 import javafx.scene.control.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,6 +124,26 @@ public class ShoppingListCtrl {
 
         } catch (IOException e) {
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Downloads a file of the shopping list.
+     */
+    @FXML
+    private void onHandleDownload() {
+        String userDownloads = System.getProperty("user.home") + "/Downloads/";
+        String fileName = "Shopping List.md";
+        Path filePath = Paths.get(userDownloads + fileName);
+
+        String shoppingListMarkdown = shoppingList.toMarkdown();
+        byte[] file = shoppingListMarkdown.getBytes();
+        
+        try {
+            Files.write(filePath, file);
+        }
+        catch (IOException ex) {
+            System.out.print("Invalid Path");
         }
     }
 

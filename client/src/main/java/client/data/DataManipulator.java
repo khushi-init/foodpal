@@ -114,4 +114,23 @@ public class DataManipulator {
         }
         storage.getRecipes().remove(hit);
     }
+
+    /**
+     * Tries to delete ingredient from server, ingredient is also deleted from any recipes that use it
+     * @param ingredient ingredient to be deleted
+     */
+    public void deleteIngredient(Ingredient ingredient) {
+        // 1. Call the ServerUtils method
+        boolean successful = server.deleteIngredient(ingredient.getId());
+
+        if (!successful) {
+            // Show error using injected ErrorCtrl
+            errs.showGenericError("Failed to delete ingredient from the server.");
+            return;
+        }
+
+        // 2. If successful, remove from the local list (LocalStorage)
+        // The UI (ListView) will update automatically.
+        storage.getIngredients().remove(ingredient);
+    }
 }
