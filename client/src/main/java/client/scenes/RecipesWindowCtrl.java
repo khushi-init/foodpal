@@ -811,7 +811,7 @@ public class RecipesWindowCtrl {
 
         popUpStage.showAndWait();
 
-        }
+    }
 
 
 }
