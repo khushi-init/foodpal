@@ -61,6 +61,14 @@ public class RecipesWindowCtrl {
     @FXML
     private Label cancelSearchButton;
 
+    @FXML
+    private Button downloadButton;
+
+    @FXML
+    private Button duplicateButton;
+
+    @FXML Button favoriteButton;
+
     // Favorite Injections
     @FXML
     private ImageView favoriteImage;
@@ -95,7 +103,8 @@ public class RecipesWindowCtrl {
      * @param p Primary Ctrl instance
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
-     * @param s - The injected searchctrl
+     * @param s - The injected search control
+     * @param p - The injected primary control
      */
     @Inject
     public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
@@ -120,12 +129,14 @@ public class RecipesWindowCtrl {
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         openRecipe(newSelection);
+                    } else {
+                        clearRecipeView();
+                        updateRecipeSelectionState(false);
                     }
                 }
         );
-        favoriteCheck.selectedProperty().addListener((obs, oldSelection, newSelection) -> {
-            updateToFav();
-        });
+        favoriteCheck.selectedProperty().addListener(
+                (obs, oldSelection, newSelection) -> updateToFav());
 
         // New listener for Recipe TextField
         // Saves the new name of teh recipe once the enter key is pressed
@@ -142,6 +153,9 @@ public class RecipesWindowCtrl {
                 saveRecipeName();
             }
         });
+
+        // Deactivate recipe specific buttons, since nothing is selected at the start.
+        updateRecipeSelectionState(false);
 
         initializeSceneEvents();
         intializeSearchElements();
@@ -164,21 +178,17 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * intializes the search field and the cancel button
+     * Initializes the search field and the cancel button.
      */
     public void intializeSearchElements(){
         cancelSearchButton.setDisable(true);
 
         searchField.setOnKeyReleased(event -> {
-            if(searchField.getText().length() == 0){
-                cancelSearchButton.setDisable(true);
-            } else {
-                cancelSearchButton.setDisable(false);
-            }
+            cancelSearchButton.setDisable(searchField.getText().isEmpty());
 
             //the query is executed iff the user presses enter:
             if(event.getCode() == KeyCode.ENTER){
-                if(searchField.getText().equals("")){
+                if(searchField.getText().isEmpty()){
                     cancelSearch(); //if query is empty, return to the normal sidebar.
                     return;
                 }
@@ -271,6 +281,43 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * Enables or disables all recipe-specific UI controls.
+     * When inactive, buttons related to the currently selected recipe
+     * (download, duplicate, favorite) and the recipe name field are
+     * hidden and disabled. When active, they become visible and usable
+     * and an informational message is shown.
+     *
+     * @param active - True if you want them active, false otherwise.
+     */
+    private void updateRecipeSelectionState(boolean active) {
+
+        downloadButton.setDisable(!active);
+        downloadButton.setVisible(active);
+
+        duplicateButton.setDisable(!active);
+        duplicateButton.setVisible(active);
+
+        favoriteButton.setDisable(!active);
+        favoriteButton.setVisible(active);
+
+        recipeNameField.setDisable(!active);
+        recipeNameField.setVisible(active);
+
+        if (!active) {
+            Label noRecipeSelectedLabel = new Label("You have not selected any recipe yet!\n" +
+                    "Select one in the list on the right or create your very own.");
+            noRecipeSelectedLabel.setStyle(
+                            "-fx-text-fill: #6b7280; " +
+                            "-fx-font-size: 14; " +
+                            "-fx-padding: 12;"
+            );
+            noRecipeSelectedLabel.setWrapText(true);
+
+            recipeView.getChildren().add(noRecipeSelectedLabel);
+        }
+    }
+
     public List<Long> getRecipeIDs() {
         List<Long> ids = new ArrayList<>();
         for (Recipe r : storage.getRecipes()) {
@@ -303,6 +350,9 @@ public class RecipesWindowCtrl {
 
         recipeNameField.setText(recipe.getName());
 
+        // Activate recipe specific buttons
+        updateRecipeSelectionState(true);
+
     }
 
     private final int fontSize = 16;
@@ -316,6 +366,11 @@ public class RecipesWindowCtrl {
         Label ingredientsLabel = new Label("Ingredients:");
         ingredientsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(ingredientsLabel);
+
+        if (recipeIngredients.isEmpty()) {
+            recipeView.getChildren().add(new Label("This recipe does not have any ingredients yet!"));
+        }
+
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
             Pair<RecipeIngredientUICtrl, Node> ing = Main.FXML.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
@@ -380,7 +435,6 @@ public class RecipesWindowCtrl {
             applyUpdatedRecipe(updated);
             openRecipe(currentRecipe);
         });
-
         recipeView.requestLayout();
     }
 
@@ -418,6 +472,11 @@ public class RecipesWindowCtrl {
         Label stepsLabel = new Label("Steps:");
         stepsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(stepsLabel);
+
+        if (recipeInstructions.isEmpty()) {
+            recipeView.getChildren().add(new Label("This recipe does not have any preparation steps yet!"));
+        }
+
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
             Pair<RecipeInstructionUICtrl, Node> ing = Main.FXML.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
@@ -666,7 +725,7 @@ public class RecipesWindowCtrl {
     public Recipe getSelectedRecipe() {
         MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
         ObservableList<Recipe> selectedRecipes = selectionModel.getSelectedItems();
-        if (selectedRecipes.size() == 0) {
+        if (selectedRecipes.isEmpty()) {
             return null; //return null if there are no selected recipes (i.e. the list of selected recipes is empty)
         }
         return selectedRecipes.get(0);
@@ -775,11 +834,14 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * Show the ingredient window when the button is clicked.
+     */
     @FXML
     public void onIngredientWindowClick() {
         primaryCtrl.showIngredientsWindow();
     }
-    
+
     /**
      * Clears the contents of the search bar and resets the sidebar
      */

@@ -5,3 +5,14 @@
 .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
+
+.scroll-pane .viewport {
+    -fx-padding: 0;
+}
+
+.scroll-pane .content {
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent; /* Ensures the background doesn't add space */
+}
