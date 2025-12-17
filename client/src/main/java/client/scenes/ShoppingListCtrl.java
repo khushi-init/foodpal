@@ -55,7 +55,8 @@ public class ShoppingListCtrl {
                 ShoppingListIngredientUICtrl ctrl = pair.getKey();
                 Node node = pair.getValue();
 
-                ctrl.setText("- " + shoppingListIngredients.get(i).getNameAmount());
+                ctrl.setText(shoppingListIngredients.get(i).getNameAmount());
+                ctrl.setCheckedOff(shoppingListIngredients.get(i).isCheckedOff());
                 ctrl.setIndex(i);
 
                 VBox.setVgrow(node, Priority.NEVER);
@@ -70,6 +71,11 @@ public class ShoppingListCtrl {
                     shoppingList.updateIngredients((int) ctrl.getIndex(), newText);
                     showShoppingList();
                 });
+
+                ctrl.setCheckoffInstruction((index, checked) ->{
+                    shoppingList.updateCheckedOff((int) ctrl.getIndex(), checked);
+                });
+
                 shoppingListView.requestLayout();
             }
         }

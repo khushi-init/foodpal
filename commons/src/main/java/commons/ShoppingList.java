@@ -54,8 +54,16 @@ public class ShoppingList {
      * @param newValue new item in the shopping list
      */
     public void updateIngredients(int index, String newValue) {
-        ingredients.get(index)
-                .setNameAmount(newValue);
+        ingredients.get(index).setNameAmount(newValue);
+    }
+
+    /**
+     * Update if an ingredient is checked off the shopping list.
+     * @param index - Which ingredient in list it is
+     * @param checked - True if the ingredient is checked off, false otherwise
+     */
+    public void updateCheckedOff(int index, boolean checked) {
+        ingredients.get(index).setCheckedOff(checked);
     }
 
     /**
