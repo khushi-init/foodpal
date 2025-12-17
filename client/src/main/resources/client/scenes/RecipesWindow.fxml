@@ -114,7 +114,7 @@
 
                                 <Region HBox.hgrow="ALWAYS" />
 
-                                <Button fx:id="favoriteBtn" onAction="#toggleFavorite" style="-fx-cursor: hand; -fx-background-color: transparent;">
+                                <Button fx:id="favoriteButton" onAction="#toggleFavorite" style="-fx-cursor: hand; -fx-background-color: transparent;">
                                     <graphic>
                                         <ImageView fx:id="favoriteImage" fitHeight="20" fitWidth="20">
                                             <image>
@@ -124,7 +124,7 @@
                                     </graphic>
                                 </Button>
 
-                                <Button fx:id="downloadBtn" onAction="#onDownloadRecipe" style="-fx-cursor: hand; -fx-background-color: transparent;">
+                                <Button fx:id="downloadButton" onAction="#onDownloadRecipe" style="-fx-cursor: hand; -fx-background-color: transparent;">
                                     <graphic>
                                         <ImageView fitHeight="20" fitWidth="20">
                                             <image>
@@ -133,7 +133,7 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>
-                        <Button fx:id="duplicateBtn1" layoutX="384.0" layoutY="10.0" onAction="#onCloneRecipe" style="-fx-cursor: hand; -fx-background-color: transparent;">
+                        <Button fx:id="duplicateButton" layoutX="384.0" layoutY="10.0" onAction="#onCloneRecipe" style="-fx-cursor: hand; -fx-background-color: transparent;">
                            <graphic>
                               <ImageView fitHeight="20" fitWidth="20">
                                  <image>

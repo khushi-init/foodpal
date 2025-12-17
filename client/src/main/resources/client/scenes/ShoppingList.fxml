@@ -50,7 +50,7 @@
                                     <Insets left="20.0" right="5.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" text="Download">
+                              <Button mnemonicParsing="false" onAction="#onHandleDownload" text="Download">
                                  <HBox.margin>
                                     <Insets left="5.0" />
                                  </HBox.margin>
