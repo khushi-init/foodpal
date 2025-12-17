@@ -7,6 +7,7 @@ import commons.RecipeIngredient;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -61,7 +62,11 @@ public class ToBeAddedCtrl {
             });
 
             ingredientsBox.getChildren().add(row);
+
         }
+        Button addButton = new Button("Add Ingredient");
+        ingredientsBox.getChildren().add(addButton);
+        //need to finish the logic here
     }
 
 }
