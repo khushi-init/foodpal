@@ -35,12 +35,12 @@ public enum SearchFunctions {
                 String ingName = (String) arguments.get(0);
                 Double amount = Double.parseDouble((String) arguments.get(1));
                 List<RecipeIngredient> ingredients = recipe.getIngredients();
-                return ingredients.stream().allMatch(x -> {
+                return ingredients.stream().anyMatch(x -> {
                     if(x.getIngredient().getName().toLowerCase().contains(ingName.toLowerCase())){
                         return amount <= x.getQuantity();
                     }
                     return false; //if the ingredient is not in the recipe to begin with, the recipe does not satisfy this condition.
-                });  
+                });
             }),
     MAXSTEPS("maxsteps", true, 1, new Class<?>[]{Integer.class},
             (recipe, arguments) -> {

@@ -54,7 +54,7 @@ public class CombinedProposition implements Proposition{
      * @return String
      */
     public String generateIllegalArgumentExceptionMessage(){
-        if(this.function.amountOfArguments == -1) return "Function " + this.function.name + " requires at least 1 child proposition.";
+        if(this.function.amountOfArguments == -1) return "Function " + this.function.name.toUpperCase() + " requires at least 1 child proposition.";
         return "Function " + this.function.name + 
             " requires exactly " + 
             this.function.amountOfArguments + 
