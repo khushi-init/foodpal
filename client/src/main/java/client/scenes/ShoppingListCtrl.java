@@ -4,6 +4,7 @@ import client.Main;
 import client.utils.ShoppingListIngredientPopUpCtrl;
 import client.utils.ShoppingListIngredientUICtrl;
 import commons.ShoppingList;
+import commons.ShoppingListIngredient;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -37,7 +38,7 @@ public class ShoppingListCtrl {
      */
     public void showShoppingList() {
         shoppingListView.getChildren().clear();
-        List<String> shoppingListIngredients = shoppingList.getIngredients();
+        List<ShoppingListIngredient> shoppingListIngredients = shoppingList.getIngredients();
 
         // Add label when the list is empty, otherwise fill the list.
         if (shoppingListIngredients.isEmpty()) {
@@ -54,7 +55,7 @@ public class ShoppingListCtrl {
                 ShoppingListIngredientUICtrl ctrl = pair.getKey();
                 Node node = pair.getValue();
 
-                ctrl.setText("- " + shoppingListIngredients.get(i));
+                ctrl.setText("- " + shoppingListIngredients.get(i).getNameAmount());
                 ctrl.setIndex(i);
 
                 VBox.setVgrow(node, Priority.NEVER);

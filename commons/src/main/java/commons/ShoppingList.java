@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class ShoppingList {
 
-    private final List<String> ingredients;
+    private final List<ShoppingListIngredient> ingredients;
 
     /**
      * Create a new shopping list.
@@ -22,7 +22,7 @@ public class ShoppingList {
      * @param ingredient - The ingredient to add.
      */
     public void addIngredient(String ingredient) {
-        ingredients.add(ingredient);
+        ingredients.add(new ShoppingListIngredient(ingredient));
     }
 
     /**
@@ -31,15 +31,6 @@ public class ShoppingList {
      */
     public void removeIngredient(int index) {
         ingredients.remove(index);
-    }
-
-    /**
-     * Change an ingredient.
-     * @param index - The index of the ingredient to change.
-     * @param changedString - The new content of the ingredient.
-     */
-    public void changeIngredient(int index, String changedString) {
-        ingredients.set(index, changedString);
     }
 
     /**
@@ -53,7 +44,7 @@ public class ShoppingList {
      * Get the shopping list.
      * @return - A new list containing the ingredients in the shopping list.
      */
-    public List<String> getIngredients() {
+    public List<ShoppingListIngredient> getIngredients() {
         return List.copyOf(ingredients);
     }
 
@@ -63,7 +54,8 @@ public class ShoppingList {
      * @param newValue new item in the shopping list
      */
     public void updateIngredients(int index, String newValue) {
-        ingredients.set(index, newValue);
+        ingredients.get(index)
+                .setNameAmount(newValue);
     }
 
     /**
@@ -89,9 +81,11 @@ public class ShoppingList {
         } else {
             output.append("## Ingredients\n");
 
-            for (String ingredient : ingredients) {
+            for (ShoppingListIngredient ingredient : ingredients) {
                 output.append("* ")
-                        .append(ingredient)
+                        .append(ingredient.isCheckedOff() ? "~~" : "")
+                        .append(ingredient.getNameAmount())
+                        .append(ingredient.isCheckedOff() ? "~~" : "")
                         .append("\n");
             }
         }
