@@ -245,13 +245,13 @@ public class ServerUtils {
                     .delete();
 
             if (response.getStatus() != statusNoContent) {
-                System.err.println("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                errorCtrl.showGenericError("Failed to delete ingredient. Server returned status: " + response.getStatus());
                 return false;
             }
             return true;
 
         } catch (ProcessingException e) {
-            System.err.println("Network/Processing error while deleting ingredient: " + e.getMessage());
+            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
         } finally {
             if (response != null) {
                 response.close();
@@ -312,12 +312,12 @@ public class ServerUtils {
                     .delete();
 
             if (response.getStatus() != statusNoContent && response.getStatus() != statusOK) {
-                System.err.println("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                errorCtrl.showGenericError("Failed to delete ingredient. Server returned status: " + response.getStatus());
                 return false;
             }
             return true;
         } catch (ProcessingException e) {
-            System.err.println("Network/Processing error while deleting ingredient: " + e.getMessage());
+            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
             return false;
         } finally {
             if (response != null) {
