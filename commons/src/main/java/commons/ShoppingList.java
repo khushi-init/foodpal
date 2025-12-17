@@ -1,5 +1,7 @@
 package commons;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -70,10 +72,17 @@ public class ShoppingList {
      */
     public String toMarkdown() {
         StringBuilder output = new StringBuilder();
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy, HH:mm:ss");
+        String currentDateTimeFormatted = currentDateTime.format(dateTimeFormat);
 
         // Header 1 with the name of the recipe
         output.append("# Shopping List")
                 .append("\n\n");
+
+        output.append("**")
+                .append(currentDateTimeFormatted)
+                .append("**\n\n");
 
         if (ingredients.isEmpty()) {
             output.append("This shopping list is empty.");
