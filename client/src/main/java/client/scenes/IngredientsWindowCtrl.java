@@ -14,12 +14,14 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import javafx.event.ActionEvent;
 import java.util.Optional;
 
 public class IngredientsWindowCtrl {
@@ -48,6 +50,19 @@ public class IngredientsWindowCtrl {
 
     @FXML
     private Button backButton;
+
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private Label proteinLabel;
+    @FXML
+    private Label fatLabel;
+    @FXML
+    private Label carbohydratesLabel;
+    @FXML
+    private Label kcalLabel;
+    @FXML
+    private Label recipesUsedInLabel;
 
     private LocalStorage storage;
 
@@ -85,6 +100,59 @@ public class IngredientsWindowCtrl {
                         openIngredient(newValue);
                     }
                 });
+
+        sidebarIngredientNamesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                showIngredientDetails(newValue);
+            } else {
+                clearDetails();
+            }
+        });
+    }
+
+    /**
+     * sets correct values in labels when an ingredient is selected from sidebar
+     * @param ingredient the ingredient selected
+     */
+    public void showIngredientDetails(Ingredient ingredient) {
+        ingredientDetailsView.setVisible(true);
+        ingredientDetailsView.setManaged(true);
+
+        nameLabel.setText(ingredient.getName());
+
+        nameLabel.setText(ingredient.getName());
+        proteinLabel.setText(String.format("%.1f g", ingredient.getNutritionalValue().protein100g()));
+        fatLabel.setText(String.format("%.1f g", ingredient.getNutritionalValue().fat100g()));
+        carbohydratesLabel.setText(String.format("%.1f g", ingredient.getNutritionalValue().carbs100g()));
+
+        // Inferred Kcal (calculated this based on the 4-4-9 rule)
+        double kcal = ingredient.getNutritionalValue().kcal100g();
+        kcalLabel.setText(String.format("%d", Math.round(kcal)));
+
+        Optional<Integer> usage = server.getIngredientUsage(ingredient.getId());
+        if(usage.isEmpty()) {
+            recipesUsedInLabel.setText("N/A (Server Error)");
+        } else {
+            recipesUsedInLabel.setText(String.format("%d recipe(s)", usage.get()));
+        }
+    }
+
+    /**
+     * when no ingredient is selected the window is ensured to be blank using this method
+     */
+    public void clearDetails() {
+        ingredientDetailsView.setVisible(false);
+        ingredientDetailsView.setManaged(false);
+    }
+
+    /**
+     * Handles the click on the edit/pencil icon next to the ingredient name.
+     * @param event The action event triggered by the button click.
+     */
+    public void handleEditNameClick(ActionEvent event) {
+        // TODO: Implement the logic to open a dialog or switch to an editable field
+        // For now, this placeholder method resolves the FXML loading error.
+        System.out.println("Edit Name button clicked!");
     }
 
     /**
@@ -109,7 +177,7 @@ public class IngredientsWindowCtrl {
      * Opens a popup window where the user is prompted to create / edit an ingredient
      * @param title - Window title
      * @param descText - Description text
-     * @return - The parsed ingredient or an empty optional if parsing failed / was cancelled
+     * @return - The parsed ingredient or an empty optional if parsing failed / was canceled
      */
     public Optional<Ingredient> ingredientDataPrompt(String title, String descText) {
         Pair<CreateIngredientCtrl, Parent> addIngPair = Main.FXML.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
@@ -156,6 +224,16 @@ public class IngredientsWindowCtrl {
         Ingredient selected = sidebarIngredientNamesList.getSelectionModel().getSelectedItem();
         if (selected == null) {
             return;
+        }
+        Optional<Integer> uses = server.getIngredientUsage(selected.getId());
+        if (uses.isEmpty()) {
+            boolean anyway = errorCtrl.displayWarning("This ingredient might be used in some recipes. Deleting it could make them unusable!",
+                    "Delete Anyway", "WAIT!");
+            if (!anyway) return;
+        } else if (uses.get() > 0) {
+            boolean anyway = errorCtrl.displayWarning("This ingredient is used in " + uses.get() + " recipe(s). Deleting it could make them unusable!",
+                    "Delete Anyway", "WAIT!");
+            if (!anyway) return;
         }
         dataManipulator.deleteIngredient(selected);
     }

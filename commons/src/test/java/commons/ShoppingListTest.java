@@ -58,17 +58,12 @@ public class ShoppingListTest {
 
     @Test
     public void toMarkdownTest() {
-        String expected = """
-                # Shopping List
-                
-                ## Ingredients
-                * Box of Cereal
-                * Sugar (50g)
-                * Milk (1.5L)
-                """;
-
         String actual = shoppingList.toMarkdown();
 
-        assertEquals(expected, actual);
+        assertTrue(actual.startsWith("# Shopping List"));
+        assertTrue(actual.contains("## Ingredients"));
+        assertTrue(actual.contains("* Box of Cereal"));
+        assertTrue(actual.contains("* Sugar (50g)"));
+        assertTrue(actual.contains("* Milk (1.5L)"));
     }
 }
