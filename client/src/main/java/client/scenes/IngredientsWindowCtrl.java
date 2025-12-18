@@ -129,8 +129,12 @@ public class IngredientsWindowCtrl {
         double kcal = ingredient.getNutritionalValue().kcal100g();
         kcalLabel.setText(String.format("%d", Math.round(kcal)));
 
-        // Temporarily setting the usage label until server call is implemented
-        recipesUsedInLabel.setText("N/A recipes (Load data)");
+        Optional<Integer> usage = server.getIngredientUsage(ingredient.getId());
+        if(usage.isEmpty()) {
+            recipesUsedInLabel.setText("N/A (Server Error)");
+        } else {
+            recipesUsedInLabel.setText(String.format("%d recipe(s)", usage.get()));
+        }
     }
 
     /**
@@ -173,7 +177,7 @@ public class IngredientsWindowCtrl {
      * Opens a popup window where the user is prompted to create / edit an ingredient
      * @param title - Window title
      * @param descText - Description text
-     * @return - The parsed ingredient or an empty optional if parsing failed / was cancelled
+     * @return - The parsed ingredient or an empty optional if parsing failed / was canceled
      */
     public Optional<Ingredient> ingredientDataPrompt(String title, String descText) {
         Pair<CreateIngredientCtrl, Parent> addIngPair = Main.FXML.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
@@ -220,6 +224,16 @@ public class IngredientsWindowCtrl {
         Ingredient selected = sidebarIngredientNamesList.getSelectionModel().getSelectedItem();
         if (selected == null) {
             return;
+        }
+        Optional<Integer> uses = server.getIngredientUsage(selected.getId());
+        if (uses.isEmpty()) {
+            boolean anyway = errorCtrl.displayWarning("This ingredient might be used in some recipes. Deleting it could make them unusable!",
+                    "Delete Anyway", "WAIT!");
+            if (!anyway) return;
+        } else if (uses.get() > 0) {
+            boolean anyway = errorCtrl.displayWarning("This ingredient is used in " + uses.get() + " recipe(s). Deleting it could make them unusable!",
+                    "Delete Anyway", "WAIT!");
+            if (!anyway) return;
         }
         dataManipulator.deleteIngredient(selected);
     }

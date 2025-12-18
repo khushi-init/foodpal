@@ -73,7 +73,7 @@ public class ShoppingListIngredientUICtrl {
      */
     @FXML
     public void handleEditButton() {
-        TextField textField = new TextField(ingredientText.getText().replace("- ", ""));
+        TextField textField = new TextField(ingredientText.getText().replace("• ", ""));
         HBox.setHgrow(textField, Priority.ALWAYS);
         textField.setPromptText(ingredientText.getText());
         textField.setFocusTraversable(false);
