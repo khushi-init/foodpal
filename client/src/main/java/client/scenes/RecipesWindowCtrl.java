@@ -67,7 +67,11 @@ public class RecipesWindowCtrl {
     @FXML
     private Button duplicateButton;
 
-    @FXML Button favoriteButton;
+    @FXML
+    private Button favoriteButton;
+
+    @FXML
+    private Button toCart;
 
     // Favorite Injections
     @FXML
@@ -290,6 +294,9 @@ public class RecipesWindowCtrl {
 
         favoriteButton.setDisable(!active);
         favoriteButton.setVisible(active);
+
+        toCart.setDisable(!active);
+        toCart.setVisible(active);
 
         recipeNameField.setDisable(!active);
         recipeNameField.setVisible(active);
