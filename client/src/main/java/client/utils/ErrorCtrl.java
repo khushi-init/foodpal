@@ -2,8 +2,15 @@ package client.utils;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
+import client.Main;
+import client.popups.WarningPopCtrl;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Stage;
+import javafx.util.Pair;
+import javafx.scene.layout.Region;
 
 public class ErrorCtrl {
     /**
@@ -63,9 +70,37 @@ public class ErrorCtrl {
      */
     public void showErrorPopup(String title, String headerText, String message){
         Alert alert = new Alert(AlertType.ERROR);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         alert.setTitle(title);
         alert.setHeaderText(headerText);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Displays a warning popup
+     * @param warningText - The description of the warning
+     * @param anywayText - The text of the 'Anyway' button, basically the one the user presses if they chose to proceed by
+     *                   disregarding the warning
+     * @param title - The popup window title
+     * @return - Whether 'anyway' was pressed
+     */
+    public boolean displayWarning(String warningText, String anywayText, String title) {
+        Pair<WarningPopCtrl, Parent> warningPopupPair = Main.FXML.load(WarningPopCtrl.class, "client", "modules", "Warning.fxml");
+
+        Parent root = warningPopupPair.getValue();
+        WarningPopCtrl popUpCtrl = warningPopupPair.getKey();
+
+        Stage popUpStage = new Stage();
+        popUpStage.setTitle(title); // Will change to language thing later
+        popUpStage.setScene(new Scene(root));
+
+        popUpCtrl.setStage(popUpStage);
+        popUpCtrl.setButtonAnywayText(anywayText);
+        popUpCtrl.setWarningLabelText(warningText);
+
+        popUpStage.showAndWait();
+
+        return popUpCtrl.isAnyway();
     }
 }

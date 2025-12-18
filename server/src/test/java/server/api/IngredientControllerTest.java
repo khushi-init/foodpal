@@ -2,6 +2,8 @@ package server.api;
 
 import commons.Ingredient;
 import commons.NutritionalValue;
+import commons.Recipe;
+import commons.RecipeIngredient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +23,15 @@ public class IngredientControllerTest {
     private IngredientRepository mockRepository;
     private RecipeIngredientRepository mockRecipeIngredientRepository;
     private Ingredient testIngredient;
+    private RecipeIngredient testRI1;
+    private RecipeIngredient testRI2;
+    private Recipe testRecipe1;
+    private Recipe testRecipe2;
+    private final double fakeQuantity = 3.0;
     private Long id = 1L;
     private Long id2 = 2L;
+    private Long fakeRecipeId1 = 30L;
+    private Long fakeRecipeId2 = 31L;
     private Long fakeId = 99L;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
@@ -37,6 +46,16 @@ public class IngredientControllerTest {
         // Setup test data
         testIngredient = new Ingredient("Sugar", defaultNutritionalValue);
         testIngredient.setId(id);
+
+
+        testRI1 = new RecipeIngredient(testRecipe1, testIngredient, fakeQuantity);
+        testRecipe1 = new Recipe("Ice soup", List.of(testRI1), List.of());
+
+        testRI2 = new RecipeIngredient(testRecipe2, testIngredient, fakeQuantity);
+        testRecipe2 = new Recipe("Ice soup", List.of(testRI2), List.of());
+
+        testRecipe1.setId(fakeRecipeId1);
+        testRecipe2.setId(fakeRecipeId2);
     }
 
     @Test

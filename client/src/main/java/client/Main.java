@@ -69,7 +69,8 @@ public class Main extends Application {
         Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
         Pair<ShoppingListCtrl, Parent> shoppingList = FXML.load(ShoppingListCtrl.class, "client", "scenes", "ShoppingList.fxml");
         Pair<IngredientsWindowCtrl, Parent> ingredientsWindow = FXML.load(IngredientsWindowCtrl.class, "client", "scenes", "IngredientsWindow.fxml");
+        Pair<SearchWindowCtrl, Parent> searchWindow = FXML.load(SearchWindowCtrl.class, "client", "scenes", "SearchWindow.fxml");
         PrimaryCtrl prime = INJECTOR.getInstance(PrimaryCtrl.class);
-        prime.init(primaryStage, recipesWindow, shoppingList, ingredientsWindow);
+        prime.init(primaryStage, recipesWindow, shoppingList, ingredientsWindow, searchWindow);
     }
 }
