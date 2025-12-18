@@ -120,6 +120,16 @@
 
                                 <Region HBox.hgrow="ALWAYS" />
 
+                                <Button fx:id="toCart" onAction="#toggleToBeAdded" style="-fx-cursor: hand; -fx-background-color: transparent;">
+                                    <graphic>
+                                        <ImageView fx:id="favoriteImage" fitHeight="20" fitWidth="20">
+                                            <image>
+                                                <Image url="@/client/images/toShoppingCart.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
                                 <Button fx:id="favoriteButton" onAction="#toggleFavorite" style="-fx-cursor: hand; -fx-background-color: transparent;">
                                     <graphic>
                                         <ImageView fx:id="favoriteImage" fitHeight="20" fitWidth="20">

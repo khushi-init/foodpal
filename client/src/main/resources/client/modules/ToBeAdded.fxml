@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.ToBeAddedCtrl">
+
+
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="20" style="-fx-background-color: #6ed157; -fx-padding: 10;">
+            <children>
+                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;" text="To be added" />
+                <Region HBox.hgrow="ALWAYS" />
+            </children>
+        </HBox>
+    </top>
+
+
+    <center>
+        <SplitPane prefHeight="400" prefWidth="600" style="-fx-background-color: #f5f5f5;" stylesheets="@/client/scenes/scrollfix.css">
+            <items>
+                <ScrollPane style="-fx-background-color: #fafafa;">
+                    <content>
+                        <VBox fx:id="ingredientsBox" spacing="6" style="-fx-padding: 10;" />
+                    </content>
+                </ScrollPane>
+
+            </items>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <SplitPane prefHeight="30" prefWidth="600" style="-fx-background-color: #fafafa;" stylesheets="@/client/scenes/scrollfix.css">
+            <items>
+                <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+                    <Button text="Add to shopping list"/>
+                </HBox>
+            </items>
+        </SplitPane>
+    </bottom>
+</BorderPane>
