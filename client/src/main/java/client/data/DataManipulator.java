@@ -5,9 +5,6 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -181,19 +178,20 @@ public class DataManipulator {
                 Long id = Long.parseLong(key);
                 storage.getFavoriteIDs().add(id);
             }
-            // Check if favorites still exist in the server
-            ObservableList<Long> newFavs = FXCollections.observableArrayList(
-                    storage.getFavoriteIDs()
-            );
+
+            List<Long> toRemove = new ArrayList<>();
             for (Long id : storage.getFavoriteIDs()) {
                 if (!getRecipeIDs().contains(id)) {
                     errs.showGenericError("RIP: Recipe " + prop.getProperty(id.toString()) + " not found!");
                     System.out.println(id + prop.getProperty(id.toString()));
                     prop.remove(id.toString());
-                    newFavs.remove(id);
+                    toRemove.add(id);
                 }
             }
-            storage.setFavoriteIDs(newFavs);
+            if(!toRemove.isEmpty()) {
+                storage.getFavoriteIDs().removeAll(toRemove);
+            }
+
             // Remove lost recipe from properties file
             try {
                 prop.store(new FileOutputStream(properties), "Favorites Updated");

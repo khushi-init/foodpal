@@ -220,7 +220,11 @@ public class RecipesWindowCtrl {
     public void applyExternalSearch(Proposition prop){
         try{
             ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                    searchCtrl.performComplexQuery(prop, storage.getRecipes())
+                    favFilter(
+                            searchCtrl.performComplexQuery(prop, storage.getRecipes()),
+                            storage.getFavoriteIDs()
+                    )
+
             );
             sidebarRecipeNamesList.setItems(searchResults);
         } catch (Exception e){
@@ -232,6 +236,7 @@ public class RecipesWindowCtrl {
      * Updates the sidebar to display favorites.
      */
     public void updateToFav() {
+        cancelSearch();
         // Load only favorites or nah
         if (favoriteCheck.isSelected()) {
             searchCtrl.setFavToggle(true);
@@ -868,14 +873,10 @@ public class RecipesWindowCtrl {
      * @return A list of recipes that comply with all query conditions and favorite toggle.
      */
     public List<Recipe> favFilter(List<Recipe> initList, List<Long> favIDs) {
-        List<Recipe> result = new ArrayList<>();
         if(favoriteCheck.isSelected()) {
-            for(Recipe r : initList) {
-                if(favIDs.contains(r.getId())) {
-                    result.add(r);
-                }
-            }
-            return result;
+            return initList.stream()
+                    .filter(x -> favIDs.contains(x.getId()))
+                    .toList();
         }
         else return initList;
     }
