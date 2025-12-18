@@ -85,15 +85,12 @@ public class RecipesWindowCtrl {
     private Recipe currentRecipe;
     @FXML
     private CheckBox favoriteCheck;
-    // File used for storing favorite ID's. Add additional stuff for config as you wish
-    private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
+
 
     private boolean newInstructionAdded = false;
 
     // This is the Shopping List data that is used in the session.
     private final ShoppingList shoppingList = new ShoppingList();
-
-    private List<Long> favoriteIds;
 
     private LocalStorage storage;
     private DataManipulator dataManipulator;
@@ -126,12 +123,11 @@ public class RecipesWindowCtrl {
      * Initializes the sidebar items (Recipe names) to track the ObservableList items
      */
     public void initialize() {
-        favoriteIds = new ArrayList<>();
-        loadFavs();
+        dataManipulator.loadFavs();
         favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
         unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
         sidebarRecipeNamesList.setItems(storage.getRecipes());
-        sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell(favoriteIds, favorite));
+        sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell(storage.getFavoriteIDs(), favorite));
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
@@ -205,7 +201,7 @@ public class RecipesWindowCtrl {
                                     searchCtrl.query(
                                     searchField.getText(), storage.getRecipes()
                             ),
-                            favoriteIds)
+                            storage.getFavoriteIDs())
                     );
                     sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                     searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
@@ -241,7 +237,7 @@ public class RecipesWindowCtrl {
             searchCtrl.setFavToggle(true);
             List<Recipe> favRecipes = new ArrayList<>();
             for (Recipe r : storage.getRecipes()) {
-                if (favoriteIds.contains(r.getId())) {
+                if (storage.getFavoriteIDs().contains(r.getId())) {
                     favRecipes.add(r);
                 }
             }
@@ -253,62 +249,8 @@ public class RecipesWindowCtrl {
         }
     }
 
-    /**
-     * Saves the current favorites to the local persistent properties file.
-     */
-    public void saveFave() {
-        // Convert all favorite ID's to a single string that will be stored
-        Properties prop = new Properties();
-        // THIS TIME COMPLEXITY SUCKS ASS LMAO O(n^2) (But im lazy, will probably refactor later)
-        for (Long id : favoriteIds) {
-            String name = "Unknown";
-            for (Recipe r : storage.getRecipes()) {
-                if (Objects.equals(r.getId(), id)) {
-                    name = r.getName();
-                }
-            }
-            prop.setProperty(id.toString(), name);
-        }
-        try {
-            prop.store(new FileOutputStream(properties), "Favorites");
-        } catch (IOException e) {
-            errorCtrl.showGenericError("Unable to store favorites, try again later!");
-        }
 
-    }
 
-    /**
-     * Load the favorites from the properties file, and displays a notification if the favorite is GONE
-     */
-    public void loadFavs() {
-        Properties prop = new Properties();
-        try {
-            FileInputStream fis = new FileInputStream(properties);
-            prop.load(fis);
-            favoriteIds.clear();
-            for (String key : prop.stringPropertyNames()) {
-                Long id = Long.parseLong(key);
-                favoriteIds.add(id);
-            }
-            // Check if favorites still exist in the server
-            for (Long id : favoriteIds) {
-                if (!getRecipeIDs().contains(id)) {
-                    errorCtrl.showGenericError("RIP: Recipe " + prop.getProperty(id.toString()) + " not found!");
-                    System.out.println(id + prop.getProperty(id.toString()));
-                    prop.remove(id.toString());
-                }
-            }
-            try {
-                prop.store(new FileOutputStream(properties), "Favorites Updated");
-            } catch (IOException e) {
-                errorCtrl.showGenericError("Can not update favorites, yikes...");
-            }
-
-        } catch (Exception e) {
-            errorCtrl.showGenericError("Unable to load favorites, try again later!");
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Enables or disables all recipe-specific UI controls.
@@ -350,13 +292,7 @@ public class RecipesWindowCtrl {
         }
     }
 
-    public List<Long> getRecipeIDs() {
-        List<Long> ids = new ArrayList<>();
-        for (Recipe r : storage.getRecipes()) {
-            ids.add(r.getId());
-        }
-        return ids;
-    }
+
 
     /**
      * Loads the contents of the provided recipe to the recipeView UI element
@@ -372,8 +308,8 @@ public class RecipesWindowCtrl {
         VBox.setMargin(sep, lineMargin);
         loadSteps(recipe.getPreparationSteps());
         // Favorites
-        if (currentRecipe != null && favoriteIds != null) {
-            if (favoriteIds.contains(currentRecipe.getId())) {
+        if (currentRecipe != null && storage.getFavoriteIDs() != null) {
+            if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
                 favoriteImage.setImage(favorite);
             } else {
                 favoriteImage.setImage(unFavorite);
@@ -848,19 +784,19 @@ public class RecipesWindowCtrl {
      * Adds or removes recipe ID to/from favorites list
      */
     public void toggleFavorite() {
-        if (favoriteIds != null) {
-            if (favoriteIds.contains(currentRecipe.getId())) {
-                favoriteIds.remove(currentRecipe.getId());
+        if (storage.getFavoriteIDs() != null) {
+            if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
+                storage.getFavoriteIDs().remove(currentRecipe.getId());
                 favoriteImage.setImage(unFavorite);
                 System.out.println("Removed from favorites!");
             } else {
-                favoriteIds.add(currentRecipe.getId());
+                storage.getFavoriteIDs().add(currentRecipe.getId());
                 favoriteImage.setImage(favorite);
                 System.out.println("Added to favorites!");
             }
             // Regardless of change, put new favorites to file.
-            saveFave();
-            loadFavs();
+            dataManipulator.saveFave();
+            dataManipulator.loadFavs();
             // Refresh for sidebar look
             sidebarRecipeNamesList.refresh();
         }
@@ -933,13 +869,15 @@ public class RecipesWindowCtrl {
      */
     public List<Recipe> favFilter(List<Recipe> initList, List<Long> favIDs) {
         List<Recipe> result = new ArrayList<>();
-        for(Recipe r : initList) {
-            if(favIDs.contains(r.getId())) {
-                result.add(r);
+        if(favoriteCheck.isSelected()) {
+            for(Recipe r : initList) {
+                if(favIDs.contains(r.getId())) {
+                    result.add(r);
+                }
             }
+            return result;
         }
-        return result;
-
+        else return initList;
     }
 
 }

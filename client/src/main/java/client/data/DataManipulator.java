@@ -5,10 +5,14 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.*;
 
 public class DataManipulator {
 
@@ -16,6 +20,9 @@ public class DataManipulator {
     private ServerUtils server;
 
     private ErrorCtrl errs;
+
+    // File used for storing favorite ID's. Add additional stuff for config as you wish
+    private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
 
     /**
      * Constructor of DataManipulator
@@ -113,6 +120,9 @@ public class DataManipulator {
             return;
         }
         storage.getRecipes().remove(hit);
+        // Delete recipe
+        storage.getFavoriteIDs().remove(hit.getId());
+        saveFave();
     }
 
     /**
@@ -133,4 +143,76 @@ public class DataManipulator {
         // The UI (ListView) will update automatically.
         storage.getIngredients().remove(ingredient);
     }
+
+    /**
+     * Saves the current favorites to the local persistent properties file.
+     */
+    public void saveFave() {
+        // Convert all favorite ID's to a single string that will be stored
+        Properties prop = new Properties();
+        // THIS TIME COMPLEXITY SUCKS ASS LMAO O(n^2) (But im lazy, will probably refactor later)
+        for (Long id : storage.getFavoriteIDs()) {
+            String name = "Unknown";
+            for (Recipe r : storage.getRecipes()) {
+                if (Objects.equals(r.getId(), id)) {
+                    name = r.getName();
+                }
+            }
+            prop.setProperty(id.toString(), name);
+        }
+        try {
+            prop.store(new FileOutputStream(properties), "Favorites");
+        } catch (IOException e) {
+            errs.showGenericError("Unable to store favorites, try again later!");
+        }
+
+    }
+
+    /**
+     * Load the favorites from the properties file, and displays a notification if the favorite is GONE
+     */
+    public void loadFavs() {
+        Properties prop = new Properties();
+        try {
+            FileInputStream fis = new FileInputStream(properties);
+            prop.load(fis);
+            storage.getFavoriteIDs().clear();
+            for (String key : prop.stringPropertyNames()) {
+                Long id = Long.parseLong(key);
+                storage.getFavoriteIDs().add(id);
+            }
+            // Check if favorites still exist in the server
+            ObservableList<Long> newFavs = FXCollections.observableArrayList(
+                    storage.getFavoriteIDs()
+            );
+            for (Long id : storage.getFavoriteIDs()) {
+                if (!getRecipeIDs().contains(id)) {
+                    errs.showGenericError("RIP: Recipe " + prop.getProperty(id.toString()) + " not found!");
+                    System.out.println(id + prop.getProperty(id.toString()));
+                    prop.remove(id.toString());
+                    newFavs.remove(id);
+                }
+            }
+            storage.setFavoriteIDs(newFavs);
+            // Remove lost recipe from properties file
+            try {
+                prop.store(new FileOutputStream(properties), "Favorites Updated");
+            } catch (IOException e) {
+                errs.showGenericError("Can not update favorites, yikes...");
+            }
+
+        } catch (Exception e) {
+            errs.showGenericError("Unable to load favorites, try again later!");
+            e.printStackTrace();
+        }
+    }
+    public List<Long> getRecipeIDs() {
+        List<Long> ids = new ArrayList<>();
+        for (Recipe r : storage.getRecipes()) {
+            ids.add(r.getId());
+        }
+        return ids;
+    }
+
+
 }
