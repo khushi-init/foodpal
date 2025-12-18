@@ -201,9 +201,11 @@ public class RecipesWindowCtrl {
                 }
                 try{
                     ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                            searchCtrl.query(
+                            favFilter(
+                                    searchCtrl.query(
                                     searchField.getText(), storage.getRecipes()
-                            )
+                            ),
+                            favoriteIds)
                     );
                     sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                     searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
@@ -921,6 +923,23 @@ public class RecipesWindowCtrl {
     @FXML
     private void onAdvancedSearch(){
         primaryCtrl.showSearchWindow();
+    }
+
+    /**
+     * The final search query step, checks if the favorite toggle is toggled, and if so filters for favorite
+     * @param initList The initial filtered list containing the recipes that comply with the query
+     * @param favIDs The list of ID's for all favorites
+     * @return A list of recipes that comply with all query conditions and favorite toggle.
+     */
+    public List<Recipe> favFilter(List<Recipe> initList, List<Long> favIDs) {
+        List<Recipe> result = new ArrayList<>();
+        for(Recipe r : initList) {
+            if(favIDs.contains(r.getId())) {
+                result.add(r);
+            }
+        }
+        return result;
+
     }
 
 }

@@ -23,7 +23,6 @@ public class SearchCtrl {
      * Performs a query on the provided List of recipes
      * @param query A String containing words recipes must contain, separated by spaces (case-insensitive)
      * @param recipes A list of all recipes in which to search
-     * @param favIDs The list of currently favorite recipe ID's for search filtering
      * @return A List of all recipes that satisfy the search conditions
      */
     public List<Recipe> performSimpleQuery(String query, List<Recipe> recipes){
@@ -169,7 +168,6 @@ public class SearchCtrl {
 
     /**
      * Applies a complex query on a List of recipes
-     * @param query The complex query as a Proposition
      * @param recipes The recipes to search through
      * @return List of recipes satisfying the search conditions
      */
@@ -189,4 +187,6 @@ public class SearchCtrl {
         }
         return performSimpleQuery(query, recipes);
     }
+
+
 }
