@@ -37,5 +37,6 @@ public class MyModule implements Module {
         binder.bind(LocalStorage.class).in(Scopes.SINGLETON);
         binder.bind(DataManipulator.class).in(Scopes.SINGLETON);
         binder.bind(ServerUtils.class).in(Scopes.SINGLETON);
+        binder.bind(SearchWindowCtrl.class).in(Scopes.SINGLETON);
     }
 }

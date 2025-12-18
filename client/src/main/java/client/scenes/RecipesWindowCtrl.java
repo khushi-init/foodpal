@@ -5,6 +5,7 @@ import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.*;
+import client.utils.searchUtils.Proposition;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import commons.Recipe;
@@ -73,6 +74,9 @@ public class RecipesWindowCtrl {
     @FXML
     private Button toCart;
 
+    @FXML
+    private Label advancedSearchButton;
+
     // Favorite Injections
     @FXML
     private ImageView favoriteImage;
@@ -104,10 +108,10 @@ public class RecipesWindowCtrl {
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param c ErrorCtrl instance for error
+     * @param p PrimaryCtrl instance to inject
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
      * @param s - The injected search control
-     * @param p - The injected primary control
      */
     @Inject
     public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
@@ -195,15 +199,35 @@ public class RecipesWindowCtrl {
                     cancelSearch(); //if query is empty, return to the normal sidebar.
                     return;
                 }
-                ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                        searchCtrl.search(
-                                searchField.getText(), storage.getRecipes()
-                        )
-                );
-                sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
-                searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                try{
+                    ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
+                            searchCtrl.query(
+                                    searchField.getText(), storage.getRecipes()
+                            )
+                    );
+                    sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
+                    searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                } catch (Exception e){
+                    errorCtrl.showGenericError(e);
+                }
+
             }
         });
+    }
+
+    /**
+     * Takes a Proposition that was created in another window and performs a search with it.
+     * @param prop
+     */
+    public void applyExternalSearch(Proposition prop){
+        try{
+            ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
+                    searchCtrl.performComplexQuery(prop, storage.getRecipes())
+            );
+            sidebarRecipeNamesList.setItems(searchResults);
+        } catch (Exception e){
+            errorCtrl.showGenericError(e);
+        }
     }
 
     /**
@@ -882,5 +906,10 @@ public class RecipesWindowCtrl {
 
     }
 
+
+    @FXML
+    private void onAdvancedSearch(){
+        primaryCtrl.showSearchWindow();
+    }
 
 }
