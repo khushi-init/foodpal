@@ -73,15 +73,21 @@ public class ShoppingListIngredientUICtrl {
      */
     @FXML
     public void handleEditButton() {
+        int labelIndex = ingredientBox.getChildren().indexOf(ingredientText);
+
         TextField textField = new TextField(ingredientText.getText().replace("• ", ""));
         HBox.setHgrow(textField, Priority.ALWAYS);
-        textField.setPromptText(ingredientText.getText());
         textField.setFocusTraversable(false);
-        textField.setOnAction(actionEvent -> {
-            editInstruction.accept(textField.getText());
-            ingredientBox.getChildren().set(0, ingredientText);
+
+        textField.setOnAction(e -> {
+            String newText = textField.getText();
+            ingredientText.setText("• " + newText);
+            editInstruction.accept(newText);
+
+            ingredientBox.getChildren().set(labelIndex, ingredientText);
         });
-        ingredientBox.getChildren().set(0, textField);
+
+        ingredientBox.getChildren().set(labelIndex, textField);
         textField.requestFocus();
     }
 
