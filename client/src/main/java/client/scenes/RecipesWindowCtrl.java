@@ -847,7 +847,7 @@ public class RecipesWindowCtrl {
 
         ToBeAddedCtrl ctrl = loader.getController();
         List<RecipeIngredient> ris = getSelectedRecipe().getIngredients();
-        ctrl.showRecipeIngredients(ris);
+        ctrl.loadFromRecipe(ris);
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);

@@ -14,7 +14,7 @@
 
 
     <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #d9534f; -fx-padding: 10;">
+        <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #6ed157; -fx-padding: 10;">
             <children>
                 <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="Shopping List" />
                 <Region HBox.hgrow="ALWAYS" />

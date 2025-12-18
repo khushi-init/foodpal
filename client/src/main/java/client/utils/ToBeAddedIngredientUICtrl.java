@@ -10,7 +10,7 @@ import javafx.scene.layout.Priority;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class ShoppingListIngredientUICtrl {
+public class ToBeAddedIngredientUICtrl {
 
     @FXML
     private Label ingredientText;
@@ -91,15 +91,4 @@ public class ShoppingListIngredientUICtrl {
         textField.requestFocus();
     }
 
-    @FXML
-    private void handleCheckoffBox() {
-        boolean checked = checkoffBox.isSelected();
-
-        if (checked) {
-            ingredientText.setStyle("-fx-text-fill: #9ca3af;");
-        } else {
-            ingredientText.setStyle("-fx-text-fill: #000000;");
-        }
-        checkoffInstruction.accept(index, checked);
-    }
 }
