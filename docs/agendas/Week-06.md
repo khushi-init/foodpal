@@ -77,11 +77,11 @@
         - nutrtional value not on track 
         - shopping list almost done
         - searching also almost done
-  - Any changes on work allocation/anyone wants to work on different epic?
-  - Does any team need extra help from teammates who are already done?
+    - Any changes on work allocation/anyone wants to work on different epic?
+    - Does any team need extra help from teammates who are already done?
         - one person helps nutrtional value, cant finish this week
         - other's work on new epics
-  - Splitting remaining Epics
+    - Splitting remaining Epics
         - 2 groups of three working on nutritional value and web sockets
         - nutritional value: Khushi, Adel, Loet
         - web sockets: Dimitris, Marnix, Luca
@@ -92,14 +92,14 @@
         - nope, everyone is doing great, no missed contributions 
 
 7. **Demo to TA: Potential shippable product (5 mins)** --> taken: 10 mins
-    - TA's feedback 
-    - some bugs due to favourites, also ingredients need refresh button
-    - add to shopping lists still needs few more functional buttons 
-    - TA says it's amazing
-    - Dimitris shows ingredient editing 
-    - maybe disable adding 100 > grams of nutritional value, maybe add warning
-    - fix order of nutritional values
-    - TA can help us add Portuguese in exchange for money...
+      - TA's feedback 
+      - some bugs due to favourites, also ingredients need refresh button
+      - add to shopping lists still needs few more functional buttons 
+      - TA says it's amazing
+      - Dimitris shows ingredient editing 
+      - maybe disable adding 100 > grams of nutritional value, maybe add warning
+      - fix order of nutritional values
+      - TA can help us add Portuguese in exchange for money...
 
 8. **Closing (2 mins)** --> taken: 4 mins
     - Any feedback/remarks?
