@@ -846,6 +846,9 @@ public class RecipesWindowCtrl {
         Parent root = loader.load();
 
         ToBeAddedCtrl ctrl = loader.getController();
+
+        ctrl.setShoppingList(shoppingList);
+        ctrl.setOpenShoppingList(this::showShoppingList);
         List<RecipeIngredient> ris = getSelectedRecipe().getIngredients();
         ctrl.loadFromRecipe(ris);
 
@@ -853,11 +856,9 @@ public class RecipesWindowCtrl {
         popUpStage.initModality(Modality.APPLICATION_MODAL);
         popUpStage.setTitle("To Be Added");
         popUpStage.setScene(new Scene(root));
-
         popUpStage.initOwner(recipeView.getScene().getWindow());
 
         popUpStage.showAndWait();
-
     }
 
 

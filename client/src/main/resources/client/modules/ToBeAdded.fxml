@@ -41,7 +41,7 @@
         <SplitPane prefHeight="30" prefWidth="600" style="-fx-background-color: #fafafa;" stylesheets="@/client/scenes/scrollfix.css">
             <items>
                 <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10;">
-                    <Button text="Add to shopping list"/>
+                    <Button text="Add to shopping list" onAction="#addToShoppingList"/>
                 </HBox>
             </items>
         </SplitPane>

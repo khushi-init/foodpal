@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import commons.ShoppingList;
 
 public class ToBeAddedCtrl {
     @FXML
@@ -34,7 +35,7 @@ public class ToBeAddedCtrl {
     }
 
     @FXML
-    private void handleCancel(){
+    private void handleCancel() {
         okClicked = false;
         close();
     }
@@ -143,6 +144,34 @@ public class ToBeAddedCtrl {
         }
     }
 
+    private ShoppingList shoppingList;
+    private Runnable openShoppingList;
+
+    public void setShoppingList(ShoppingList shoppingList) {
+        this.shoppingList = shoppingList;
+    }
+    public void setOpenShoppingList(Runnable openShoppingList) {
+        this.openShoppingList = openShoppingList;
+    }
+
+    @FXML
+    private void addToShoppingList() {
+        System.out.println("added");
+        if (shoppingList == null) return;
+
+        for (ToBeAddedIngredient ing : toBeAddedList.getIngredients()) {
+            String text = ing.getText();
+            if (text != null && !text.isBlank()) {
+                shoppingList.addIngredient(text.trim());
+            }
+        }
+
+        toBeAddedList.clear();
+        close();
+        if (openShoppingList != null) {
+            openShoppingList.run();
+        }
 
 
+    }
 }
