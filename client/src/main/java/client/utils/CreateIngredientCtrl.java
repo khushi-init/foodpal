@@ -73,4 +73,11 @@ public class CreateIngredientCtrl {
     public void setDescLabelText(String text) {
         descLabel.setText(text);
     }
+
+    public void setDefaults(String name, String fat, String protein, String carbs) {
+        nameField.setText(name);
+        fatField.setText(fat);
+        proteinField.setText(protein);
+        carbField.setText(carbs);
+    }
 }

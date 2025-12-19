@@ -133,4 +133,28 @@ public class DataManipulator {
         // The UI (ListView) will update automatically.
         storage.getIngredients().remove(ingredient);
     }
+
+    /**
+     * Uses ServerUtils to update the ingredient on the server using replacement
+     * If successful, updates the localstorage with the edited ingredient
+     * @param replacement - The updated ingredient
+     * @return - Whether successful
+     */
+    public boolean editIngredient(Ingredient replacement) {
+        Optional<Ingredient> update = server.editIngredient(replacement);
+
+        if (update.isEmpty()) {
+            errs.showGenericError("Failed to update ingredient in the server");
+            return false;
+        }
+
+        // Replace with update on the local ingredients list
+        for (int i = 0; i < storage.getIngredients().size(); i++) {
+            if (Objects.equals(storage.getIngredients().get(i).getId(), update.get().getId())) {
+                storage.getIngredients().set(i, update.get());
+                return true;
+            }
+        }
+        return false;
+    }
 }
