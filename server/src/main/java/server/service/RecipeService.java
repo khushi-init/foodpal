@@ -18,6 +18,11 @@ public class RecipeService {
     private final IngredientRepository ingredientRepository;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
+    /**
+     * The Recipe Service constructor method
+     * @param recipeRepository The Recipe repository to meddle with
+     * @param ingredientRepository the ingredient repository to meddle with
+     */
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;

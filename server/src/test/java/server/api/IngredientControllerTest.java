@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import server.database.IngredientRepository;
 import server.database.RecipeIngredientRepository;
+import server.service.IngredientService;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,8 +21,7 @@ import static org.mockito.Mockito.*;
 public class IngredientControllerTest {
 
     private IngredientController sut;
-    private IngredientRepository mockRepository;
-    private RecipeIngredientRepository mockRecipeIngredientRepository;
+    private IngredientService mockIngredientService;
     private Ingredient testIngredient;
     private RecipeIngredient testRI1;
     private RecipeIngredient testRI2;
@@ -39,9 +39,9 @@ public class IngredientControllerTest {
     @BeforeEach
     public void setUp(){
         // Setup mock repository and controller
-        mockRepository = mock(IngredientRepository.class);
-        mockRecipeIngredientRepository = mock(RecipeIngredientRepository.class);
-        sut = new IngredientController(mockRepository, mockRecipeIngredientRepository);
+        mockIngredientService = mock(IngredientService.class);
+        sut = new IngredientController(mockIngredientService);
+
 
         // Setup test data
         testIngredient = new Ingredient("Sugar", defaultNutritionalValue);
@@ -62,40 +62,40 @@ public class IngredientControllerTest {
     public void getAllIngredientsTest(){
         // ARRANGE: Mock repository to return a list
         List<Ingredient> expectedList = List.of(testIngredient);
-        when(mockRepository.findAll()).thenReturn(expectedList);
+        when(mockIngredientService.getAllIngredients()).thenReturn(expectedList);
 
         // ACT
-        List<Ingredient> actualList = sut.getAllIngredients();
+        List<Ingredient> actualList = mockIngredientService.getAllIngredients();
 
         // ASSERT: Check list content and verify repository call
         assertEquals(expectedList, actualList);
-        verify(mockRepository, times(1)).findAll();
+        verify(mockIngredientService, times(1)).getAllIngredients();
     }
 
     @Test
     public void getByIdCorrect() {
         // ARRANGE: Mock repository to return the ingredient when ID 1 is requested
-        when(mockRepository.findById(id)).thenReturn(Optional.of(testIngredient));
+        when(mockIngredientService.getIngredientByID(id)).thenReturn(Optional.of(testIngredient));
 
         // ACT
         ResponseEntity<Ingredient> response = sut.getIngredientById(id);
 
         // ASSERT: Check 200 OK status
         assertEquals(OK, response.getStatusCode());
-        verify(mockRepository, times(1)).findById(id);
+        verify(mockIngredientService, times(1)).getIngredientByID(id);
     }
 
     @Test
     public void getByIdNotFound() {
         // ARRANGE: Mock repository to return empty when ID 99 is requested
-        when(mockRepository.findById(fakeId)).thenReturn(Optional.empty());
+        when(mockIngredientService.getIngredientByID(fakeId)).thenReturn(Optional.empty());
 
         // ACT
         ResponseEntity<Ingredient> response = sut.getIngredientById(fakeId);
 
         // ASSERT: Check 404 Not Found status
         assertEquals(NOT_FOUND, response.getStatusCode());
-        verify(mockRepository, times(1)).findById(fakeId);
+        verify(mockIngredientService, times(1)).getIngredientByID(fakeId);
     }
 
     @Test
@@ -104,14 +104,14 @@ public class IngredientControllerTest {
         Ingredient inputIngredient = new Ingredient("Flour", defaultNutritionalValue);
         Ingredient savedIngredient = new Ingredient("Flour",  defaultNutritionalValue);
         savedIngredient.setId(id2);
-        when(mockRepository.save(inputIngredient)).thenReturn(savedIngredient);
+        when(mockIngredientService.createIngredient(inputIngredient)).thenReturn(Optional.of(savedIngredient));
 
         // ACT
         ResponseEntity<Ingredient> response = sut.createIngredient(inputIngredient);
 
         // ASSERT: Check 201 Created status
         assertEquals(CREATED, response.getStatusCode());
-        verify(mockRepository, times(1)).save(inputIngredient);
+        verify(mockIngredientService, times(1)).createIngredient(inputIngredient);
     }
 
     @Test
@@ -126,26 +126,26 @@ public class IngredientControllerTest {
         assertEquals(BAD_REQUEST, response.getStatusCode());
 
         // ASSERT: Verify save was never called
-        verify(mockRepository, never()).save(badIngredient);
+        verify(mockIngredientService, never()).createIngredient(badIngredient);
     }
 
     @Test
     public void deleteIngredientCorrect() {
         // ARRANGE: Mock repository to confirm ID 1 exists
-        when(mockRepository.existsById(id)).thenReturn(true);
+        when(mockIngredientService.deleteIngredient(id)).thenReturn(true);
 
         // ACT
         ResponseEntity<?> response = sut.deleteIngredient(id);
 
         // ASSERT: Check 204 No Content status and verify delete call
         assertEquals(NO_CONTENT, response.getStatusCode());
-        verify(mockRepository, times(1)).deleteById(id);
+        verify(mockIngredientService, times(1)).deleteIngredient(id);
     }
 
     @Test
     public void deleteIngredientNotFound() {
         // ARRANGE: Mock repository to confirm ID 99 does not exist
-        when(mockRepository.existsById(fakeId)).thenReturn(false);
+        when(mockIngredientService.deleteIngredient(fakeId)).thenReturn(false);
 
         // ACT
         ResponseEntity<?> response = sut.deleteIngredient(fakeId);
@@ -154,6 +154,6 @@ public class IngredientControllerTest {
         assertEquals(NOT_FOUND, response.getStatusCode());
 
         // ASSERT: Verify delete was not called
-        verify(mockRepository, never()).deleteById(fakeId);
+        verify(mockIngredientService, never()).deleteIngredient(fakeId);
     }
 }
