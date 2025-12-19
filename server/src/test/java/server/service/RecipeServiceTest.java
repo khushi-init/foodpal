@@ -18,6 +18,8 @@ public class RecipeServiceTest {
     private RecipeService sut;
     private RecipeRepository mockRecipeRepo;
     private IngredientRepository mockIngredientRepo;
+    private Long id = 1L;
+    private Long id2 = 5L;
 
     @BeforeEach
     public void setUp() {
@@ -37,9 +39,9 @@ public class RecipeServiceTest {
 
     @Test
     public void getRecipeByIdTest() {
-        when(mockRecipeRepo.findById(1L)).thenReturn(Optional.of(new Recipe()));
+        when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(new Recipe()));
 
-        Optional<Recipe> result = sut.getRecipeById(1L);
+        Optional<Recipe> result = sut.getRecipeById(id);
 
         assertTrue(result.isPresent());
     }
@@ -48,9 +50,9 @@ public class RecipeServiceTest {
     public void getRecipeMarkdownBytesTest() {
         Recipe r = new Recipe("Test", new ArrayList<>(), new ArrayList<>());
 
-        when(mockRecipeRepo.findById(1L)).thenReturn(Optional.of(r));
+        when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(r));
 
-        Optional<byte[]> result = sut.getRecipeMarkdownBytes(1L);
+        Optional<byte[]> result = sut.getRecipeMarkdownBytes(id);
 
         assertTrue(result.isPresent());
     }
@@ -68,19 +70,19 @@ public class RecipeServiceTest {
     @Test
     public void updateRecipeTest() {
         Recipe existing = new Recipe();
-        when(mockRecipeRepo.findById(1L)).thenReturn(Optional.of(existing));
+        when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(existing));
         when(mockRecipeRepo.save(any(Recipe.class))).thenReturn(existing);
 
-        Optional<Recipe> result = sut.updateRecipe(1L, new Recipe("Updated", null, null));
+        Optional<Recipe> result = sut.updateRecipe(id, new Recipe("Updated", null, null));
 
         assertTrue(result.isPresent());
     }
 
     @Test
     public void deleteRecipeTest() {
-        when(mockRecipeRepo.existsById(1L)).thenReturn(true);
+        when(mockRecipeRepo.existsById(id)).thenReturn(true);
 
-        boolean deleted = sut.deleteRecipe(1L);
+        boolean deleted = sut.deleteRecipe(id);
 
         assertTrue(deleted);
     }
@@ -91,10 +93,10 @@ public class RecipeServiceTest {
         Recipe recipe = new Recipe();
         recipe.setIngredients(new ArrayList<>());
 
-        when(mockRecipeRepo.findById(1L)).thenReturn(Optional.of(recipe));
+        when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(recipe));
 
         // ACT
-        boolean result = sut.removeIngredientFromRecipe(1L, 5L);
+        boolean result = sut.removeIngredientFromRecipe(id, id2);
 
         // ASSERT: Should be false because the list was empty
         assertFalse(result);
