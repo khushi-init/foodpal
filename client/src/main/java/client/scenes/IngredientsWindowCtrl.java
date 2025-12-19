@@ -16,12 +16,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import javafx.event.ActionEvent;
+import java.util.Objects;
 import java.util.Optional;
 
 public class IngredientsWindowCtrl {
@@ -147,12 +148,35 @@ public class IngredientsWindowCtrl {
 
     /**
      * Handles the click on the edit/pencil icon next to the ingredient name.
+     * Prompts user to edit ingredient by calling ingredientDataPrompt, updates the ingredient with the new one using
+     * DataManipulator and if successful, re-selects the edited ingredient to update the DetailsView
      * @param event The action event triggered by the button click.
      */
-    public void handleEditNameClick(ActionEvent event) {
-        // TODO: Implement the logic to open a dialog or switch to an editable field
-        // For now, this placeholder method resolves the FXML loading error.
-        System.out.println("Edit Name button clicked!");
+    public void handleEditNameClick(MouseEvent event) {
+        Ingredient selected = sidebarIngredientNamesList.getSelectionModel().getSelectedItem();
+        Optional<Ingredient> edit = ingredientDataPrompt("Edit Ingredient", "Ingredient to edit:", selected.getName(),
+                String.valueOf(selected.getNutritionalValue().fat100g()),
+                String.valueOf(selected.getNutritionalValue().protein100g()),
+                String.valueOf(selected.getNutritionalValue().carbs100g()));
+        if (edit.isEmpty()) return;
+        Ingredient replacement = edit.get();
+        if (replacement.getName().trim().isEmpty()) replacement.setName(selected.getName());
+        replacement.setId(selected.getId());
+
+        boolean successful = dataManipulator.editIngredient(replacement);
+        if (!successful) {
+            errorCtrl.showGenericError("Something went wrong when updating the ingredient :/");
+            return;
+        }
+        int index = 0;
+        for (int i = 0; i < storage.getIngredients().size(); i++) {
+            if (Objects.equals(storage.getIngredients().get(i).getId(), replacement.getId())) {
+                index = i;
+                break;
+            }
+        }
+        sidebarIngredientNamesList.getSelectionModel().select(index);
+
     }
 
     /**
@@ -168,7 +192,7 @@ public class IngredientsWindowCtrl {
      * If added to the server successfully, it is also added to the client-side local list.
      */
     public void handlePlusButtonPress() {
-        Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:");
+        Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:", "", "", "", "");
         if (parsed.isEmpty()) return;
         dataManipulator.addIngredient(parsed.get());
     }
@@ -177,9 +201,13 @@ public class IngredientsWindowCtrl {
      * Opens a popup window where the user is prompted to create / edit an ingredient
      * @param title - Window title
      * @param descText - Description text
-     * @return - The parsed ingredient or an empty optional if parsing failed / was canceled
+     * @param defaultName - The name to display in the name field initially
+     * @param defaultFat - The fat to display in the name field initially
+     * @param defaultProtein - The protein to display in the name field initially
+     * @param defaultCarbs - The carbs to display in the name field initially
+     * @return - The parsed ingredient or an empty optional if parsing failed / was cancelled
      */
-    public Optional<Ingredient> ingredientDataPrompt(String title, String descText) {
+    public Optional<Ingredient> ingredientDataPrompt(String title, String descText, String defaultName, String defaultFat, String defaultProtein, String defaultCarbs) {
         Pair<CreateIngredientCtrl, Parent> addIngPair = Main.FXML.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
 
         Parent root = addIngPair.getValue();
@@ -192,6 +220,7 @@ public class IngredientsWindowCtrl {
 
         createIngCtr.setStage(popUpStage);
         createIngCtr.setDescLabelText(descText);
+        createIngCtr.setDefaults(defaultName, defaultFat, defaultProtein, defaultCarbs);
 
         popUpStage.showAndWait();
 

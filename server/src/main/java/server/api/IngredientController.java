@@ -89,10 +89,13 @@ public class IngredientController {
     /**
      * Updates an existing ingredient.
      * @param ingredient ingredient with updated data
-     * @return 200 ok with update or 400 if bad request
+     * @return 200 ok with update, 400 if bad request and 404 if not found
      */
     @PutMapping
     public ResponseEntity<Ingredient> updateIngredient(@RequestBody Ingredient ingredient) {
+        if (!ingredientRepository.existsById(ingredient.getId())) {
+            return ResponseEntity.notFound().build();
+        }
         if(ingredient.getName() == null || ingredient.getName().trim().isEmpty()){
             return ResponseEntity.badRequest().build();
         }
