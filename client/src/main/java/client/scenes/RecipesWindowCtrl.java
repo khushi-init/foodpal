@@ -1,14 +1,11 @@
 package client.scenes;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Properties;
+
 import java.util.function.BiConsumer;
 
 import com.google.inject.Inject;
@@ -53,16 +50,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.BiConsumer;
 
-import com.google.inject.Inject;
 
 
 public class RecipesWindowCtrl {
