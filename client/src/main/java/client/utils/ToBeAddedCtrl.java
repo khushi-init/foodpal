@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-
 import commons.RecipeIngredient;
 import commons.ShoppingList;
 import commons.ToBeAddedIngredient;
@@ -14,19 +13,19 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import commons.ShoppingList;
 
 public class ToBeAddedCtrl {
     @FXML
     private VBox ingredientsBox;
-
-    private ToBeAddedList toBeAddedList = new ToBeAddedList();
+    private String sourceRecipeName;
+    private final ToBeAddedList toBeAddedList = new ToBeAddedList();
     private boolean okClicked = false;
+    private ShoppingList shoppingList;
+    private Runnable openShoppingList;
 
     @FXML
     private void handleOk() {
@@ -44,11 +43,10 @@ public class ToBeAddedCtrl {
         ingredientsBox.getScene().getWindow().hide();
     }
 
-    public void loadFromRecipe(List<RecipeIngredient> ris) {
+    public void loadFromRecipe(List<RecipeIngredient> ingredients) {
         toBeAddedList.clear();
-
-        for (RecipeIngredient ri : ris) {
-            String text = ri.getIngredient().getName() + " (" + ri.getQuantity() + ")";
+        for (RecipeIngredient recipeIngredient : ingredients) {
+            String text = recipeIngredient.getIngredient().getName() + " (" + recipeIngredient.getQuantity() + ")";
             toBeAddedList.addIngredient(text);
         }
 
@@ -57,8 +55,7 @@ public class ToBeAddedCtrl {
 
 
     /**
-     * creating to be added list of ingredients from list
-     * @throws IOException error
+     * Display the ingredients in the "To Be Added" list
      */
     public void showRecipeIngredients() {
         ingredientsBox.getChildren().clear();
@@ -72,9 +69,9 @@ public class ToBeAddedCtrl {
                 ToBeAddedIngredientUICtrl ctrl = loader.getController();
 
                 int index = i;
-                String text = toBeAddedList.getIngredients().get(i).getText();
+                String displayText = toBeAddedList.getIngredients().get(i).getText();
 
-                ctrl.setText("• " + text);
+                ctrl.setText("• " + displayText);
                 ctrl.setIndex(index);
 
                 ctrl.setDeleteCheck(idx -> {
@@ -103,16 +100,12 @@ public class ToBeAddedCtrl {
                 String amount = pair.getValue().trim();
 
                 if (!name.isEmpty()) {
-                    if (!amount.isEmpty()) {
-                        toBeAddedList.addIngredient(name + " (" + amount + ")");
-                    } else {
-                        toBeAddedList.addIngredient(name);
-                    }
+                    String ingredientText = amount.isEmpty() ? name : name + " (" + amount + ")";
+                    toBeAddedList.addIngredient(ingredientText);
                     showRecipeIngredients();
                 }
             });
         });
-
     }
 
     private Optional<Pair<String, String>> showIngredientPopUp() {
@@ -144,9 +137,6 @@ public class ToBeAddedCtrl {
         }
     }
 
-    private ShoppingList shoppingList;
-    private Runnable openShoppingList;
-
     public void setShoppingList(ShoppingList shoppingList) {
         this.shoppingList = shoppingList;
     }
@@ -156,14 +146,10 @@ public class ToBeAddedCtrl {
 
     @FXML
     private void addToShoppingList() {
-        System.out.println("added");
         if (shoppingList == null) return;
-
         for (ToBeAddedIngredient ing : toBeAddedList.getIngredients()) {
             String text = ing.getText();
-            if (text != null && !text.isBlank()) {
-                shoppingList.addIngredient(text.trim());
-            }
+            shoppingList.addIngredient(text.trim(), sourceRecipeName);
         }
 
         toBeAddedList.clear();
@@ -171,7 +157,9 @@ public class ToBeAddedCtrl {
         if (openShoppingList != null) {
             openShoppingList.run();
         }
+    }
 
-
+    public void setSourceRecipeName(String sourceRecipeName) {
+        this.sourceRecipeName = sourceRecipeName;
     }
 }
