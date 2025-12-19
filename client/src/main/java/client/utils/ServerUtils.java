@@ -326,6 +326,29 @@ public class ServerUtils {
         }
     }
 
+    /**
+     * PUTs the replacement ingredient to the server and returns the response entity in an optional
+     * @param replacement - The updated ingredient to PUT
+     * @return - The response entity ingredient if successful and an empty optional otherwise
+     */
+    public Optional<Ingredient> editIngredient(Ingredient replacement) {
+        try (Response response = ClientBuilder.newClient()
+                .target(server)
+                .path("api/ingredients")
+                .request()
+                .put(Entity.entity(replacement, APPLICATION_JSON))
+        ) {
+            if (response.getStatus() != statusOK) {
+                errorCtrl.showGenericError("Failed to update ingredient. Server returned status: " + response.getStatus());
+                return Optional.empty();
+            }
+            return Optional.of(response.readEntity(Ingredient.class));
+        } catch (ProcessingException e) {
+            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     public Optional<Integer> getIngredientUsage(long ingredientId) {
         try (Response response = ClientBuilder.newClient()
                 .target(server)
