@@ -7,8 +7,6 @@ import commons.RecipeIngredient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
-import server.database.IngredientRepository;
-import server.database.RecipeIngredientRepository;
 import server.service.IngredientService;
 
 import java.util.List;

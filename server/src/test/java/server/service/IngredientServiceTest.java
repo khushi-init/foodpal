@@ -55,13 +55,14 @@ public class IngredientServiceTest {
     @Test
     public void getRecipeUsageNumberTest() {
         // ARRANGE
-        when(mockRecipeIngredientRepo.getRecipeUsageNumber(id)).thenReturn(5);
+        final int testid = 5;
+        when(mockRecipeIngredientRepo.getRecipeUsageNumber(id)).thenReturn(testid);
 
         // ACT
         int result = sut.getRecipeUsageNumber(id);
 
         // ASSERT
-        assertEquals(5, result);
+        assertEquals(testid, result);
     }
 
     @Test
