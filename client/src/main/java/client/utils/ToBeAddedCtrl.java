@@ -43,6 +43,10 @@ public class ToBeAddedCtrl {
         ingredientsBox.getScene().getWindow().hide();
     }
 
+    /**
+     * Loading ingredients from recipe and adding their quantity
+     * @param ingredients list of ingredients from the selected recipe
+     */
     public void loadFromRecipe(List<RecipeIngredient> ingredients) {
         toBeAddedList.clear();
         for (RecipeIngredient recipeIngredient : ingredients) {
@@ -108,6 +112,10 @@ public class ToBeAddedCtrl {
         });
     }
 
+    /**
+     * show pop up for user to enter a nema/quantity
+     * @return name and quantity if inserted
+     */
     private Optional<Pair<String, String>> showIngredientPopUp() {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -159,6 +167,10 @@ public class ToBeAddedCtrl {
         }
     }
 
+    /**
+     * getting name of the source recipe
+     * @param sourceRecipeName source recipe name
+     */
     public void setSourceRecipeName(String sourceRecipeName) {
         this.sourceRecipeName = sourceRecipeName;
     }
