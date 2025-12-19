@@ -67,9 +67,13 @@ public class IngredientController {
      */
     @PostMapping
     public ResponseEntity<Ingredient> createIngredient(@RequestBody Ingredient ingredient) {
+        if (ingredient.getName() == null || ingredient.getName().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Optional<Ingredient> saved = ingredientService.createIngredient(ingredient);
-        return saved.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return saved.map(i -> ResponseEntity.status(HttpStatus.CREATED).body(i))
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     // PUT ENDPOINT

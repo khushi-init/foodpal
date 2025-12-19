@@ -151,7 +151,7 @@ public class IngredientControllerTest {
         // ASSERT: Check 404 Not Found status
         assertEquals(NOT_FOUND, response.getStatusCode());
 
-        // ASSERT: Verify delete was not called
-        verify(mockIngredientService, never()).deleteIngredient(fakeId);
+        // ASSERT: Verify delete was called once
+        verify(mockIngredientService, times(1)).deleteIngredient(fakeId);
     }
 }
