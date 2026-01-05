@@ -1,11 +1,28 @@
 package client.scenes;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import java.util.function.BiConsumer;
+
+import com.google.inject.Inject;
+
 import client.Main;
 import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.*;
 import client.utils.searchUtils.Proposition;
+import client.utils.ErrorCtrl;
+import client.utils.IngredientPopUpCtrl;
+import client.utils.RecipeIngredientUICtrl;
+import client.utils.RecipeInstructionUICtrl;
+import client.utils.SearchCtrl;
+import client.utils.ServerUtils;
+import client.utils.ToBeAddedCtrl;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import commons.Recipe;
@@ -19,7 +36,13 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -27,16 +50,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.BiConsumer;
 
-import com.google.inject.Inject;
 
 
 public class RecipesWindowCtrl {
@@ -837,7 +857,7 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * handles button for to be added window
+     * Handles button for to be added window
      */
     public void toggleToBeAdded() throws IOException {
         FXMLLoader loader = new FXMLLoader(
@@ -846,18 +866,19 @@ public class RecipesWindowCtrl {
         Parent root = loader.load();
 
         ToBeAddedCtrl ctrl = loader.getController();
-        List<RecipeIngredient> ris = getSelectedRecipe().getIngredients();
-        ctrl.showRecipeIngredients(ris);
+
+        ctrl.setShoppingList(shoppingList);
+        ctrl.setSourceRecipeName(getSelectedRecipe().getName());
+        ctrl.setOpenShoppingList(this::showShoppingList);
+        ctrl.loadFromRecipe(getSelectedRecipe().getIngredients());
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);
         popUpStage.setTitle("To Be Added");
         popUpStage.setScene(new Scene(root));
-
         popUpStage.initOwner(recipeView.getScene().getWindow());
 
         popUpStage.showAndWait();
-
     }
 
 

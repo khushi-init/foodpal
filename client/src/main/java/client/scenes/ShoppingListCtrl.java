@@ -1,5 +1,14 @@
 package client.scenes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import client.Main;
 import client.utils.ShoppingListIngredientPopUpCtrl;
 import client.utils.ShoppingListIngredientUICtrl;
@@ -11,20 +20,12 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
-import javafx.scene.control.*;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
 
 public class ShoppingListCtrl {
 
@@ -45,41 +46,81 @@ public class ShoppingListCtrl {
             Label emptyList = new Label("You have added no ingredients to the shopping list yet!");
             shoppingListView.getChildren().add(emptyList);
         } else {
-            for (int i = 0; i < shoppingListIngredients.size(); i++) {
-                Pair<ShoppingListIngredientUICtrl, Node> pair =
-                        Main.FXML.loadNode(
-                                ShoppingListIngredientUICtrl.class,
-                                "client", "modules", "ShoppingListIngredient.fxml"
-                        );
-
-                ShoppingListIngredientUICtrl ctrl = pair.getKey();
-                Node node = pair.getValue();
-
-                ctrl.setText(shoppingListIngredients.get(i).getNameAmount());
-                ctrl.setCheckedOff(shoppingListIngredients.get(i).isCheckedOff());
-                ctrl.setIndex(i);
-
-                VBox.setVgrow(node, Priority.NEVER);
-                shoppingListView.getChildren().add(node);
-
-                ctrl.setDeleteCheck(index -> {
-                    shoppingList.removeIngredient(index.intValue());
-                    showShoppingList();
-                });
-
-                ctrl.setEditInstruction(newText ->{
-                    shoppingList.updateIngredients((int) ctrl.getIndex(), newText);
-                    showShoppingList();
-                });
-
-                ctrl.setCheckoffInstruction((index, checked) ->{
-                    shoppingList.updateCheckedOff((int) ctrl.getIndex(), checked);
-                });
-
-                shoppingListView.requestLayout();
-            }
+            Map<String, Integer> ingredientNameCounts = countIngredientNames(shoppingListIngredients);
+            showIngredients(shoppingListIngredients, ingredientNameCounts);
         }
 
+        addButton();
+        shoppingListView.requestLayout();
+    }
+
+    private Map<String, Integer> countIngredientNames(List<ShoppingListIngredient> ingredients) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (ShoppingListIngredient ingredient : ingredients) {
+            String name = extractIngredientName(ingredient.getNameAmount());
+            counts.put(name, counts.getOrDefault(name, 0) + 1);
+        }
+        return counts;
+    }
+
+    private void showIngredients(List<ShoppingListIngredient> ingredients, Map<String, Integer> counts) {
+        for (int i = 0; i < ingredients.size(); i++) {
+            Pair<ShoppingListIngredientUICtrl, Node> pair =
+                    Main.FXML.loadNode(
+                            ShoppingListIngredientUICtrl.class,
+                            "client", "modules", "ShoppingListIngredient.fxml"
+                    );
+
+            ShoppingListIngredientUICtrl ctrl = pair.getKey();
+            Node node = pair.getValue();
+
+            String displayText = ingredients.get(i).getNameAmount();
+            String ingredientName = extractIngredientName(displayText);
+            // show recipe name only when duplicates
+            if (counts.get(ingredientName) > 1 && 
+                    ingredients.get(i).getRecipeName() != null && 
+                    !ingredients.get(i).getRecipeName().isEmpty()) {
+                displayText += " - " + ingredients.get(i).getRecipeName();
+            }
+            
+            ctrl.setText(displayText);
+            ctrl.setCheckedOff(ingredients.get(i).isCheckedOff());
+            ctrl.setIndex(i);
+
+            VBox.setVgrow(node, Priority.NEVER);
+            shoppingListView.getChildren().add(node);
+
+            ctrl.setDeleteCheck(index -> {
+                shoppingList.removeIngredient(index.intValue());
+                showShoppingList();
+            });
+
+            ctrl.setEditInstruction(newText -> {
+                String nameAmount;
+                String recipeName = null;
+                
+                if (newText.contains(" - ")) {
+                    String[] parts = newText.split(" - ", 2);
+                    nameAmount = parts[0].trim();
+                    recipeName = parts[1].trim();
+                } else {
+                    nameAmount = newText.trim();
+                }
+                
+                shoppingList.updateIngredients((int) ctrl.getIndex(), nameAmount);
+                if (recipeName != null) {
+                    shoppingList.getIngredients().get((int) ctrl.getIndex()).setRecipeName(recipeName);
+                }
+                showShoppingList();
+            });
+
+            ctrl.setCheckoffInstruction((index, checked) ->{
+                shoppingList.updateCheckedOff((int) ctrl.getIndex(), checked);
+            });
+        }
+    }
+
+    private void addButton() {
         Button addButton = new Button("Add Ingredient");
         shoppingListView.getChildren().add(addButton);
         addButton.setOnAction(e -> {
@@ -89,11 +130,8 @@ public class ShoppingListCtrl {
                 String amount = pair.getValue().trim();
 
                 if (!name.isEmpty()) {
-                    if (!amount.isEmpty()) {
-                        shoppingList.addIngredient(name + " (" + amount + ")");
-                    } else {
-                        shoppingList.addIngredient(name);
-                    }
+                    String ingredientText = amount.isEmpty() ? name : name + " (" + amount + ")";
+                    shoppingList.addIngredient(ingredientText);
                     showShoppingList();
                 }
             });
@@ -170,6 +208,22 @@ public class ShoppingListCtrl {
     public void setAndShowShoppingList(ShoppingList shoppingList) {
         this.shoppingList = shoppingList;
         showShoppingList();
+    }
+
+    /**
+     * Extract the ingredient name from a formatted string like "Sugar (100g)" or "Sugar (100g) - Recipe Name"
+     * @param text The formatted ingredient text
+     * @return The ingredient name, or null if it can't be parsed
+     */
+    private String extractIngredientName(String text) {
+        String withoutRecipe = text.trim();
+
+        //take the name before (
+        int quantityStart = withoutRecipe.lastIndexOf(" (");
+        if (quantityStart > 0) {
+            return withoutRecipe.substring(0, quantityStart).trim();
+        }
+        return withoutRecipe.trim();
     }
 
 }
