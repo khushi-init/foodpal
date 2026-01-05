@@ -1,13 +1,11 @@
 package client.utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import commons.RecipeIngredient;
-import commons.ShoppingList;
-import commons.ToBeAddedIngredient;
-import commons.ToBeAddedList;
+import commons.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -22,7 +20,7 @@ public class ToBeAddedCtrl {
     @FXML
     private VBox ingredientsBox;
     private String sourceRecipeName;
-    private final ToBeAddedList toBeAddedList = new ToBeAddedList();
+    private final List<ShoppingListIngredient> toBeAddedList = new ArrayList<>();
     private boolean okClicked = false;
     private ShoppingList shoppingList;
     private Runnable openShoppingList;
@@ -51,7 +49,7 @@ public class ToBeAddedCtrl {
         toBeAddedList.clear();
         for (RecipeIngredient recipeIngredient : ingredients) {
             String text = recipeIngredient.getIngredient().getName() + " (" + recipeIngredient.getQuantity() + ")";
-            toBeAddedList.addIngredient(text);
+            toBeAddedList.add(new ShoppingListIngredient(text));
         }
 
         showRecipeIngredients();
@@ -64,27 +62,28 @@ public class ToBeAddedCtrl {
     public void showRecipeIngredients() {
         ingredientsBox.getChildren().clear();
 
-        for (int i = 0; i < toBeAddedList.getIngredients().size(); i++) {
+        for (int i = 0; i < toBeAddedList.size(); i++) {
             try {
                 FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource("/client/modules/ToBeAddedIngredient.fxml")
+                        getClass().getResource("/client/modules/ShoppingListIngredient.fxml")
                 );
                 Parent row = loader.load();
-                ToBeAddedIngredientUICtrl ctrl = loader.getController();
+                ShoppingListIngredientUICtrl ctrl = loader.getController();
+                ctrl.setCheckboxEnabled(false);
 
                 int index = i;
-                String displayText = toBeAddedList.getIngredients().get(i).getText();
+                String displayText = toBeAddedList.get(i).getNameAmount();
 
                 ctrl.setText("• " + displayText);
                 ctrl.setIndex(index);
 
                 ctrl.setDeleteCheck(idx -> {
-                    toBeAddedList.removeIngredient(index);
+                    toBeAddedList.remove(index);
                     showRecipeIngredients();
                 });
 
                 ctrl.setEditInstruction(newText -> {
-                    toBeAddedList.updateIngredient(index, newText);
+                    toBeAddedList.get(index).setNameAmount(newText);
                     showRecipeIngredients();
                 });
 
@@ -105,7 +104,8 @@ public class ToBeAddedCtrl {
 
                 if (!name.isEmpty()) {
                     String ingredientText = amount.isEmpty() ? name : name + " (" + amount + ")";
-                    toBeAddedList.addIngredient(ingredientText);
+                    toBeAddedList.add(new ShoppingListIngredient(ingredientText));
+                    showRecipeIngredients();
                     showRecipeIngredients();
                 }
             });
@@ -155,9 +155,8 @@ public class ToBeAddedCtrl {
     @FXML
     private void addToShoppingList() {
         if (shoppingList == null) return;
-        for (ToBeAddedIngredient ing : toBeAddedList.getIngredients()) {
-            String text = ing.getText();
-            shoppingList.addIngredient(text.trim(), sourceRecipeName);
+        for (ShoppingListIngredient ing : toBeAddedList) {
+            shoppingList.addIngredient(ing.getNameAmount().trim(), sourceRecipeName);
         }
 
         toBeAddedList.clear();
