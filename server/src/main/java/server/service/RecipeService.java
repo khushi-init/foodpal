@@ -104,7 +104,7 @@ public class RecipeService {
         return recipeRepository.findById(id).map(existing -> {
             // Update basic fields
             boolean nameChange = false;
-            if (!existing.getName().equals(incoming.getName())){
+            if (existing.getName() != null && !existing.getName().equals(incoming.getName())){
                 existing.setName(incoming.getName());
                 nameChange = true;
             }
