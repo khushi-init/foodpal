@@ -1,10 +1,10 @@
 package server.service;
 
-import commons.Ingredient;
-import commons.NutritionalValue;
-import commons.Recipe;
-import commons.RecipeIngredient;
+import commons.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
@@ -16,16 +16,19 @@ import java.util.Optional;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
+    private final SimpMessagingTemplate messaging;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
     /**
      * The Recipe Service constructor method
      * @param recipeRepository The Recipe repository to meddle with
      * @param ingredientRepository the ingredient repository to meddle with
+     * @param messaging The messaging template needed for socket communication
      */
-    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, SimpMessagingTemplate messaging) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
+        this.messaging = messaging;
     }
 
     /**
@@ -98,7 +101,11 @@ public class RecipeService {
     public Optional<Recipe> updateRecipe(Long id, Recipe incoming) {
         return recipeRepository.findById(id).map(existing -> {
             // Update basic fields
-            existing.setName(incoming.getName());
+            boolean nameChange = false;
+            if (!existing.getName().equals(incoming.getName())){
+                existing.setName(incoming.getName());
+                nameChange = true;
+            }
             existing.setPreparationSteps(incoming.getPreparationSteps());
 
             if (incoming.getIngredients() != null) {
@@ -120,7 +127,16 @@ public class RecipeService {
                     }
                 }
             }
-            return recipeRepository.save(existing);
+            Recipe saved = recipeRepository.save(existing);
+            if (nameChange) {
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        messaging.convertAndSend("/updates/title", new TitleUpdate(id, incoming.getName()));
+                    }
+                });
+            }
+            return saved;
         });
     }
 

@@ -25,7 +25,7 @@ public class RecipeServiceTest {
     public void setUp() {
         mockRecipeRepo = mock(RecipeRepository.class);
         mockIngredientRepo = mock(IngredientRepository.class);
-        sut = new RecipeService(mockRecipeRepo, mockIngredientRepo);
+        sut = new RecipeService(mockRecipeRepo, mockIngredientRepo, null);
     }
 
     @Test
