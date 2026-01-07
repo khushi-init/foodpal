@@ -66,7 +66,7 @@ public class RecipesWindowCtrl {
 
     private final WebSocketManager socker;
 
-    private StompSession.Subscription titleSubscription;
+    private volatile StompSession.Subscription titleSubscription;
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -186,11 +186,32 @@ public class RecipesWindowCtrl {
 
         initializeSceneEvents();
         intializeSearchElements();
+    }
 
+    /**
+     * This is the greatest method I have ever written.
+     * A new thread is created and subscribes to the websocket for title and only title updates via WebSocketManager.
+     * Upon notification of any changes, the program will return to the UI thread via Platform.runLater() and will
+     * 1. Change the name of the recipe in the localstorage
+     * 2. Refresh the sidebar for the name update
+     * 3. If the recipe is currently selected, update the name in the title bar
+     * THIS MUST ALWAYS BE RUN WHEN RECIPEWINDOW COMES INTO VIEW
+     */
+    public void startup() {
+        if (titleSubscription != null) {
+            return;
+        }
         Thread subscribeThread = new Thread(() -> {
             titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
                 Platform.runLater(() -> {
-                    System.out.println("Title Changed!");
+                    System.out.println("Title of recipe " + update.id() + " Changed!");
+                    dataManipulator.changeNameLocal(update.id(), update.newTitle());
+//                    dataManipulator.refreshRecipes();
+                    // A "softer" refresh is required to keep selection
+                    sidebarRecipeNamesList.refresh();
+                    if (currentRecipe.getId().equals(update.id())) {
+                        recipeNameField.setText(update.newTitle());
+                    }
                 });
             });
             if (titleSubscription == null ) {
@@ -201,15 +222,17 @@ public class RecipesWindowCtrl {
         });
         subscribeThread.setDaemon(true);
         subscribeThread.start();
+        dataManipulator.refreshRecipes();
     }
 
     /**
-     * This should be run when RecipesWindowCtrl isn't into view
+     * This should be run when RecipesWindowCtrl goes out of view
      * It ensures the app isn't subscribed into any unnecessary updates
      */
     public void shutdown() {
         if (titleSubscription != null) {
             titleSubscription.unsubscribe();
+            titleSubscription = null;
             System.out.println("Unsubscribed from title updates.");
         }
     }

@@ -54,6 +54,7 @@ public class PrimaryCtrl {
      */
     public void showRecipesWindow() {
         primaryStage.setTitle("Cool recipe app"); // Subject to change
+        recipesWindowCtrl.startup();
         primaryStage.setScene(recipesWindowScene);
     }
 
@@ -70,6 +71,7 @@ public class PrimaryCtrl {
      */
     public void showIngredientsWindow() {
         primaryStage.setTitle("Ingredients List");
+        recipesWindowCtrl.shutdown();
         primaryStage.setScene(ingredientsWindowScene);
     }
 

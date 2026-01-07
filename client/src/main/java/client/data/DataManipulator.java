@@ -86,6 +86,20 @@ public class DataManipulator {
     }
 
     /**
+     * Updates the name of a recipe client side without sending the update to the server. I promise this is needed
+     * @param id - The id of the recipe
+     * @param newName - The new name
+     */
+    public void changeNameLocal(Long id, String newName) {
+        for (int i = 0; i < storage.getRecipes().size(); i++) {
+            if (Objects.equals(storage.getRecipes().get(i).getId(), id)) {
+                storage.getRecipes().get(i).setName(newName);
+                break;
+            }
+        }
+    }
+
+    /**
      * Replaces the recipe with the same id in the local list with the updates one
      * @param updated - The recipe to update
      */
