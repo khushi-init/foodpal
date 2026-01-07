@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import java.util.function.BiConsumer;
 
+import client.data.WebSocketManager;
 import com.google.inject.Inject;
 
 import client.Main;
@@ -23,11 +24,8 @@ import client.utils.RecipeInstructionUICtrl;
 import client.utils.SearchCtrl;
 import client.utils.ServerUtils;
 import client.utils.ToBeAddedCtrl;
-import commons.Ingredient;
-import commons.NutritionalValue;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.ShoppingList;
+import commons.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -53,6 +51,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import org.springframework.messaging.simp.stomp.StompSession;
 
 import java.io.*;
 import java.util.*;
@@ -65,6 +64,9 @@ public class RecipesWindowCtrl {
 
     private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
 
+    private final WebSocketManager socker;
+
+    private StompSession.Subscription titleSubscription;
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -124,6 +126,7 @@ public class RecipesWindowCtrl {
 
     /**
      * Injectable constructor for RecipesWindowCtrl
+     * @param socker WebSocketManager instance
      * @param c ErrorCtrl instance for error
      * @param p Primary Ctrl instance
      * @param storage - The local storage storing recipes and ingredients
@@ -131,7 +134,8 @@ public class RecipesWindowCtrl {
      * @param s - The injected search control
      */
     @Inject
-    public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
+    public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
+        this.socker = socker;
         this.errorCtrl = c;
         this.primaryCtrl = p;
         this.storage = storage;
@@ -182,6 +186,32 @@ public class RecipesWindowCtrl {
 
         initializeSceneEvents();
         intializeSearchElements();
+
+        Thread subscribeThread = new Thread(() -> {
+            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    System.out.println("Title Changed!");
+                });
+            });
+            if (titleSubscription == null ) {
+                Platform.runLater(() -> {
+                    errorCtrl.showGenericError("Could not subscribe to title changes, server might be down!");
+                });
+            }
+        });
+        subscribeThread.setDaemon(true);
+        subscribeThread.start();
+    }
+
+    /**
+     * This should be run when RecipesWindowCtrl isn't into view
+     * It ensures the app isn't subscribed into any unnecessary updates
+     */
+    public void shutdown() {
+        if (titleSubscription != null) {
+            titleSubscription.unsubscribe();
+            System.out.println("Unsubscribed from title updates.");
+        }
     }
 
     /**
@@ -219,9 +249,9 @@ public class RecipesWindowCtrl {
                     ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                             favFilter(
                                     searchCtrl.query(
-                                    searchField.getText(), storage.getRecipes()
-                            ),
-                            storage.getFavoriteIDs())
+                                            searchField.getText(), storage.getRecipes()
+                                    ),
+                                    storage.getFavoriteIDs())
                     );
                     sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                     searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
@@ -307,7 +337,7 @@ public class RecipesWindowCtrl {
             Label noRecipeSelectedLabel = new Label("You have not selected any recipe yet!\n" +
                     "Select one in the list on the right or create your very own.");
             noRecipeSelectedLabel.setStyle(
-                            "-fx-text-fill: #6b7280; " +
+                    "-fx-text-fill: #6b7280; " +
                             "-fx-font-size: 14; " +
                             "-fx-padding: 12;"
             );

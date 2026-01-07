@@ -3,6 +3,7 @@ package server.service;
 import commons.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import server.database.IngredientRepository;
@@ -98,6 +99,7 @@ public class RecipeService {
      * @param incoming The new data to apply.
      * @return An Optional containing the updated recipe, or empty if not found.
      */
+    @Transactional
     public Optional<Recipe> updateRecipe(Long id, Recipe incoming) {
         return recipeRepository.findById(id).map(existing -> {
             // Update basic fields

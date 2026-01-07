@@ -61,7 +61,9 @@ public class WebSocketManager {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        errorCtrl.showGenericError("Failed to subscribe: Connection timed out.");
+        Platform.runLater(() -> {
+            errorCtrl.showGenericError("Failed to subscribe: Connection timed out.");
+        });
         return null;
     }
 
