@@ -128,6 +128,7 @@ public class RecipeService {
                 }
             }
             Recipe saved = recipeRepository.save(existing);
+            // If the name change was successfully commited in the DB, transmit the change in the websocket.
             if (nameChange) {
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override

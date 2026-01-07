@@ -17,6 +17,7 @@ package client;
 
 import client.data.DataManipulator;
 import client.data.LocalStorage;
+import client.data.WebSocketManager;
 import client.scenes.*;
 import client.utils.ErrorCtrl;
 
@@ -38,5 +39,6 @@ public class MyModule implements Module {
         binder.bind(DataManipulator.class).in(Scopes.SINGLETON);
         binder.bind(ServerUtils.class).in(Scopes.SINGLETON);
         binder.bind(SearchWindowCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(WebSocketManager.class).in(Scopes.SINGLETON);
     }
 }
