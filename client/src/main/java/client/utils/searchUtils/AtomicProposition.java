@@ -30,6 +30,7 @@ public class AtomicProposition implements Proposition{
             String message = generateIllegalArgumentExceptionMessage();
             throw new IllegalArgumentException(message);
         }
+        if(recipe == null) throw new IllegalArgumentException("Cannot evaluate null recipe");
         ArrayList<Object> objectArgs = new ArrayList<>(arguments.stream().map(x -> (Object) x).toList());
         return this.function.evaluate.apply(recipe, objectArgs);
     }
@@ -98,5 +99,51 @@ public class AtomicProposition implements Proposition{
     public String toString(){
         return "{" + this.function.name + ", " + this.arguments.toString() + "}";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((arguments == null) ? 0 : arguments.hashCode());
+        result = prime * result + ((function == null) ? 0 : function.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AtomicProposition other = (AtomicProposition) obj;
+        if (arguments == null) {
+            if (other.arguments != null)
+                return false;
+        } else if (!arguments.equals(other.arguments))
+            return false;
+        if (function != other.function)
+            return false;
+        return true;
+    }
+
+    public ArrayList<String> getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(ArrayList<String> arguments) {
+        this.arguments = arguments;
+    }
+
+    public SearchFunctions getFunction() {
+        return function;
+    }
+
+    public void setFunction(SearchFunctions function) {
+        this.function = function;
+    }
+
+    
 
 }

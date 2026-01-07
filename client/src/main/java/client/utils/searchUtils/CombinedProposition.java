@@ -28,6 +28,7 @@ public class CombinedProposition implements Proposition{
             String message = generateIllegalArgumentExceptionMessage();
             throw new IllegalArgumentException(message);
         }
+        if(recipe == null) throw new IllegalArgumentException("Cannot evaluate null recipe");
         ArrayList<Object> objectArgs = new ArrayList<>(arguments.stream().map(x -> (Object) x).toList());
         return this.function.evaluate.apply(recipe, objectArgs);
     }
@@ -62,4 +63,34 @@ public class CombinedProposition implements Proposition{
             (this.function.amountOfArguments == 1 ? "" : "s") +  
             ".";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((function == null) ? 0 : function.hashCode());
+        result = prime * result + ((arguments == null) ? 0 : arguments.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CombinedProposition other = (CombinedProposition) obj;
+        if (function != other.function)
+            return false;
+        if (arguments == null) {
+            if (other.arguments != null)
+                return false;
+        } else if (!arguments.equals(other.arguments))
+            return false;
+        return true;
+    }
+
+    
 }
