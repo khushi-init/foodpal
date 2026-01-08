@@ -36,13 +36,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MultipleSelectionModel;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -65,7 +59,6 @@ public class RecipesWindowCtrl {
 
     private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
 
-
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
 
@@ -81,6 +74,9 @@ public class RecipesWindowCtrl {
 
     @FXML
     private Label cancelSearchButton;
+
+    @FXML
+    private TextField totalServingsField;
 
     @FXML
     private Button downloadButton;
@@ -177,11 +173,40 @@ public class RecipesWindowCtrl {
             }
         });
 
+        initializeTotalServings();
+
         // Deactivate recipe specific buttons, since nothing is selected at the start.
         updateRecipeSelectionState(false);
 
         initializeSceneEvents();
         intializeSearchElements();
+    }
+
+    private void initializeTotalServings() {
+        // Set text field of servings amount selector to integers
+        totalServingsField.setTextFormatter(new TextFormatter<> (e -> {
+            if (e.getControlNewText().matches("\\d*")) {
+                return e;
+            } else {
+                return null;
+            }
+        }));
+
+        // New listener for total servings TextField
+        // Saves the servings amount
+        totalServingsField.setOnKeyReleased(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                System.out.println("TEST 1");
+                totalServingsField.getParent().requestFocus();
+            }
+        });
+        // Focused Property Listener, saves when the TextField loses focus
+        totalServingsField.focusedProperty().addListener((obs,
+                                                       oldFocused, newFocused) -> {
+            if (oldFocused && !newFocused) {
+                System.out.println("TEST 2");
+            }
+        });
     }
 
     /**

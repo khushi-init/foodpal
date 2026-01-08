@@ -124,6 +124,11 @@
                                 </TextField>
 
                                 <Region HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="totalServingsField" prefHeight="26.0" prefWidth="91.0" promptText="Servings">
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin>
+                        </TextField>
 
                                 <Button fx:id="toCart" onAction="#toggleToBeAdded" style="-fx-cursor: hand; -fx-background-color: transparent;">
                                     <graphic>
