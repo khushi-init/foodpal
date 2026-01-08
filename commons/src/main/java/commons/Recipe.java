@@ -55,6 +55,19 @@ public class Recipe {
         this.preparationSteps = preparationSteps;
     }
 
+    /**
+     * constructor for a new recipe
+     * @param name  name of recipe
+     * @param ingredients list of ingredients
+     * @param preparationSteps list of preparation steps
+     */
+    public Recipe (String name, List<RecipeIngredient> ingredients,
+                   List<String> preparationSteps) {
+        this.name = name;
+        this.ingredients = ingredients;
+        this.preparationSteps = preparationSteps;
+    }
+
     // GETTERS AND SETTERS MANDATORY
     // for frameworks (JPA/Jackson) to read and write object data from/to the database and JSON
 
