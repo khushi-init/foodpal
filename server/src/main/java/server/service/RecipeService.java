@@ -1,11 +1,9 @@
 package server.service;
 
 import commons.*;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
@@ -17,19 +15,19 @@ import java.util.Optional;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
-    private final SimpMessagingTemplate messaging;
+    private final ApplicationEventPublisher eventPublisher;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
     /**
      * The Recipe Service constructor method
      * @param recipeRepository The Recipe repository to meddle with
      * @param ingredientRepository the ingredient repository to meddle with
-     * @param messaging The messaging template needed for socket communication
+     * @param eventPublisher The event publisher for sending updates to sockets
      */
-    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, SimpMessagingTemplate messaging) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ApplicationEventPublisher eventPublisher) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
-        this.messaging = messaging;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -132,12 +130,7 @@ public class RecipeService {
             Recipe saved = recipeRepository.save(existing);
             // If the name change was successfully commited in the DB, transmit the change in the websocket.
             if (nameChange) {
-                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                    @Override
-                    public void afterCommit() {
-                        messaging.convertAndSend("/updates/title", new TitleUpdate(id, incoming.getName()));
-                    }
-                });
+                eventPublisher.publishEvent(new TitleUpdate(id, incoming.getName()));
             }
             return saved;
         });
