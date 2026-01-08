@@ -65,6 +65,7 @@ public class ShoppingListIngredientUICtrl {
         if (deleteCheck != null) {
             deleteCheck.accept(index);
             ingredientBox.getChildren().clear();
+            System.out.println("Deleted ingredient \"" + ingredientText.getText().replace("• ", "") + "\"");
         }
     }
 
@@ -85,6 +86,7 @@ public class ShoppingListIngredientUICtrl {
             editInstruction.accept(newText);
 
             ingredientBox.getChildren().set(labelIndex, ingredientText);
+            System.out.println("Edited ingredient \"" +  ingredientText.getText().replace("• ", "")+ "\" to \"" + newText + "\"");
         });
 
         ingredientBox.getChildren().set(labelIndex, textField);
