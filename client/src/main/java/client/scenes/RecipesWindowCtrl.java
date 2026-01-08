@@ -368,7 +368,6 @@ public class RecipesWindowCtrl {
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
-
             Long ingredientId = (ri.getIngredient() != null) ? ri.getIngredient().getId() : null;
             long recipeId = currentRecipe.getId();
 
@@ -391,6 +390,7 @@ public class RecipesWindowCtrl {
                     ri.setQuantity(newQty);
                     ri.getIngredient().setName(newName);
                     openRecipe(currentRecipe);
+                    server.updateRecipe(currentRecipe);
                     System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" updated successfully");
                 });
             });
