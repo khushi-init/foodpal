@@ -19,6 +19,9 @@ public class Recipe {
     @Column(unique = true)
     private String name;
 
+    @Column
+    private int totalServings = 0;
+
     // One Recipe has MANY RecipeIngredients (the join entity)
     @OneToMany(
             mappedBy = "recipe",
@@ -43,8 +46,10 @@ public class Recipe {
      * @param ingredients list of ingredients
      * @param preparationSteps list of preparation steps
      */
-    public Recipe (String name, List<RecipeIngredient> ingredients, List<String> preparationSteps) {
+    public Recipe (String name, int totalServings, List<RecipeIngredient> ingredients,
+                   List<String> preparationSteps) {
         this.name = name;
+        this.totalServings = totalServings;
         this.ingredients = ingredients;
         this.preparationSteps = preparationSteps;
     }
@@ -66,6 +71,22 @@ public class Recipe {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getTotalServings() {
+        return totalServings;
+    }
+
+    public void setTotalServings(int totalServings) {
+        this.totalServings = totalServings;
+    }
+
+    /**
+     * Add an amount of servings to the total amount.
+     * @param servings - The servings to add to the total servings amount.
+     */
+    public void addServings(int servings) {
+        this.totalServings += servings;
     }
 
     public List<RecipeIngredient> getIngredients() {
@@ -127,6 +148,11 @@ public class Recipe {
         for (String step : preparationSteps) {
             output.append("* ").append(step).append("\n");
         }
+
+        output.append("\n")
+                .append("*This recipe has been served ")
+                .append(totalServings)
+                .append(" time(s)*\n");
 
         return output.toString();
     }
