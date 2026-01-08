@@ -386,8 +386,7 @@ public class RecipesWindowCtrl {
                 }
                 openRecipe(currentRecipe);
             });
-            // Editing ingredient Logic!
-            ingCtrl.setEditIngredient(() -> {
+            ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
                 handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
                     ri.setQuantity(newQty);
                     ri.getIngredient().setName(newName);
@@ -732,14 +731,19 @@ public class RecipesWindowCtrl {
      *
      * @param recipe The recipe to be selected
      */
-
     public void setSelectedRecipe(Recipe recipe){
         if(!storage.getRecipes().contains(recipe)) return; //if the recipe is not in the list, do nothing
         MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
         selectionModel.select(recipe);
     }
 
-
+    /**
+     * Displays a modal dialog for editing an ingredient and returns the entered values
+     *
+     * @param initialName ingredient name
+     * @param initialQuantity ingredient quantity
+     * @return Optional containing the name and quantity if confirmed, otherwise Optional is empty
+     */
     private Optional<Pair<String, String>> showIngredientPopUp(String initialName, String initialQuantity) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -775,6 +779,9 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * Opens a new window displaying the current shopping list.
+     */
     private void showShoppingList() {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -800,7 +807,10 @@ public class RecipesWindowCtrl {
         }
     }
 
-
+    /**
+     * Updates the current recipe
+     * @param updated the updated recipe, or null to leave unchanged
+     */
     private void applyUpdatedRecipe(Recipe updated) {
         if (updated == null) {
             return;

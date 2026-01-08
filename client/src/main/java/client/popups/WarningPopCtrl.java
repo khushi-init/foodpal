@@ -35,6 +35,9 @@ public class WarningPopCtrl {
         this.warningLabel.setText(warningText);
     }
 
+    /**
+     * Initializes the controller by disabling mouse and keyboard interactions on the warning label
+     */
     public void initialize() {
         // Block mouse selection
         warningLabel.addEventFilter(MouseEvent.ANY, e -> {
