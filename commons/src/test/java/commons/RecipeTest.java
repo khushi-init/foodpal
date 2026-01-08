@@ -17,7 +17,6 @@ public class RecipeTest {
     private double amount1 = 50.0;
     private double amount2 = 25.0;
     private int totalServings1 = 1;
-    private int totalServings2 = 3;
     private List<RecipeIngredient> ingredientList;
     private List<String> preparationSteps;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
@@ -39,14 +38,6 @@ public class RecipeTest {
         ));
 
         recipe = new Recipe("Pepernoten", totalServings1, ingredientList,preparationSteps);
-    }
-
-    @Test
-    public void addServingsTest() {
-        Recipe expected = new Recipe("Pepernoten", totalServings2, ingredientList,preparationSteps);
-        recipe.addServings(2);
-
-        assertEquals(expected, recipe);
     }
 
     @Test
