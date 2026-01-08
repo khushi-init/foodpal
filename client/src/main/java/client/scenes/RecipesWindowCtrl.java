@@ -36,13 +36,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MultipleSelectionModel;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -400,40 +394,42 @@ public class RecipesWindowCtrl {
                 });
             });
         }
-        //button for adding an ingredient --> pop up window will show
-        Button addButton = new Button("Add Ingredient");
+        //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
+        SplitMenuButton addButton = new SplitMenuButton("Add Ingredient");
         recipeView.getChildren().add(addButton);
-        addButton.setOnAction(e -> {
-            showIngredientPopUp("Name", "0.0").ifPresent(pair -> {
-                String name = pair.getKey();
-                String quantityText = pair.getValue(); //extraction name and quantity
-
-                double quantity;
-                try {  //converting string value of quantity to double
-                    quantity = Double.parseDouble(quantityText);
-                } catch (NumberFormatException err) {
-                    if (errorCtrl != null) {
-                        errorCtrl.showGenericError("Quantity must be a number.");
-                    }
-                    return;
-                }
-                recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                        new Ingredient(name, defaultNutritionalValue), quantity));
-            });
-            Recipe updated = server.updateRecipe(currentRecipe);
-            if (updated == null) {
-                errorCtrl.showServerUnavailableError();
-                return;
-            }
-            applyUpdatedRecipe(updated);
-            openRecipe(currentRecipe);
+        addButton.setOnAction((a) -> {
+            Optional<Ingredient> parsed = primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress();
+            parsed.ifPresent(ingredient -> recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                    ingredient, 0.0)));
+            updateRefresh();
         });
+        addButton.setOnShowing((a) -> storage.getIngredients().forEach(ingredient -> {
+            MenuItem menu = new MenuItem(ingredient.getName());
+            menu.setId(ingredient.getId().toString());
+            menu.setOnAction((actionEvent) -> {
+                recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                        ingredient, 0.0));
+                updateRefresh();
+            });
+            addButton.getItems().add(menu);
+        }));
         recipeView.requestLayout();
     }
 
+    public void updateRefresh() {
+        Recipe updated = server.updateRecipe(currentRecipe);
+        if (updated == null) {
+            errorCtrl.showServerUnavailableError();
+            return;
+        }
+        applyUpdatedRecipe(updated);
+        openRecipe(currentRecipe);
+
+    }
+
+
     /**
      * Handling input window for ingredient editing
-     *
      * @param initName the initial name value to be displayed
      * @param initQty  the initial quantity value to be displayed
      * @param handler  the consumer that handles to call back to the value's usage

@@ -191,10 +191,11 @@ public class IngredientsWindowCtrl {
      * Runs when the green "plus" button is pressed. Prompts user to create an ingredient and adds it to the server.
      * If added to the server successfully, it is also added to the client-side local list.
      */
-    public void handlePlusButtonPress() {
+    public Optional<Ingredient> handlePlusButtonPress() {
         Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:", "", "", "", "");
-        if (parsed.isEmpty()) return;
+        if (parsed.isEmpty()) return Optional.empty();
         dataManipulator.addIngredient(parsed.get());
+        return parsed;
     }
 
     /**
