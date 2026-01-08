@@ -94,6 +94,7 @@ public class RecipeService {
         return recipeRepository.findById(id).map(existing -> {
             // Update basic fields
             existing.setName(incoming.getName());
+            existing.setTotalServings(incoming.getTotalServings());
             existing.setPreparationSteps(incoming.getPreparationSteps());
 
             if (incoming.getIngredients() != null) {
