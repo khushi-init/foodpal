@@ -135,6 +135,15 @@ public class RecipeService {
      * @param incoming the recipe containing the wanted set of ingredients
      */
     private void removeDeletedIngredients(Recipe existing, Recipe incoming) {
+        if (existing == null) {
+            return;
+        }
+
+        if (incoming == null || incoming.getIngredients() == null) {
+            // If incoming has no ingredients--> remove all existing ones
+            existing.getIngredients().clear();
+            return;
+        }
         existing.getIngredients().removeIf(existingRi -> {
             String existingName = getIngredientName(existingRi);
             if (existingName == null) {
@@ -152,7 +161,7 @@ public class RecipeService {
      * @param recipeIngredient the recipe ingredient from which to extract the name
      * @return the trimmed ingredient name, or null if unavailable
      */
-    private String getIngredientName(RecipeIngredient recipeIngredient) {
+    String getIngredientName(RecipeIngredient recipeIngredient) {
         if (recipeIngredient == null || recipeIngredient.getIngredient() == null) {
             return null;
         }
