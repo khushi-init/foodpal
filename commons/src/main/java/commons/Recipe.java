@@ -20,7 +20,7 @@ public class Recipe {
     private String name;
 
     @Column
-    private int totalServings = 0;
+    private Integer totalServings = 0;
 
     // One Recipe has MANY RecipeIngredients (the join entity)
     @OneToMany(
@@ -43,6 +43,7 @@ public class Recipe {
     /**
      * constructor for a new recipe
      * @param name  name of recipe
+     * @param totalServings the amount of total servings
      * @param ingredients list of ingredients
      * @param preparationSteps list of preparation steps
      */
@@ -73,20 +74,25 @@ public class Recipe {
         this.name = name;
     }
 
-    public int getTotalServings() {
+    public Integer getTotalServings() {
         return totalServings;
     }
 
-    public void setTotalServings(int totalServings) {
-        this.totalServings = totalServings;
+    public void setTotalServings(Integer totalServings) {
+        if (totalServings != null && totalServings >= 0) {
+            this.totalServings = totalServings;
+        }
     }
 
     /**
      * Add an amount of servings to the total amount.
+     * The servings to add must be equal or greater than 0.
      * @param servings - The servings to add to the total servings amount.
      */
     public void addServings(int servings) {
-        this.totalServings += servings;
+        if (servings >= 0) {
+            this.totalServings += servings;
+        }
     }
 
     public List<RecipeIngredient> getIngredients() {
