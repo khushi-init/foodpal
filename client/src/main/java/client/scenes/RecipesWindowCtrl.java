@@ -79,6 +79,9 @@ public class RecipesWindowCtrl {
     private TextField totalServingsField;
 
     @FXML
+    private Label totalServingsLabel;
+
+    @FXML
     private Button downloadButton;
 
     @FXML
@@ -196,17 +199,30 @@ public class RecipesWindowCtrl {
         // Saves the servings amount
         totalServingsField.setOnKeyReleased(e -> {
             if (e.getCode() == KeyCode.ENTER) {
-                System.out.println("TEST 1");
+                addRecipeServings();
                 totalServingsField.getParent().requestFocus();
+                System.out.println("TEST: " + currentRecipe.getTotalServings());
             }
         });
         // Focused Property Listener, saves when the TextField loses focus
         totalServingsField.focusedProperty().addListener((obs,
                                                        oldFocused, newFocused) -> {
             if (oldFocused && !newFocused) {
-                System.out.println("TEST 2");
+                addRecipeServings();
+                System.out.println("TEST: " + currentRecipe.getTotalServings());
             }
         });
+    }
+
+    /**
+     * Sets the total servings label to the correct amount and resets the field.
+     */
+    private void updateTotalServingsUI() {
+        totalServingsLabel.setText(
+                "Total servings: " + currentRecipe.getTotalServings()
+        );
+
+        totalServingsField.setText("");
     }
 
     /**
@@ -313,6 +329,12 @@ public class RecipesWindowCtrl {
      */
     private void updateRecipeSelectionState(boolean active) {
 
+        totalServingsField.setDisable(!active);
+        totalServingsField.setVisible(active);
+
+        totalServingsLabel.setDisable(!active);
+        totalServingsLabel.setVisible(active);
+
         downloadButton.setDisable(!active);
         downloadButton.setVisible(active);
 
@@ -370,6 +392,8 @@ public class RecipesWindowCtrl {
 
         // Activate recipe specific buttons
         updateRecipeSelectionState(true);
+
+        updateTotalServingsUI();
 
     }
 
@@ -618,9 +642,10 @@ public class RecipesWindowCtrl {
      * @return a new Recipe that is clone of the original
      */
     private Recipe cloneRecipe(Recipe original, String newName) {
+        int totalServings = original.getTotalServings();
         List<String> stepsCopy = new ArrayList<>(original.getPreparationSteps());
 
-        Recipe clone = new Recipe(newName, null, stepsCopy);
+        Recipe clone = new Recipe(newName, totalServings, null, stepsCopy);
 
         List<RecipeIngredient> ingredientsCopy = new ArrayList<>();
         for (RecipeIngredient ri : original.getIngredients()) {
@@ -646,6 +671,7 @@ public class RecipesWindowCtrl {
         cancelSearch();
         Recipe newRecipe = new Recipe(
                 "New Recipe",
+                0,
                 new ArrayList<>(),
                 new ArrayList<>()
         );
@@ -680,6 +706,40 @@ public class RecipesWindowCtrl {
             else recipeNameField.setText(currentRecipe.getName());
         }
 
+    }
+
+    /**
+     * Add the servings entered to the total servings of a recipe.
+     */
+    public void addRecipeServings() {
+        if (currentRecipe == null) {
+            return;
+        }
+
+        String text = totalServingsField.getText();
+        if (text.isEmpty()) {
+            return;
+        }
+
+        int servings = Integer.parseInt(text);
+
+        if (servings < 0) {
+            errorCtrl.showGenericError("The amount of servings must be greater than or equal to 0!");
+            return;
+        }
+
+        currentRecipe.addServings(servings);
+
+        System.out.println("Local totalServings: " + currentRecipe.getTotalServings());
+        Recipe updatedRecipe = server.updateRecipe(currentRecipe);
+        System.out.println("Server returned totalServings: " + updatedRecipe.getTotalServings());
+        if (updatedRecipe != null) {
+            applyUpdatedRecipe(updatedRecipe);
+
+            openRecipe(currentRecipe);
+
+            totalServingsField.clear();
+        }
     }
 
     /**

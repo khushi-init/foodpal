@@ -124,10 +124,13 @@
                                 </TextField>
 
                                 <Region HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="totalServingsField" prefHeight="26.0" prefWidth="91.0" promptText="Servings">
+                        <TextField fx:id="totalServingsField" prefHeight="26.0" prefWidth="98.0" promptText="Add servings">
                            <HBox.margin>
                               <Insets top="5.0" />
                            </HBox.margin>
+                           <font>
+                              <Font size="9.0" />
+                           </font>
                         </TextField>
 
                                 <Button fx:id="toCart" onAction="#toggleToBeAdded" style="-fx-cursor: hand; -fx-background-color: transparent;">
@@ -192,5 +195,8 @@
 
         </SplitPane>
     </center>
+   <bottom>
+      <Label fx:id="totalServingsLabel" text="Total servings: 0" BorderPane.alignment="CENTER" />
+   </bottom>
 
 </BorderPane>
