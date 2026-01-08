@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import client.Main;
+import client.utils.ErrorCtrl;
 import client.utils.ShoppingListIngredientPopUpCtrl;
 import client.utils.ShoppingListIngredientUICtrl;
 import commons.ShoppingList;
@@ -29,10 +30,16 @@ import javafx.util.Pair;
 
 public class ShoppingListCtrl {
 
+    private ErrorCtrl errorCtrl;
+
     @FXML
     private VBox shoppingListView;
 
     private ShoppingList shoppingList;
+
+    public void setErrorCtrl(ErrorCtrl errorCtrl) {
+        this.errorCtrl = errorCtrl;
+    }
 
     /**
      * Show the shopping list.
@@ -186,6 +193,10 @@ public class ShoppingListCtrl {
         
         try {
             Files.write(filePath, file);
+            errorCtrl.displayInfo("The download has been successful! " +
+                            "You can find it at " + filePath,
+                    "Close",
+                    "SUCCESS");
         }
         catch (IOException ex) {
             System.out.print("Invalid Path");
