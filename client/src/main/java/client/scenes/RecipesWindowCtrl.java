@@ -201,7 +201,6 @@ public class RecipesWindowCtrl {
             if (e.getCode() == KeyCode.ENTER) {
                 addRecipeServings();
                 totalServingsField.getParent().requestFocus();
-                System.out.println("TEST: " + currentRecipe.getTotalServings());
             }
         });
         // Focused Property Listener, saves when the TextField loses focus
@@ -209,7 +208,6 @@ public class RecipesWindowCtrl {
                                                        oldFocused, newFocused) -> {
             if (oldFocused && !newFocused) {
                 addRecipeServings();
-                System.out.println("TEST: " + currentRecipe.getTotalServings());
             }
         });
     }
@@ -728,11 +726,9 @@ public class RecipesWindowCtrl {
             return;
         }
 
-        currentRecipe.addServings(servings);
+        currentRecipe.setTotalServings(servings);
 
-        System.out.println("Local totalServings: " + currentRecipe.getTotalServings());
         Recipe updatedRecipe = server.updateRecipe(currentRecipe);
-        System.out.println("Server returned totalServings: " + updatedRecipe.getTotalServings());
         if (updatedRecipe != null) {
             applyUpdatedRecipe(updatedRecipe);
 

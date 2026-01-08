@@ -97,17 +97,6 @@ public class Recipe {
         }
     }
 
-    /**
-     * Add an amount of servings to the total amount.
-     * The servings to add must be equal or greater than 0.
-     * @param servings - The servings to add to the total servings amount.
-     */
-    public void addServings(int servings) {
-        if (servings >= 0) {
-            this.totalServings += servings;
-        }
-    }
-
     public List<RecipeIngredient> getIngredients() {
         return ingredients;
     }

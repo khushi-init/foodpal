@@ -124,7 +124,7 @@
                                 </TextField>
 
                                 <Region HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="totalServingsField" prefHeight="26.0" prefWidth="98.0" promptText="Add servings">
+                        <TextField fx:id="totalServingsField" prefHeight="26.0" prefWidth="98.0" promptText="Set servings">
                            <HBox.margin>
                               <Insets top="5.0" />
                            </HBox.margin>
