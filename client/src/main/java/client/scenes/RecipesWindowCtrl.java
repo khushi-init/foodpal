@@ -416,6 +416,18 @@ public class RecipesWindowCtrl {
         recipeView.requestLayout();
     }
 
+    public void updateRefresh() {
+        Recipe updated = server.updateRecipe(currentRecipe);
+        if (updated == null) {
+            errorCtrl.showServerUnavailableError();
+            return;
+        }
+        applyUpdatedRecipe(updated);
+        openRecipe(currentRecipe);
+
+    }
+
+
     /**
      * Updates the current recipe and refreshes it to reflect changes made
      */
