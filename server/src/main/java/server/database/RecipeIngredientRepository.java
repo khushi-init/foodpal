@@ -10,6 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface RecipeIngredientRepository extends JpaRepository<RecipeIngredient, RecipeIngredientKey> {
 
+    /**
+     * Deletes all RecipeIngredient associations that reference the given ingredient
+     * @param ingredientId The ID of the ingredient whose associations should be deleted
+     */
     @Modifying
     @Transactional
     // This custom HQL query deletes all links associated with the given ingredient ID
