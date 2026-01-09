@@ -64,7 +64,7 @@ public class SearchWindowCtrl {
                 + " like the max. amount of steps or an ingredient that must be present."
                 + " The HAS function checks if the recipe contains the given string in"
                 + " any of its ingredients, steps or its name."
-                + "\nCombined functions let you combine conditions. For example,"
+                + "\n\nCombined functions let you combine conditions. For example,"
                 + " the HAS function is equivalent to AND(HASING, HASSTEP, HASNAME)."
                 + " Combined functions can be nested."
         );
