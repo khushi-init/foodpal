@@ -53,7 +53,7 @@ public class SearchCtrlTest {
         assertEquals(recipes, searchCtrl.query("*/MAXSTEPS(1000)", recipes));
         assertEquals(recipes, searchCtrl.query("testname2", recipes));
         assertEquals(List.of(), searchCtrl.query("*/MINSTEPS(1000)", recipes));
-        assertEquals(List.of(), searchCtrl.query("asdfdfsjksdf", recipes));
+        assertEquals(List.of(), searchCtrl.query("asdfdfsksdf", recipes));
     }
 
     @Test
