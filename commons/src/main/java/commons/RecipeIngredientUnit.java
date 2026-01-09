@@ -23,6 +23,18 @@ public class RecipeIngredientUnit {
     }
 
     /**
+     * Custom constructor for manual initialization
+     * @param type type of unit
+     * @param formalUnitName name of formal unit
+     * @param informalUnitName name of informal unit
+     */
+    public RecipeIngredientUnit(UnitType type, String formalUnitName, String informalUnitName) {
+        this.type = type;
+        this.formalUnitName = formalUnitName;
+        this.informalUnitName = informalUnitName;
+    }
+
+    /**
      * Converts a concrete Unit object (formal or informal) into a
      * persistable RecipeIngredientUnit storage wrapper.
      * @param unit unit to be converted
@@ -32,7 +44,7 @@ public class RecipeIngredientUnit {
         RecipeIngredientUnit recipeIngredientUnit = new RecipeIngredientUnit();
         if(unit instanceof FormalUnit formalUnit) {
             recipeIngredientUnit.type = UnitType.FORMAL;
-            recipeIngredientUnit.formalUnitName = formalUnit.getDisplayName();
+            recipeIngredientUnit.formalUnitName = formalUnit.name();
         } else if (unit instanceof InformalUnit informalunit) {
             recipeIngredientUnit.type = UnitType.INFORMAL;
             recipeIngredientUnit.informalUnitName = informalunit.getDisplayName();

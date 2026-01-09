@@ -3,6 +3,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 
 import client.Main;
+import client.popups.InfoPopCtrl;
 import client.popups.WarningPopCtrl;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -102,5 +103,30 @@ public class ErrorCtrl {
         popUpStage.showAndWait();
 
         return popUpCtrl.isAnyway();
+    }
+
+    /**
+     * Display an info message.
+     * @param infoText        - The text of info.
+     * @param closeButtonText - The text of the button.
+     * @param title           - The text of the title.
+     */
+    public void displayInfo(String infoText, String closeButtonText, String title) {
+        Pair<InfoPopCtrl, Parent> infoPopUpPair = Main.FXML.load
+                (InfoPopCtrl.class, "client", "modules", "Info.fxml");
+
+        Parent root = infoPopUpPair.getValue();
+        InfoPopCtrl popUpCtrl = infoPopUpPair.getKey();
+
+        Stage popUpStage = new Stage();
+        popUpStage.setTitle(title);
+        popUpStage.setScene(new Scene(root));
+
+        popUpCtrl.setStage(popUpStage);
+        popUpCtrl.setInfoLabelText(infoText);
+        popUpCtrl.setCloseButtonText(closeButtonText);
+        popUpCtrl.setTitleText(title);
+
+        popUpStage.showAndWait();
     }
 }

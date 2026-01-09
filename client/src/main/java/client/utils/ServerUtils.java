@@ -193,6 +193,10 @@ public class ServerUtils {
                 // Write the file to the path
                 Files.write(filePath, response.readEntity(byte[].class));
                 System.out.println("Downloaded recipe " + recipeId + " to " + filePath);
+                errorCtrl.displayInfo("The download has been successful! " +
+                                "You can find it at " + filePath,
+                        "Close",
+                        "SUCCESS");
             }
 
         } catch (Exception e) {
@@ -232,7 +236,7 @@ public class ServerUtils {
     /**
      * Sends a DELETE request to the server to delete the ingredient of the provided id.
      * This will trigger the server-side cascading deletion to remove it from all recipes.
-     * * @param ingredientId - The id of the ingredient to destroy
+     * @param ingredientId - The id of the ingredient to destroy
      * @return - A boolean indicating whether the deletion was successful or not
      */
     public boolean deleteIngredient(Long ingredientId) {

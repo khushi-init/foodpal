@@ -53,6 +53,7 @@ public class ToBeAddedCtrl {
         }
 
         showRecipeIngredients();
+        System.out.println("Loaded recipe \"" + sourceRecipeName + "\" ingredients");
     }
 
 
@@ -106,7 +107,7 @@ public class ToBeAddedCtrl {
                     String ingredientText = amount.isEmpty() ? name : name + " (" + amount + ")";
                     toBeAddedList.add(new ShoppingListIngredient(ingredientText));
                     showRecipeIngredients();
-                    showRecipeIngredients();
+                    System.out.println("Ingredient \"" + name + "\" added");
                 }
             });
         });
@@ -163,6 +164,7 @@ public class ToBeAddedCtrl {
         close();
         if (openShoppingList != null) {
             openShoppingList.run();
+            System.out.println("Added to shopping list");
         }
     }
 
