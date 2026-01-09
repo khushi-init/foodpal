@@ -419,7 +419,9 @@ public class RecipesWindowCtrl {
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity().toString());
+            String unitName = (ri.getUnit() != null) ? ri.getUnit().toUnit().getDisplayName() : "";
+            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity().toString() + " " + unitName);
+
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
@@ -440,36 +442,34 @@ public class RecipesWindowCtrl {
                 }
                 openRecipe(currentRecipe);
             });
-            ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
-                handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
-                    ri.setQuantity(newQty);
-                    ri.getIngredient().setName(newName);
-                    openRecipe(currentRecipe);
-                    server.updateRecipe(currentRecipe);
-                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" updated successfully");
-                });
+            ingCtrl.setEditIngredient(() -> {
+                // Remove the old one first so we don't have duplicates
+                currentRecipe.getIngredients().remove(ri);
+                openQuantityDialog(ri.getIngredient());
             });
         }
         //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
         SplitMenuButton addButton = new SplitMenuButton("Add Ingredient");
         recipeView.getChildren().add(addButton);
+
         addButton.setOnAction((a) -> {
             Optional<Ingredient> parsed = primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress();
-            parsed.ifPresent(ingredient -> recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                    ingredient, 0.0, defaultUnit)));
-            updateRefresh();
+            // Use the dialog instead of hardcoding 0.0
+            parsed.ifPresent(this::openQuantityDialog);
         });
-        addButton.setOnShowing((a) -> storage.getIngredients().forEach(ingredient -> {
-            MenuItem menu = new MenuItem(ingredient.getName());
-            menu.setId(ingredient.getId().toString());
-            menu.setOnAction((actionEvent) -> {
-                recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                        ingredient, 0.0,  defaultUnit));
-                System.out.println("Added a new ingredient \"" + ingredient.getName() + "\" to \"" + currentRecipe.getName() + "\"");
-                updateRefresh();
+
+        addButton.setOnShowing((a) -> {
+            addButton.getItems().clear(); // Clear to avoid duplicate menu items
+            storage.getIngredients().forEach(ingredient -> {
+                MenuItem menu = new MenuItem(ingredient.getName());
+                menu.setId(ingredient.getId().toString());
+                menu.setOnAction((actionEvent) -> {
+                    // Open our new dialog for the existing ingredient
+                    openQuantityDialog(ingredient);
+                });
+                addButton.getItems().add(menu);
             });
-            addButton.getItems().add(menu);
-        }));
+        });
         recipeView.requestLayout();
     }
 
