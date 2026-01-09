@@ -19,13 +19,6 @@ public class InfoPopCtrl {
 
     private Stage stage;
 
-    private boolean close = false;
-
-
-    public boolean isClose () {
-        return close;
-    }
-
     public void setStage(Stage stage) {
         this.stage = stage;
     }
@@ -47,7 +40,6 @@ public class InfoPopCtrl {
      */
     @FXML
     public void handleClose() {
-        close = false;
         if (stage != null) {
             stage.close();
         }
