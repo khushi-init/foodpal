@@ -970,4 +970,44 @@ public class RecipesWindowCtrl {
         else return initList;
     }
 
+    private void openQuantityDialog(Ingredient ingredient) {
+        try {
+            // 1. Setup the Loader
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/modules/QuantityUnitPopUp.fxml"));
+            Parent root = loader.load();
+
+            // 2. Setup the Window (Stage)
+            Stage popUpStage = new Stage();
+            popUpStage.initModality(Modality.APPLICATION_MODAL); // Blocks interaction with main window
+            popUpStage.initOwner(recipeView.getScene().getWindow()); // Links to main window
+            popUpStage.setTitle("Add Quantity for " + ingredient.getName());
+
+            // 3. Setup the Controller
+            QuantityUnitSelectionCtrl controller = loader.getController();
+            controller.setStage(popUpStage);
+
+            // 4. Show and Wait
+            popUpStage.setScene(new Scene(root));
+            popUpStage.showAndWait(); // Execution stops here until window is closed
+
+            // 5. Handle the Result
+            if (controller.isOkClicked()) {
+                RecipeIngredient newEntry = new RecipeIngredient(
+                        this.currentRecipe,  // The current recipe you are editing
+                        ingredient,           // The ingredient from your list/search
+                        controller.getQuantity(),
+                        controller.getUnit()
+                );
+
+                // Add to your recipe's internal list
+                currentRecipe.getIngredients().add(newEntry);
+
+                // Refresh the UI to show the new item
+                updateRefresh();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
