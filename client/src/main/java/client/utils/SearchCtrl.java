@@ -162,7 +162,7 @@ public class SearchCtrl {
 
     /**
      * Applies a complex query on a List of recipes
-     * @param query The complex query as a Proposition
+     * @param prop The complex query as a Proposition
      * @param recipes The recipes to search through
      * @return List of recipes satisfying the search conditions
      */

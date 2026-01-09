@@ -92,5 +92,21 @@ public class CombinedProposition implements Proposition{
         return true;
     }
 
+    public SearchFunctions getFunction() {
+        return function;
+    }
+
+    public void setFunction(SearchFunctions function) {
+        this.function = function;
+    }
+
+    public ArrayList<Proposition> getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(ArrayList<Proposition> arguments) {
+        this.arguments = arguments;
+    }
+
     
 }
