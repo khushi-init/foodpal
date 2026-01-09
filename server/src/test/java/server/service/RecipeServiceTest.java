@@ -160,4 +160,17 @@ public class RecipeServiceTest {
         assertNull(result);
     }
 
+    @Test
+    public void updateRecipeNotFoundTest() {
+        //when recipe does not exist
+        when(mockRecipeRepo.findById(id)).thenReturn(Optional.empty());
+
+        Optional<Recipe> result = sut.updateRecipe(id, new Recipe("Updated", new ArrayList<>(), new ArrayList<>())
+        );
+
+        assertFalse(result.isPresent());
+        verify(mockRecipeRepo, never()).save(any(Recipe.class));
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
 }

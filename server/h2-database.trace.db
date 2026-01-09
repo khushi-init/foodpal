@@ -1,0 +1,3 @@
+2026-01-09 15:41:25.049459+01:00 jdbc[103]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "PREPARATION_STEPS CHARACTER VARYING(255)": "'suuuuuper looooong instructsuuuuuper looooong instructionsuuuuuper looooong ins... (339)"; SQL statement:
+insert into recipe_preparation_steps (recipe_id,preparation_steps) values (?,?) [22001-232]
