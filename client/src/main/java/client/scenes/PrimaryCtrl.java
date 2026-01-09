@@ -17,6 +17,7 @@ public class PrimaryCtrl {
     private Scene searchWindow;
 
     private RecipesWindowCtrl recipesWindowCtrl;
+    private IngredientsWindowCtrl ingredientsWindowCtrl;
 
     /**
      * Initializes the primary control scene
@@ -37,6 +38,7 @@ public class PrimaryCtrl {
         this.searchWindow = new Scene(searchWindow.getValue());
 
         this.recipesWindowCtrl = recipesWindow.getKey();
+        this.ingredientsWindowCtrl = ingredientsWindow.getKey();
 
         recipesWindowScene.getStylesheets().add(
                 getClass().getResource("/styles/styles.css").toExternalForm()
@@ -54,6 +56,7 @@ public class PrimaryCtrl {
      */
     public void showRecipesWindow() {
         primaryStage.setTitle("Cool recipe app"); // Subject to change
+        recipesWindowCtrl.startup();
         primaryStage.setScene(recipesWindowScene);
     }
 
@@ -70,6 +73,7 @@ public class PrimaryCtrl {
      */
     public void showIngredientsWindow() {
         primaryStage.setTitle("Ingredients List");
+        recipesWindowCtrl.shutdown();
         primaryStage.setScene(ingredientsWindowScene);
     }
 
@@ -91,4 +95,7 @@ public class PrimaryCtrl {
         recipesWindowCtrl.applyExternalSearch(prop);
     }
 
+    public IngredientsWindowCtrl getIngredientsWindowCtrl() {
+        return ingredientsWindowCtrl;
+    }
 }

@@ -1,12 +1,10 @@
 package server.api;
 
 import commons.Ingredient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import server.database.IngredientRepository;
-import server.database.RecipeIngredientRepository;
+import server.service.IngredientService;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,19 +12,14 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/ingredients")
 public class IngredientController {
-    private final IngredientRepository ingredientRepository;
-    private final RecipeIngredientRepository recipeIngredientRepository;
+    private final IngredientService ingredientService;
 
     /**
-     * Creates controller for ingredient actions.
-     * @param ingredientRepository repository to access ingredient data
-     * @param recipeIngredientRepository new repository to access recipe ingredient links
+     * Constructor method
+     * @param ingredientService Ingredient service to handle repositories.
      */
-    @Autowired
-    public IngredientController(IngredientRepository ingredientRepository,
-                                RecipeIngredientRepository recipeIngredientRepository) {
-        this.ingredientRepository = ingredientRepository;
-        this.recipeIngredientRepository = recipeIngredientRepository;
+    public IngredientController(IngredientService ingredientService) {
+        this.ingredientService = ingredientService;
     }
 
     // GET ENDPOINTS
@@ -36,8 +29,8 @@ public class IngredientController {
      * @return list of all ingredients
      */
     @GetMapping
-    public List<Ingredient> getAllIngredients() {
-        return ingredientRepository.findAll();
+    public List<Ingredient> findAllIngredients() {
+        return ingredientService.getAllIngredients();
     }
 
     /**
@@ -47,10 +40,11 @@ public class IngredientController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Ingredient> getIngredientById(@PathVariable Long id) {
-        Optional<Ingredient> ingredient = ingredientRepository.findById(id);
+        Optional<Ingredient> ingredient = ingredientService.getIngredientByID(id);
 
         // if the ingredient is found return 200 OK or else return 404 not found
-        return ingredient.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ingredient.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     /**
@@ -60,7 +54,7 @@ public class IngredientController {
      */
     @GetMapping("/recipecount/{id}")
     public ResponseEntity<Integer> getIngredientUsageNum(@PathVariable Long id) {
-        int uses = recipeIngredientRepository.getRecipeUsageNumber(id);
+        int uses = ingredientService.getRecipeUsageNumber(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(uses);
     }
@@ -73,16 +67,13 @@ public class IngredientController {
      */
     @PostMapping
     public ResponseEntity<Ingredient> createIngredient(@RequestBody Ingredient ingredient) {
-
-        if(ingredient.getName() == null || ingredient.getName().trim().isEmpty()){
+        if (ingredient.getName() == null || ingredient.getName().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
-        // saving the new ingredient
-        Ingredient saved =  ingredientRepository.save(ingredient);
-
-        // returning the HTTP code for created
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        Optional<Ingredient> saved = ingredientService.createIngredient(ingredient);
+        return saved.map(i -> ResponseEntity.status(HttpStatus.CREATED).body(i))
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     // PUT ENDPOINT
@@ -93,14 +84,9 @@ public class IngredientController {
      */
     @PutMapping
     public ResponseEntity<Ingredient> updateIngredient(@RequestBody Ingredient ingredient) {
-        if (!ingredientRepository.existsById(ingredient.getId())) {
-            return ResponseEntity.notFound().build();
-        }
-        if(ingredient.getName() == null || ingredient.getName().trim().isEmpty()){
-            return ResponseEntity.badRequest().build();
-        }
-        Ingredient updated = ingredientRepository.save(ingredient);
-        return ResponseEntity.ok(updated);
+        Optional<Ingredient> updated = ingredientService.updateIngredient(ingredient);
+        return updated.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // DELETE ENDPOINT
@@ -112,16 +98,10 @@ public class IngredientController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteIngredient(@PathVariable Long id) {
-        if (!ingredientRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+        boolean deleted = ingredientService.deleteIngredient(id);
+        if(deleted) {
+            return ResponseEntity.noContent().build();
         }
-
-        //Manually delete all RecipeIngredient link entities associated with this ingredient
-        recipeIngredientRepository.deleteByIngredientId(id);
-
-        //Now the constraint is satisfied, delete the parent ingredient
-        ingredientRepository.deleteById(id);
-
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.notFound().build();
     }
 }

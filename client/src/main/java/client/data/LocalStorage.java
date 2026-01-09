@@ -17,6 +17,10 @@ public class LocalStorage {
 
     private Recipe currentRecipe;
 
+    /**
+     *Creates a LocalStorage instance initialized with data from the server
+     * @param server the server utility used to load recipes and ingredients
+     */
     @Inject
     public LocalStorage(ServerUtils server) {
         if (server != null) {

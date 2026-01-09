@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import java.util.function.BiConsumer;
 
+import client.data.WebSocketManager;
 import com.google.inject.Inject;
 
 import client.Main;
@@ -23,11 +24,8 @@ import client.utils.RecipeInstructionUICtrl;
 import client.utils.SearchCtrl;
 import client.utils.ServerUtils;
 import client.utils.ToBeAddedCtrl;
-import commons.Ingredient;
-import commons.NutritionalValue;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.ShoppingList;
+import commons.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -47,6 +45,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import org.springframework.messaging.simp.stomp.StompSession;
 
 import java.io.*;
 import java.util.*;
@@ -58,6 +57,10 @@ public class RecipesWindowCtrl {
     private final Insets lineMargin = new Insets(0, 15, 0, 15);
 
     private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
+
+    private final WebSocketManager socker;
+
+    private volatile StompSession.Subscription titleSubscription;
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -123,6 +126,7 @@ public class RecipesWindowCtrl {
 
     /**
      * Injectable constructor for RecipesWindowCtrl
+     * @param socker WebSocketManager instance
      * @param c ErrorCtrl instance for error
      * @param p Primary Ctrl instance
      * @param storage - The local storage storing recipes and ingredients
@@ -130,7 +134,8 @@ public class RecipesWindowCtrl {
      * @param s - The injected search control
      */
     @Inject
-    public RecipesWindowCtrl(ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
+    public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
+        this.socker = socker;
         this.errorCtrl = c;
         this.primaryCtrl = p;
         this.storage = storage;
@@ -185,6 +190,9 @@ public class RecipesWindowCtrl {
         intializeSearchElements();
     }
 
+    /**
+     * Initializes the total servings field to be of type integer and adds listeners.
+     */
     private void initializeTotalServings() {
         // Set text field of servings amount selector to integers
         totalServingsField.setTextFormatter(new TextFormatter<> (e -> {
@@ -224,6 +232,55 @@ public class RecipesWindowCtrl {
     }
 
     /**
+     * This is the greatest method I have ever written.
+     * A new thread is created and subscribes to the websocket for title and only title updates via WebSocketManager.
+     * Upon notification of any changes, the program will return to the UI thread via Platform.runLater() and will
+     * 1. Change the name of the recipe in the localstorage
+     * 2. Refresh the sidebar for the name update
+     * 3. If the recipe is currently selected, update the name in the title bar
+     * THIS MUST ALWAYS BE RUN WHEN RECIPEWINDOW COMES INTO VIEW
+     */
+    public void startup() {
+        if (titleSubscription != null) {
+            return;
+        }
+        Thread subscribeThread = new Thread(() -> {
+            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    System.out.println("Title of recipe " + update.id() + " Changed!");
+                    dataManipulator.changeNameLocal(update.id(), update.newTitle());
+//                    dataManipulator.refreshRecipes();
+                    // A "softer" refresh is required to keep selection
+                    sidebarRecipeNamesList.refresh();
+                    if (currentRecipe.getId().equals(update.id())) {
+                        recipeNameField.setText(update.newTitle());
+                    }
+                });
+            });
+            if (titleSubscription == null ) {
+                Platform.runLater(() -> {
+                    errorCtrl.showGenericError("Could not subscribe to title changes, server might be down!");
+                });
+            }
+        });
+        subscribeThread.setDaemon(true);
+        subscribeThread.start();
+        dataManipulator.refreshRecipes();
+    }
+
+    /**
+     * This should be run when RecipesWindowCtrl goes out of view
+     * It ensures the app isn't subscribed into any unnecessary updates
+     */
+    public void shutdown() {
+        if (titleSubscription != null) {
+            titleSubscription.unsubscribe();
+            titleSubscription = null;
+            System.out.println("Unsubscribed from title updates.");
+        }
+    }
+
+    /**
      * Sets event handlers for the whole window
      */
     public void initializeSceneEvents(){
@@ -258,9 +315,9 @@ public class RecipesWindowCtrl {
                     ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                             favFilter(
                                     searchCtrl.query(
-                                    searchField.getText(), storage.getRecipes()
-                            ),
-                            storage.getFavoriteIDs())
+                                            searchField.getText(), storage.getRecipes()
+                                    ),
+                                    storage.getFavoriteIDs())
                     );
                     sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                     searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
@@ -352,7 +409,7 @@ public class RecipesWindowCtrl {
             Label noRecipeSelectedLabel = new Label("You have not selected any recipe yet!\n" +
                     "Select one in the list on the right or create your very own.");
             noRecipeSelectedLabel.setStyle(
-                            "-fx-text-fill: #6b7280; " +
+                    "-fx-text-fill: #6b7280; " +
                             "-fx-font-size: 14; " +
                             "-fx-padding: 12;"
             );
@@ -421,7 +478,6 @@ public class RecipesWindowCtrl {
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
-
             Long ingredientId = (ri.getIngredient() != null) ? ri.getIngredient().getId() : null;
             long recipeId = currentRecipe.getId();
 
@@ -434,53 +490,61 @@ public class RecipesWindowCtrl {
                     if (!success) {
                         errorCtrl.showGenericError("Failed to delete ingredient from server.");
                     }
+                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" deleted successfully");
                     return;
                 }
                 openRecipe(currentRecipe);
             });
-            // Editing ingredient Logic!
-            ingCtrl.setEditIngredient(() -> {
+            ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
                 handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
                     ri.setQuantity(newQty);
                     ri.getIngredient().setName(newName);
                     openRecipe(currentRecipe);
+                    server.updateRecipe(currentRecipe);
+                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" updated successfully");
                 });
             });
         }
-        //button for adding an ingredient --> pop up window will show
-        Button addButton = new Button("Add Ingredient");
+        //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
+        SplitMenuButton addButton = new SplitMenuButton("Add Ingredient");
         recipeView.getChildren().add(addButton);
-        addButton.setOnAction(e -> {
-            showIngredientPopUp("Name", "0.0").ifPresent(pair -> {
-                String name = pair.getKey();
-                String quantityText = pair.getValue(); //extraction name and quantity
-
-                double quantity;
-                try {  //converting string value of quantity to double
-                    quantity = Double.parseDouble(quantityText);
-                } catch (NumberFormatException err) {
-                    if (errorCtrl != null) {
-                        errorCtrl.showGenericError("Quantity must be a number.");
-                    }
-                    return;
-                }
-                recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                        new Ingredient(name, defaultNutritionalValue), quantity));
-            });
-            Recipe updated = server.updateRecipe(currentRecipe);
-            if (updated == null) {
-                errorCtrl.showServerUnavailableError();
-                return;
-            }
-            applyUpdatedRecipe(updated);
-            openRecipe(currentRecipe);
+        addButton.setOnAction((a) -> {
+            Optional<Ingredient> parsed = primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress();
+            parsed.ifPresent(ingredient -> recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                    ingredient, 0.0)));
+            updateRefresh();
         });
+        addButton.setOnShowing((a) -> storage.getIngredients().forEach(ingredient -> {
+            MenuItem menu = new MenuItem(ingredient.getName());
+            menu.setId(ingredient.getId().toString());
+            menu.setOnAction((actionEvent) -> {
+                recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                        ingredient, 0.0));
+                System.out.println("Added a new ingredient \"" + ingredient.getName() + "\" to \"" + currentRecipe.getName() + "\"");
+                updateRefresh();
+            });
+            addButton.getItems().add(menu);
+        }));
         recipeView.requestLayout();
     }
 
     /**
+     * Updates the current recipe and refreshes it to reflect changes made
+     */
+    public void updateRefresh() {
+        Recipe updated = server.updateRecipe(currentRecipe);
+        if (updated == null) {
+            errorCtrl.showServerUnavailableError();
+            return;
+        }
+        applyUpdatedRecipe(updated);
+        openRecipe(currentRecipe);
+
+    }
+
+
+    /**
      * Handling input window for ingredient editing
-     *
      * @param initName the initial name value to be displayed
      * @param initQty  the initial quantity value to be displayed
      * @param handler  the consumer that handles to call back to the value's usage
@@ -540,7 +604,9 @@ public class RecipesWindowCtrl {
             // Edit Logic
             instCtrl.setEditInstruction(newInstruction -> {
                 // This code is run when a string is passed into the editInstruction consumer
-                System.out.println("Instruction edit from " + recipeInstructions.get(currentIndex) + " to " + newInstruction);
+                if(!instruction.equals("New Instruction")) {
+                    System.out.println("Instruction edited successfully");
+                }
                 recipeInstructions.set(currentIndex, newInstruction);
                 Recipe updated = server.updateRecipe(currentRecipe);
                 if (updated == null) {
@@ -568,6 +634,7 @@ public class RecipesWindowCtrl {
             recipeInstructions.add("New Instruction");
             newInstructionAdded = true;
             openRecipe(currentRecipe);
+            System.out.println("Added instruction");
         });
         recipeView.requestLayout();
     }
@@ -587,19 +654,17 @@ public class RecipesWindowCtrl {
     @FXML
     public void onCloneRecipe() {
         cancelSearch();
-        Recipe recipe = currentRecipe;
-        if (recipe == null) {
-            recipe = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
-        }
-        if (recipe == null) {
+        if (currentRecipe == null) {
+            currentRecipe = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
             return;
         }
-        String newName = createCopyName(recipe.getName());
-        Recipe clone = cloneRecipe(recipe, newName);
+        String newName = createCopyName(currentRecipe.getName());
+        Recipe clone = cloneRecipe(currentRecipe, newName);
         Recipe savedRecipe = server.addRecipe(clone);
         if(savedRecipe != null){
             storage.getRecipes().add(savedRecipe);
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
+            System.out.println("Cloned recipe \"" + currentRecipe.getName() + "\" to \"" + newName + "\"");
         } else {
             errorCtrl.showGenericError("Recipe not selected to clone.");
         }
@@ -802,7 +867,7 @@ public class RecipesWindowCtrl {
         if (selectedRecipes.isEmpty()) {
             return null; //return null if there are no selected recipes (i.e. the list of selected recipes is empty)
         }
-        return selectedRecipes.get(0);
+        return selectedRecipes.getFirst();
     }
 
     /**
@@ -810,14 +875,19 @@ public class RecipesWindowCtrl {
      *
      * @param recipe The recipe to be selected
      */
-
     public void setSelectedRecipe(Recipe recipe){
         if(!storage.getRecipes().contains(recipe)) return; //if the recipe is not in the list, do nothing
         MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
         selectionModel.select(recipe);
     }
 
-
+    /**
+     * Displays a modal dialog for editing an ingredient and returns the entered values
+     *
+     * @param initialName ingredient name
+     * @param initialQuantity ingredient quantity
+     * @return Optional containing the name and quantity if confirmed, otherwise Optional is empty
+     */
     private Optional<Pair<String, String>> showIngredientPopUp(String initialName, String initialQuantity) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -853,6 +923,9 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * Opens a new window displaying the current shopping list.
+     */
     private void showShoppingList() {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -879,7 +952,10 @@ public class RecipesWindowCtrl {
         }
     }
 
-
+    /**
+     * Updates the current recipe
+     * @param updated the updated recipe, or null to leave unchanged
+     */
     private void applyUpdatedRecipe(Recipe updated) {
         if (updated == null) {
             return;
@@ -895,11 +971,11 @@ public class RecipesWindowCtrl {
             if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
                 storage.getFavoriteIDs().remove(currentRecipe.getId());
                 favoriteImage.setImage(unFavorite);
-                System.out.println("Removed from favorites!");
+                System.out.println("Removed \""+currentRecipe.getName()+"\" from favorites!");
             } else {
                 storage.getFavoriteIDs().add(currentRecipe.getId());
                 favoriteImage.setImage(favorite);
-                System.out.println("Added to favorites!");
+                System.out.println("Added \""+currentRecipe.getName()+"\" to favorites!");
             }
             // Regardless of change, put new favorites to file.
             dataManipulator.saveFave();

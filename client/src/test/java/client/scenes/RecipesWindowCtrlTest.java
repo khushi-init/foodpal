@@ -30,7 +30,7 @@ public class RecipesWindowCtrlTest {
         server = new ServerUtils(error);
         storage = new LocalStorage(null);
         dataManipulator = new DataManipulator(storage, server, error);
-        window = new RecipesWindowCtrl(error, primary, storage, dataManipulator, new SearchCtrl());
+        window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchCtrl());
     }
 
     private String invokeCreateCopyName(String baseName) throws Exception {

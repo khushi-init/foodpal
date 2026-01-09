@@ -18,6 +18,10 @@ import java.util.Optional;
 public class RecipeController {
     private final RecipeService recipeService;
 
+    /**
+     * Creates a RecipeController with the given recipe service
+     * @param recipeService the service used to manage recipes
+     */
     public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
     }
@@ -26,7 +30,7 @@ public class RecipeController {
 
     /**
      * Retrieves all recipes from the system via the RecipeService.
-     * * @return a list of all existing recipes
+     * @return a list of all existing recipes
      */
     @GetMapping
     public List<Recipe> findAllRecipes() {
@@ -139,6 +143,7 @@ public class RecipeController {
     /**
      * Handles database errors related to unique constraints (like duplicate recipe names)
      * and returns a 409 Conflict status.
+     * @param e The thrown data integrity violation exception
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT) // This is the key: maps the exception to HTTP 409
