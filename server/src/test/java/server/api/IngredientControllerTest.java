@@ -151,4 +151,41 @@ public class IngredientControllerTest {
         // ASSERT: Verify delete was called once
         verify(mockIngredientService, times(1)).deleteIngredient(fakeId);
     }
+
+    @Test
+    public void getIngredientUsageNumTest() {
+        final int uses = 7; //final so its not a magic number
+        when(mockIngredientService.getRecipeUsageNumber(id)).thenReturn(uses);
+        ResponseEntity<Integer> response = sut.getIngredientUsageNum(id);
+
+        assertEquals(OK, response.getStatusCode());
+        assertEquals(uses, response.getBody());
+        verify(mockIngredientService, times(1)).getRecipeUsageNumber(id);
+    }
+
+    @Test
+    public void updateIngredientCorrectTest() {
+        Ingredient incoming = new Ingredient("Banana", defaultNutritionalValue);
+        incoming.setId(id);
+        when(mockIngredientService.updateIngredient(incoming)).thenReturn(Optional.of(incoming));
+
+        ResponseEntity<Ingredient> response = sut.updateIngredient(incoming);
+
+        assertEquals(OK, response.getStatusCode());
+        verify(mockIngredientService, times(1)).updateIngredient(incoming);
+    }
+
+    @Test
+    public void updateIngredientNotFoundTest() {
+        Ingredient incoming = new Ingredient("Apple", defaultNutritionalValue);
+        incoming.setId(id);
+        when(mockIngredientService.updateIngredient(incoming)).thenReturn(Optional.empty());
+
+        ResponseEntity<Ingredient> response = sut.updateIngredient(incoming);
+
+        assertEquals(NOT_FOUND, response.getStatusCode());
+        verify(mockIngredientService, times(1)).updateIngredient(incoming);
+    }
+
+
 }

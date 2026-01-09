@@ -185,5 +185,26 @@ public class RecipeControllerTest {
         verify(mockRecipeService, times(1)).deleteRecipe(fakeId);
     }
 
+    @Test
+    public void deleteIngredientFromRecipeCorrectTest() {
+        //when service reports successful removal
+        when(mockRecipeService.removeIngredientFromRecipe(id, id2)).thenReturn(true);
+
+        ResponseEntity<Void> response = sut.deleteIngredientFromRecipe(id, id2);
+
+        assertEquals(NO_CONTENT, response.getStatusCode());
+        verify(mockRecipeService, times(1)).removeIngredientFromRecipe(id, id2);
+    }
+
+    @Test
+    public void deleteIngredientFromRecipeNotFoundTest() {
+        //when service reports failure (recipe or ingredient not found)
+        when(mockRecipeService.removeIngredientFromRecipe(id, fakeId)).thenReturn(false);
+
+        ResponseEntity<Void> response = sut.deleteIngredientFromRecipe(id, fakeId);
+
+        assertEquals(NOT_FOUND, response.getStatusCode());
+        verify(mockRecipeService, times(1)).removeIngredientFromRecipe(id, fakeId);
+    }
 
 }
