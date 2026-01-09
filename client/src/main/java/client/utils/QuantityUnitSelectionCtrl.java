@@ -6,16 +6,19 @@ import commons.RecipeIngredientUnit;
 import commons.Unit;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class QuantityUnitSelectionCtrl {
 
     @FXML private TextField quantityField;
-    @FXML private RadioButton formalRadio;
-    @FXML
-    private ComboBox<FormalUnit> formalUnitComboBox;
+
+    // Matched to FXML fx:id="unitTypePicker"
+    @FXML private ComboBox<String> unitTypePicker;
+
+    // Matched to FXML fx:id="formalUnitPicker"
+    @FXML private ComboBox<FormalUnit> formalUnitPicker;
+
     @FXML private TextField informalUnitField;
 
     private Stage stage;
@@ -25,21 +28,32 @@ public class QuantityUnitSelectionCtrl {
 
     @FXML
     public void initialize() {
-        // Populate the dropdown with your FormalUnit Enum values
-        formalUnitComboBox.getItems().setAll(FormalUnit.values());
-        formalUnitComboBox.getSelectionModel().selectFirst();
+        // 1. Setup the Unit Type Picker (Formal vs Informal selection)
+        unitTypePicker.getItems().addAll("Formal", "Informal");
+        unitTypePicker.getSelectionModel().selectFirst();
 
-        // Listener to swap UI visibility based on RadioButton selection
-        formalRadio.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-            formalUnitComboBox.setVisible(isSelected);
-            informalUnitField.setVisible(!isSelected);
+        // 2. Populate the Formal Units dropdown with Enum values
+        formalUnitPicker.getItems().setAll(FormalUnit.values());
+        formalUnitPicker.getSelectionModel().selectFirst();
 
-            if (isSelected) {
+        // 3. Listener to swap UI visibility based on unitTypePicker selection
+        unitTypePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            boolean isFormal = "Formal".equals(newVal);
+
+            // Toggle visibility
+            formalUnitPicker.setVisible(isFormal);
+            informalUnitField.setVisible(!isFormal);
+
+            // Clean up selections when switching
+            if (isFormal) {
                 informalUnitField.clear();
             } else {
-                formalUnitComboBox.getSelectionModel().clearSelection();
+                formalUnitPicker.getSelectionModel().clearSelection();
             }
         });
+
+        // Initial state: ensure informal field is hidden if Formal is selected
+        informalUnitField.setVisible(false);
     }
 
     public void setStage(Stage stage) {
@@ -50,15 +64,16 @@ public class QuantityUnitSelectionCtrl {
     private void handleOk() {
         if (isInputValid()) {
             resultQuantity = Double.parseDouble(quantityField.getText());
+
             Unit selectedUnit;
-            if (formalRadio.isSelected()) {
-                selectedUnit = formalUnitComboBox.getValue();
+            // Use unitTypePicker value to decide which input to read
+            if ("Formal".equals(unitTypePicker.getValue())) {
+                selectedUnit = formalUnitPicker.getValue();
             } else {
                 selectedUnit = new InformalUnit(informalUnitField.getText());
             }
-            // Convert our Unit object into the persistable wrapper you created
-            resultUnit = RecipeIngredientUnit.fromUnit(selectedUnit);
 
+            resultUnit = RecipeIngredientUnit.fromUnit(selectedUnit);
             okClicked = true;
             stage.close();
         }
@@ -70,20 +85,25 @@ public class QuantityUnitSelectionCtrl {
     }
 
     private boolean isInputValid() {
+        // Validate Quantity
         try {
             Double.parseDouble(quantityField.getText());
         } catch (NumberFormatException e) {
-            // You could add an alert here: "Please enter a valid number for quantity"
             return false;
         }
 
-        if (!formalRadio.isSelected() && informalUnitField.getText().isBlank()) {
-            return false; // Informal unit needs a name
+        // Validate Unit
+        boolean isFormal = "Formal".equals(unitTypePicker.getValue());
+        if (isFormal && formalUnitPicker.getValue() == null) {
+            return false;
         }
+        if (!isFormal && (informalUnitField.getText() == null || informalUnitField.getText().isBlank())) {
+            return false;
+        }
+
         return true;
     }
 
-    // Accessors for the Main Controller to call
     public boolean isOkClicked() {
         return okClicked;
     }

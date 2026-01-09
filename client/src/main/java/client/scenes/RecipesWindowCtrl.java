@@ -419,7 +419,10 @@ public class RecipesWindowCtrl {
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            String unitName = (ri.getUnit() != null) ? ri.getUnit().toUnit().getDisplayName() : "";
+            String unitName = "";
+            if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
+                unitName = ri.getUnit().toUnit().getDisplayName();
+            }
             ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity().toString() + " " + unitName);
 
             ingCtrl.setIndex(i);
