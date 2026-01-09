@@ -13,6 +13,8 @@ public class LocalStorage {
 
     private ObservableList<Ingredient> ingredients = FXCollections.observableArrayList();
 
+    private ObservableList<Long> favoriteIDs = FXCollections.observableArrayList();
+
     private Recipe currentRecipe;
 
     @Inject
@@ -37,5 +39,13 @@ public class LocalStorage {
 
     public void setIngredients(ObservableList<Ingredient> ingredients) {
         this.ingredients = ingredients;
+    }
+
+    public ObservableList<Long> getFavoriteIDs() {
+        return favoriteIDs;
+    }
+
+    public void setFavoriteIDs(ObservableList<Long> favoriteIDs) {
+        this.favoriteIDs = favoriteIDs;
     }
 }

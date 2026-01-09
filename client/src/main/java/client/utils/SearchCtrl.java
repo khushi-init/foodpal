@@ -13,9 +13,15 @@ import commons.RecipeIngredient;
 import commons.Ingredient;
 
 public class SearchCtrl {
+    private boolean favToggle;
+
+    public void setFavToggle(boolean favToggle) {
+        this.favToggle = favToggle;
+    }
+
     /**
      * Performs a query on the provided List of recipes
-     * @param query A String containing words recipes must contain, separated by spaces (case insensitive)
+     * @param query A String containing words recipes must contain, separated by spaces (case-insensitive)
      * @param recipes A list of all recipes in which to search
      * @return A List of all recipes that satisfy the search conditions
      */
@@ -23,12 +29,12 @@ public class SearchCtrl {
         query = query.toLowerCase();
         List<String> queries = List.of(query.split(" "));
         ArrayList<Recipe> filteredRecipes = new ArrayList<>();
-
         for(Recipe recipe : recipes){
             //check if this recipe satisfies all conditions (i.e. contains all keywords)
             if(queries.stream().allMatch(x -> checkIfRecipeSatisfiesQuery(x, recipe))){
                 filteredRecipes.add(recipe);
             }
+
         }
         return filteredRecipes;
     }
@@ -182,4 +188,6 @@ public class SearchCtrl {
         }
         return performSimpleQuery(query, recipes);
     }
+
+
 }

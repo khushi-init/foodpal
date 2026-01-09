@@ -1,11 +1,28 @@
 package client.scenes;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import java.util.function.BiConsumer;
+
+import com.google.inject.Inject;
+
 import client.Main;
 import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.*;
 import client.utils.searchUtils.Proposition;
+import client.utils.ErrorCtrl;
+import client.utils.IngredientPopUpCtrl;
+import client.utils.RecipeIngredientUICtrl;
+import client.utils.RecipeInstructionUICtrl;
+import client.utils.SearchCtrl;
+import client.utils.ServerUtils;
+import client.utils.ToBeAddedCtrl;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import commons.Recipe;
@@ -27,16 +44,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.BiConsumer;
 
-import com.google.inject.Inject;
 
 
 public class RecipesWindowCtrl {
@@ -85,15 +99,12 @@ public class RecipesWindowCtrl {
     private Recipe currentRecipe;
     @FXML
     private CheckBox favoriteCheck;
-    // File used for storing favorite ID's. Add additional stuff for config as you wish
-    private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
+
 
     private boolean newInstructionAdded = false;
 
     // This is the Shopping List data that is used in the session.
     private final ShoppingList shoppingList = new ShoppingList();
-
-    private List<Long> favoriteIds;
 
     private LocalStorage storage;
     private DataManipulator dataManipulator;
@@ -108,7 +119,7 @@ public class RecipesWindowCtrl {
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param c ErrorCtrl instance for error
-     * @param p PrimaryCtrl instance to inject
+     * @param p Primary Ctrl instance
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
      * @param s - The injected search control
@@ -126,12 +137,11 @@ public class RecipesWindowCtrl {
      * Initializes the sidebar items (Recipe names) to track the ObservableList items
      */
     public void initialize() {
-        favoriteIds = new ArrayList<>();
-        loadFavs();
+        dataManipulator.loadFavs();
         favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
         unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
         sidebarRecipeNamesList.setItems(storage.getRecipes());
-        sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell());
+        sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell(storage.getFavoriteIDs(), favorite));
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
@@ -201,9 +211,11 @@ public class RecipesWindowCtrl {
                 }
                 try{
                     ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                            searchCtrl.query(
+                            favFilter(
+                                    searchCtrl.query(
                                     searchField.getText(), storage.getRecipes()
-                            )
+                            ),
+                            storage.getFavoriteIDs())
                     );
                     sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                     searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
@@ -222,7 +234,11 @@ public class RecipesWindowCtrl {
     public void applyExternalSearch(Proposition prop){
         try{
             ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                    searchCtrl.performComplexQuery(prop, storage.getRecipes())
+                    favFilter(
+                            searchCtrl.performComplexQuery(prop, storage.getRecipes()),
+                            storage.getFavoriteIDs()
+                    )
+
             );
             sidebarRecipeNamesList.setItems(searchResults);
         } catch (Exception e){
@@ -234,70 +250,26 @@ public class RecipesWindowCtrl {
      * Updates the sidebar to display favorites.
      */
     public void updateToFav() {
+        cancelSearch();
         // Load only favorites or nah
         if (favoriteCheck.isSelected()) {
+            searchCtrl.setFavToggle(true);
             List<Recipe> favRecipes = new ArrayList<>();
             for (Recipe r : storage.getRecipes()) {
-                if (favoriteIds.contains(r.getId())) {
+                if (storage.getFavoriteIDs().contains(r.getId())) {
                     favRecipes.add(r);
                 }
             }
             sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
             sidebarRecipeNamesList.getSelectionModel().select(0);
         } else {
+            searchCtrl.setFavToggle(false);
             sidebarRecipeNamesList.setItems(storage.getRecipes());
         }
     }
 
-    /**
-     * Saves the current favorites to the local persistent properties file.
-     */
-    public void saveFave() {
-        // Convert all favorite ID's to a single string that will be stored
-        Properties prop = new Properties();
-        // THIS TIME COMPLEXITY SUCKS ASS LMAO O(n^2) (But im lazy, will probably refactor later)
-        for (Long id : favoriteIds) {
-            String name = "Unknown";
-            for (Recipe r : storage.getRecipes()) {
-                if (Objects.equals(r.getId(), id)) {
-                    name = r.getName();
-                }
-            }
-            prop.setProperty(id.toString(), name);
-        }
-        try {
-            prop.store(new FileOutputStream(properties), "Favorites");
-        } catch (IOException e) {
-            errorCtrl.showGenericError("Unable to store favorites, try again later!");
-        }
 
-    }
 
-    /**
-     * Load the favorites from the properties file, and displays a notification if the favorite is GONE
-     */
-    public void loadFavs() {
-        Properties prop = new Properties();
-        try {
-            FileInputStream fis = new FileInputStream(properties);
-            prop.load(fis);
-            favoriteIds.clear();
-            for (String key : prop.stringPropertyNames()) {
-                Long id = Long.parseLong(key);
-                favoriteIds.add(id);
-            }
-            // Check if favorites still exist in the server
-            for (Long id : favoriteIds) {
-                if (!getRecipeIDs().contains(id)) {
-                    errorCtrl.showGenericError("RIP: Recipe " + prop.getProperty(id.toString()) + " not found!");
-                }
-            }
-
-        } catch (Exception e) {
-            errorCtrl.showGenericError("Unable to load favorites, try again later!");
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Enables or disables all recipe-specific UI controls.
@@ -339,13 +311,7 @@ public class RecipesWindowCtrl {
         }
     }
 
-    public List<Long> getRecipeIDs() {
-        List<Long> ids = new ArrayList<>();
-        for (Recipe r : storage.getRecipes()) {
-            ids.add(r.getId());
-        }
-        return ids;
-    }
+
 
     /**
      * Loads the contents of the provided recipe to the recipeView UI element
@@ -361,8 +327,8 @@ public class RecipesWindowCtrl {
         VBox.setMargin(sep, lineMargin);
         loadSteps(recipe.getPreparationSteps());
         // Favorites
-        if (currentRecipe != null && favoriteIds != null) {
-            if (favoriteIds.contains(currentRecipe.getId())) {
+        if (currentRecipe != null && storage.getFavoriteIDs() != null) {
+            if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
                 favoriteImage.setImage(favorite);
             } else {
                 favoriteImage.setImage(unFavorite);
@@ -428,40 +394,45 @@ public class RecipesWindowCtrl {
                 });
             });
         }
-        //button for adding an ingredient --> pop up window will show
-        Button addButton = new Button("Add Ingredient");
+        //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
+        SplitMenuButton addButton = new SplitMenuButton("Add Ingredient");
         recipeView.getChildren().add(addButton);
-        addButton.setOnAction(e -> {
-            showIngredientPopUp("Name", "0.0").ifPresent(pair -> {
-                String name = pair.getKey();
-                String quantityText = pair.getValue(); //extraction name and quantity
-
-                double quantity;
-                try {  //converting string value of quantity to double
-                    quantity = Double.parseDouble(quantityText);
-                } catch (NumberFormatException err) {
-                    if (errorCtrl != null) {
-                        errorCtrl.showGenericError("Quantity must be a number.");
-                    }
-                    return;
-                }
-                recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                        new Ingredient(name, defaultNutritionalValue), quantity));
-            });
-            Recipe updated = server.updateRecipe(currentRecipe);
-            if (updated == null) {
-                errorCtrl.showServerUnavailableError();
-                return;
-            }
-            applyUpdatedRecipe(updated);
-            openRecipe(currentRecipe);
+        addButton.setOnAction((a) -> {
+            Optional<Ingredient> parsed = primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress();
+            parsed.ifPresent(ingredient -> recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                    ingredient, 0.0)));
+            updateRefresh();
         });
+        addButton.setOnShowing((a) -> storage.getIngredients().forEach(ingredient -> {
+            MenuItem menu = new MenuItem(ingredient.getName());
+            menu.setId(ingredient.getId().toString());
+            menu.setOnAction((actionEvent) -> {
+                recipeIngredients.add(new RecipeIngredient(currentRecipe,
+                        ingredient, 0.0));
+                updateRefresh();
+            });
+            addButton.getItems().add(menu);
+        }));
         recipeView.requestLayout();
     }
 
     /**
+     * Updates the current recipe and refreshes it to reflect changes made
+     */
+    public void updateRefresh() {
+        Recipe updated = server.updateRecipe(currentRecipe);
+        if (updated == null) {
+            errorCtrl.showServerUnavailableError();
+            return;
+        }
+        applyUpdatedRecipe(updated);
+        openRecipe(currentRecipe);
+
+    }
+
+
+    /**
      * Handling input window for ingredient editing
-     *
      * @param initName the initial name value to be displayed
      * @param initQty  the initial quantity value to be displayed
      * @param handler  the consumer that handles to call back to the value's usage
@@ -837,19 +808,21 @@ public class RecipesWindowCtrl {
      * Adds or removes recipe ID to/from favorites list
      */
     public void toggleFavorite() {
-        if (favoriteIds != null) {
-            if (favoriteIds.contains(currentRecipe.getId())) {
-                favoriteIds.remove(currentRecipe.getId());
+        if (storage.getFavoriteIDs() != null) {
+            if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
+                storage.getFavoriteIDs().remove(currentRecipe.getId());
                 favoriteImage.setImage(unFavorite);
                 System.out.println("Removed from favorites!");
             } else {
-                favoriteIds.add(currentRecipe.getId());
+                storage.getFavoriteIDs().add(currentRecipe.getId());
                 favoriteImage.setImage(favorite);
                 System.out.println("Added to favorites!");
             }
             // Regardless of change, put new favorites to file.
-            saveFave();
-            loadFavs();
+            dataManipulator.saveFave();
+            dataManipulator.loadFavs();
+            // Refresh for sidebar look
+            sidebarRecipeNamesList.refresh();
         }
     }
 
@@ -883,7 +856,7 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * handles button for to be added window
+     * Handles button for to be added window
      */
     public void toggleToBeAdded() throws IOException {
         FXMLLoader loader = new FXMLLoader(
@@ -892,24 +865,40 @@ public class RecipesWindowCtrl {
         Parent root = loader.load();
 
         ToBeAddedCtrl ctrl = loader.getController();
-        List<RecipeIngredient> ris = getSelectedRecipe().getIngredients();
-        ctrl.showRecipeIngredients(ris);
+
+        ctrl.setShoppingList(shoppingList);
+        ctrl.setSourceRecipeName(getSelectedRecipe().getName());
+        ctrl.setOpenShoppingList(this::showShoppingList);
+        ctrl.loadFromRecipe(getSelectedRecipe().getIngredients());
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);
         popUpStage.setTitle("To Be Added");
         popUpStage.setScene(new Scene(root));
-
         popUpStage.initOwner(recipeView.getScene().getWindow());
 
         popUpStage.showAndWait();
-
     }
 
 
     @FXML
     private void onAdvancedSearch(){
         primaryCtrl.showSearchWindow();
+    }
+
+    /**
+     * The final search query step, checks if the favorite toggle is toggled, and if so filters for favorite
+     * @param initList The initial filtered list containing the recipes that comply with the query
+     * @param favIDs The list of ID's for all favorites
+     * @return A list of recipes that comply with all query conditions and favorite toggle.
+     */
+    public List<Recipe> favFilter(List<Recipe> initList, List<Long> favIDs) {
+        if(favoriteCheck.isSelected()) {
+            return initList.stream()
+                    .filter(x -> favIDs.contains(x.getId()))
+                    .toList();
+        }
+        else return initList;
     }
 
 }

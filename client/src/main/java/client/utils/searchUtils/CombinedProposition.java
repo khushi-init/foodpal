@@ -57,11 +57,11 @@ public class CombinedProposition implements Proposition{
     public String generateIllegalArgumentExceptionMessage(){
         if(this.function.amountOfArguments == -1) return "Function " + this.function.name.toUpperCase() + " requires at least 1 child proposition.";
         return "Function " + this.function.name + 
-            " requires exactly " + 
-            this.function.amountOfArguments + 
-            " child proposition" + 
-            (this.function.amountOfArguments == 1 ? "" : "s") +  
-            ".";
+                " requires exactly " +
+                this.function.amountOfArguments +
+                " child proposition" +
+                (this.function.amountOfArguments == 1 ? "" : "s") +
+                ".";
     }
 
     @Override

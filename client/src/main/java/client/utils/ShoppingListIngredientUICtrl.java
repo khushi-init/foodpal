@@ -102,4 +102,13 @@ public class ShoppingListIngredientUICtrl {
         }
         checkoffInstruction.accept(index, checked);
     }
+
+    public void setCheckboxEnabled(boolean enabled) {
+        checkoffBox.setVisible(enabled);
+        checkoffBox.setManaged(enabled);
+        checkoffBox.setDisable(!enabled);
+        if (!enabled) {
+            checkoffBox.setOnAction(null);
+        }
+    }
 }

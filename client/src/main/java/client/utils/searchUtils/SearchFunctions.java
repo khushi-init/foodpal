@@ -72,8 +72,8 @@ public enum SearchFunctions {
     NOT     ("not", true, 1, new Class<?>[]{String.class},
             (recipe, arguments) -> {
                 return NOTSTEP.evaluate.apply(recipe, arguments)
-                    && NOTING.evaluate.apply(recipe, arguments)
-                    && NOTNAME.evaluate.apply(recipe, arguments);
+                        && NOTING.evaluate.apply(recipe, arguments)
+                        && NOTNAME.evaluate.apply(recipe, arguments);
 
             }),
     HAS     ("has", true, 1, new Class<?>[]{String.class},
