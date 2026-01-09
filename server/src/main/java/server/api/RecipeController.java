@@ -90,6 +90,10 @@ public class RecipeController {
             return ResponseEntity.badRequest().build();
         }
 
+        if (incoming.getTotalServings() < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Recipe savedRecipe = recipeService.createRecipe(incoming);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipe);
@@ -107,6 +111,10 @@ public class RecipeController {
     public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe incoming) {
         // checking if the recipe has a valid name
         if(incoming.getName() == null || incoming.getName().trim().isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (incoming.getTotalServings() < 0) {
             return ResponseEntity.badRequest().build();
         }
 

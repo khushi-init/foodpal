@@ -79,6 +79,12 @@ public class RecipesWindowCtrl {
     private Label cancelSearchButton;
 
     @FXML
+    private TextField totalServingsField;
+
+    @FXML
+    private Label totalServingsLabel;
+
+    @FXML
     private Button downloadButton;
 
     @FXML
@@ -175,11 +181,54 @@ public class RecipesWindowCtrl {
             }
         });
 
+        initializeTotalServings();
+
         // Deactivate recipe specific buttons, since nothing is selected at the start.
         updateRecipeSelectionState(false);
 
         initializeSceneEvents();
         intializeSearchElements();
+    }
+
+    /**
+     * Initializes the total servings field to be of type integer and adds listeners.
+     */
+    private void initializeTotalServings() {
+        // Set text field of servings amount selector to integers
+        totalServingsField.setTextFormatter(new TextFormatter<> (e -> {
+            if (e.getControlNewText().matches("\\d*")) {
+                return e;
+            } else {
+                return null;
+            }
+        }));
+
+        // New listener for total servings TextField
+        // Saves the servings amount
+        totalServingsField.setOnKeyReleased(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                addRecipeServings();
+                totalServingsField.getParent().requestFocus();
+            }
+        });
+        // Focused Property Listener, saves when the TextField loses focus
+        totalServingsField.focusedProperty().addListener((obs,
+                                                       oldFocused, newFocused) -> {
+            if (oldFocused && !newFocused) {
+                addRecipeServings();
+            }
+        });
+    }
+
+    /**
+     * Sets the total servings label to the correct amount and resets the field.
+     */
+    private void updateTotalServingsUI() {
+        totalServingsLabel.setText(
+                "Total servings: " + currentRecipe.getTotalServings()
+        );
+
+        totalServingsField.setText("");
     }
 
     /**
@@ -335,6 +384,12 @@ public class RecipesWindowCtrl {
      */
     private void updateRecipeSelectionState(boolean active) {
 
+        totalServingsField.setDisable(!active);
+        totalServingsField.setVisible(active);
+
+        totalServingsLabel.setDisable(!active);
+        totalServingsLabel.setVisible(active);
+
         downloadButton.setDisable(!active);
         downloadButton.setVisible(active);
 
@@ -392,6 +447,8 @@ public class RecipesWindowCtrl {
 
         // Activate recipe specific buttons
         updateRecipeSelectionState(true);
+
+        updateTotalServingsUI();
 
     }
 
@@ -648,9 +705,10 @@ public class RecipesWindowCtrl {
      * @return a new Recipe that is clone of the original
      */
     private Recipe cloneRecipe(Recipe original, String newName) {
+        int totalServings = original.getTotalServings();
         List<String> stepsCopy = new ArrayList<>(original.getPreparationSteps());
 
-        Recipe clone = new Recipe(newName, null, stepsCopy);
+        Recipe clone = new Recipe(newName, totalServings, null, stepsCopy);
 
         List<RecipeIngredient> ingredientsCopy = new ArrayList<>();
         for (RecipeIngredient ri : original.getIngredients()) {
@@ -676,6 +734,7 @@ public class RecipesWindowCtrl {
         cancelSearch();
         Recipe newRecipe = new Recipe(
                 "New Recipe",
+                0,
                 new ArrayList<>(),
                 new ArrayList<>()
         );
@@ -710,6 +769,38 @@ public class RecipesWindowCtrl {
             else recipeNameField.setText(currentRecipe.getName());
         }
 
+    }
+
+    /**
+     * Add the servings entered to the total servings of a recipe.
+     */
+    public void addRecipeServings() {
+        if (currentRecipe == null) {
+            return;
+        }
+
+        String text = totalServingsField.getText();
+        if (text.isEmpty()) {
+            return;
+        }
+
+        int servings = Integer.parseInt(text);
+
+        if (servings < 0) {
+            errorCtrl.showGenericError("The amount of servings must be greater than or equal to 0!");
+            return;
+        }
+
+        currentRecipe.setTotalServings(servings);
+
+        Recipe updatedRecipe = server.updateRecipe(currentRecipe);
+        if (updatedRecipe != null) {
+            applyUpdatedRecipe(updatedRecipe);
+
+            openRecipe(currentRecipe);
+
+            totalServingsField.clear();
+        }
     }
 
     /**

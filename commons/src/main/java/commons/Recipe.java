@@ -19,6 +19,9 @@ public class Recipe {
     @Column(unique = true)
     private String name;
 
+    @Column
+    private Integer totalServings = 0;
+
     // One Recipe has MANY RecipeIngredients (the join entity)
     @OneToMany(
             mappedBy = "recipe",
@@ -40,10 +43,26 @@ public class Recipe {
     /**
      * constructor for a new recipe
      * @param name  name of recipe
+     * @param totalServings the amount of total servings
      * @param ingredients list of ingredients
      * @param preparationSteps list of preparation steps
      */
-    public Recipe (String name, List<RecipeIngredient> ingredients, List<String> preparationSteps) {
+    public Recipe (String name, int totalServings, List<RecipeIngredient> ingredients,
+                   List<String> preparationSteps) {
+        this.name = name;
+        this.totalServings = totalServings;
+        this.ingredients = ingredients;
+        this.preparationSteps = preparationSteps;
+    }
+
+    /**
+     * constructor for a new recipe
+     * @param name  name of recipe
+     * @param ingredients list of ingredients
+     * @param preparationSteps list of preparation steps
+     */
+    public Recipe (String name, List<RecipeIngredient> ingredients,
+                   List<String> preparationSteps) {
         this.name = name;
         this.ingredients = ingredients;
         this.preparationSteps = preparationSteps;
@@ -66,6 +85,16 @@ public class Recipe {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getTotalServings() {
+        return totalServings;
+    }
+
+    public void setTotalServings(Integer totalServings) {
+        if (totalServings != null && totalServings >= 0) {
+            this.totalServings = totalServings;
+        }
     }
 
     public List<RecipeIngredient> getIngredients() {
@@ -127,6 +156,11 @@ public class Recipe {
         for (String step : preparationSteps) {
             output.append("* ").append(step).append("\n");
         }
+
+        output.append("\n")
+                .append("*This recipe has been served ")
+                .append(totalServings)
+                .append(" time(s)*\n");
 
         return output.toString();
     }
