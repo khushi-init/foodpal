@@ -16,6 +16,7 @@ public class RecipeTest {
     private RecipeIngredient recipeIngredient2;
     private double amount1 = 50.0;
     private double amount2 = 25.0;
+    private int totalServings1 = 1;
     private List<RecipeIngredient> ingredientList;
     private List<String> preparationSteps;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
@@ -36,7 +37,7 @@ public class RecipeTest {
                 "Put it in the oven for 10 minutes."
         ));
 
-        recipe = new Recipe("Pepernoten", ingredientList,preparationSteps);
+        recipe = new Recipe("Pepernoten", totalServings1, ingredientList,preparationSteps);
     }
 
     @Test
@@ -54,6 +55,8 @@ public class RecipeTest {
                 * Mix the sugar and butter together.
                 * Use the spell 'Pepernoteratus'.
                 * Put it in the oven for 10 minutes.
+                
+                *This recipe has been served 1 time(s)*
                 """;
 
         String result = recipe.toMarkdown();

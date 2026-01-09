@@ -41,7 +41,7 @@ public class SearchCtrl {
 
     /**
      * Checks if a recipe satisfies a single query
-     * @param query String with single query (is not parsed for spaces), not case sensitive
+     * @param query String with single query (is not parsed for spaces), not case-sensitive
      * @param recipe The recipe to check
      * @return boolean indicating if the recipe satisfies the String query
      */

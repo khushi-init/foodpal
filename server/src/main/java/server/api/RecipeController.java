@@ -18,6 +18,10 @@ import java.util.Optional;
 public class RecipeController {
     private final RecipeService recipeService;
 
+    /**
+     * Creates a RecipeController with the given recipe service
+     * @param recipeService the service used to manage recipes
+     */
     public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
     }
@@ -26,7 +30,7 @@ public class RecipeController {
 
     /**
      * Retrieves all recipes from the system via the RecipeService.
-     * * @return a list of all existing recipes
+     * @return a list of all existing recipes
      */
     @GetMapping
     public List<Recipe> findAllRecipes() {
@@ -86,6 +90,10 @@ public class RecipeController {
             return ResponseEntity.badRequest().build();
         }
 
+        if (incoming.getTotalServings() < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Recipe savedRecipe = recipeService.createRecipe(incoming);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipe);
@@ -103,6 +111,10 @@ public class RecipeController {
     public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe incoming) {
         // checking if the recipe has a valid name
         if(incoming.getName() == null || incoming.getName().trim().isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (incoming.getTotalServings() < 0) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -131,6 +143,7 @@ public class RecipeController {
     /**
      * Handles database errors related to unique constraints (like duplicate recipe names)
      * and returns a 409 Conflict status.
+     * @param e The thrown data integrity violation exception
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT) // This is the key: maps the exception to HTTP 409
