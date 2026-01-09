@@ -1,10 +1,9 @@
 package server.service;
 
-import commons.Ingredient;
-import commons.NutritionalValue;
-import commons.Recipe;
-import commons.RecipeIngredient;
+import commons.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
@@ -16,16 +15,19 @@ import java.util.Optional;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
     /**
      * The Recipe Service constructor method
      * @param recipeRepository The Recipe repository to meddle with
      * @param ingredientRepository the ingredient repository to meddle with
+     * @param eventPublisher The event publisher for sending updates to sockets
      */
-    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ApplicationEventPublisher eventPublisher) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -95,10 +97,15 @@ public class RecipeService {
      * @param incoming The new data to apply.
      * @return An Optional containing the updated recipe, or empty if not found.
      */
+    @Transactional
     public Optional<Recipe> updateRecipe(Long id, Recipe incoming) {
         return recipeRepository.findById(id).map(existing -> {
             // Update basic fields
-            existing.setName(incoming.getName());
+            boolean nameChange = false;
+            if (existing.getName() != null && !existing.getName().equals(incoming.getName())){
+                existing.setName(incoming.getName());
+                nameChange = true;
+            }
             existing.setPreparationSteps(incoming.getPreparationSteps());
 
             // Delete ingredients that are in existing but not in incoming
@@ -124,8 +131,12 @@ public class RecipeService {
                     existingMatchingIngredient.get().setQuantity(ri.getQuantity());
                 }
             }
-
-            return recipeRepository.save(existing);
+            Recipe saved = recipeRepository.save(existing);
+            // If the name change was successfully commited in the DB, transmit the change in the websocket.
+            if (nameChange) {
+                eventPublisher.publishEvent(new TitleUpdate(id, incoming.getName()));
+            }
+            return saved;
         });
     }
 
