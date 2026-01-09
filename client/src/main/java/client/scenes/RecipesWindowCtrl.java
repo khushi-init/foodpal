@@ -445,10 +445,14 @@ public class RecipesWindowCtrl {
                 }
                 openRecipe(currentRecipe);
             });
-            ingCtrl.setEditIngredient(() -> {
-                // Remove the old one first so we don't have duplicates
-                currentRecipe.getIngredients().remove(ri);
-                openQuantityDialog(ri.getIngredient());
+            ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
+                handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
+                    ri.setQuantity(newQty);
+                    ri.getIngredient().setName(newName);
+                    openRecipe(currentRecipe);
+                    server.updateRecipe(currentRecipe);
+                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" updated successfully");
+                });
             });
         }
         //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
