@@ -572,7 +572,7 @@ public class RecipesWindowCtrl {
                 n.setStyle("");
             }
         });
-        //When dropped on another instruction, remove original, and set on new target index
+        // When dropped on another instruction, remove original, and set on new target index
         n.setOnDragDropped(dragEvent -> {
             boolean succes = false;
             Dragboard db = dragEvent.getDragboard();
