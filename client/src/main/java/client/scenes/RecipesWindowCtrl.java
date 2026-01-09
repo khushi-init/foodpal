@@ -118,6 +118,8 @@ public class RecipesWindowCtrl {
 
     private final PrimaryCtrl primaryCtrl;
 
+    private final RecipeIngredientUnit defaultUnit = RecipeIngredientUnit.fromUnit(FormalUnit.GRAM);
+
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param socker WebSocketManager instance
@@ -454,7 +456,7 @@ public class RecipesWindowCtrl {
         addButton.setOnAction((a) -> {
             Optional<Ingredient> parsed = primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress();
             parsed.ifPresent(ingredient -> recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                    ingredient, 0.0)));
+                    ingredient, 0.0, defaultUnit)));
             updateRefresh();
         });
         addButton.setOnShowing((a) -> storage.getIngredients().forEach(ingredient -> {
@@ -462,7 +464,7 @@ public class RecipesWindowCtrl {
             menu.setId(ingredient.getId().toString());
             menu.setOnAction((actionEvent) -> {
                 recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                        ingredient, 0.0));
+                        ingredient, 0.0,  defaultUnit));
                 System.out.println("Added a new ingredient \"" + ingredient.getName() + "\" to \"" + currentRecipe.getName() + "\"");
                 updateRefresh();
             });
@@ -656,7 +658,7 @@ public class RecipesWindowCtrl {
         for (RecipeIngredient ri : original.getIngredients()) {
             Ingredient oldIng = ri.getIngredient();
             Ingredient newIng = new Ingredient(oldIng.getName(), defaultNutritionalValue);
-            RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity());
+            RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity(), defaultUnit);
             ingredientsCopy.add(newRi);
         }
         clone.setIngredients(ingredientsCopy);

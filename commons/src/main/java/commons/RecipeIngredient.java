@@ -46,11 +46,12 @@ public class RecipeIngredient {
      * @param ingredient the ingredient
      * @param quantity quantity of the ingredient
      */
-    public RecipeIngredient(Recipe recipe, Ingredient ingredient, Double quantity) {
+    public RecipeIngredient(Recipe recipe, Ingredient ingredient, Double quantity,  RecipeIngredientUnit unit) {
         this.id = new  RecipeIngredientKey();
         this.recipe = recipe;
         this.ingredient = ingredient;
         this.quantity = quantity;
+        this.unit = unit;
     }
 
 
@@ -88,6 +89,14 @@ public class RecipeIngredient {
 
     public void setQuantity(Double quantity) {
         this.quantity = quantity;
+    }
+
+    public RecipeIngredientUnit getUnit() {
+        return unit;
+    }
+
+    public void setUnit(RecipeIngredientUnit unit) {
+        this.unit = unit;
     }
 
     @Override

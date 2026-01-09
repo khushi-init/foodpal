@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.layout.StackPane?>
+<VBox prefWidth="550.0" spacing="20.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.QuantityUnitSelectionCtrl">
+    <padding>
+        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+    </padding>
+
+    <Label fx:id="headerLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Ingredient Quantity" />
+
+    <HBox alignment="BOTTOM_LEFT" spacing="15.0">
+
+        <VBox spacing="5.0">
+            <Label style="-fx-font-weight: bold;" text="Quantity" />
+            <TextField fx:id="quantityField" prefHeight="35.0" prefWidth="120.0" promptText="e.g. 500" />
+        </VBox>
+
+        <VBox spacing="5.0">
+            <Label style="-fx-font-weight: bold;" text="Unit Type" />
+            <ComboBox fx:id="unitTypePicker" prefHeight="35.0" prefWidth="140.0" />
+        </VBox>
+
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold;" text="Unit" />
+            <StackPane alignment="CENTER_LEFT">
+                <ComboBox fx:id="formalUnitPicker" prefHeight="35.0" maxWidth="Infinity" />
+                <TextField fx:id="informalUnitField" prefHeight="35.0" maxWidth="Infinity" />
+            </StackPane>
+        </VBox>
+
+    </HBox>
+</VBox>
