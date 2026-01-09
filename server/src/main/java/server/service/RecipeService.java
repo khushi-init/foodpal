@@ -82,7 +82,7 @@ public class RecipeService {
                 Ingredient ing = ingredientRepository.findByName(name)
                         .orElseGet(() -> new Ingredient(name, defaultNutritionalValue));
 
-                RecipeIngredient newRi = new RecipeIngredient(recipe, ing, inRi.getQuantity());
+                RecipeIngredient newRi = new RecipeIngredient(recipe, ing, inRi.getQuantity(), inRi.getUnit());
                 ingredients.add(newRi);
             }
             recipe.setIngredients(ingredients);
@@ -125,10 +125,13 @@ public class RecipeService {
 
                 // Add new RecipeIngredient if it does not exist yet
                 if (!alreadyExists) {
-                    existing.getIngredients().add(new RecipeIngredient(existing, ing, ri.getQuantity()));
-                } else if (!ri.getQuantity().equals(existingMatchingIngredient.get().getQuantity())) {
-                    // Update the quantity if it has been changed
-                    existingMatchingIngredient.get().setQuantity(ri.getQuantity());
+                    // Add the unit here
+                    existing.getIngredients().add(new RecipeIngredient(existing, ing, ri.getQuantity(), ri.getUnit()));
+                } else {
+                    // Update both quantity AND unit if they changed
+                    RecipeIngredient existingRi = existingMatchingIngredient.get();
+                    existingRi.setQuantity(ri.getQuantity());
+                    existingRi.setUnit(ri.getUnit()); // Add this line
                 }
             }
             Recipe saved = recipeRepository.save(existing);

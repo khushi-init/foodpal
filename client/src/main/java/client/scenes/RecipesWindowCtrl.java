@@ -124,6 +124,8 @@ public class RecipesWindowCtrl {
 
     private final PrimaryCtrl primaryCtrl;
 
+    private final RecipeIngredientUnit defaultUnit = RecipeIngredientUnit.fromUnit(FormalUnit.GRAM);
+
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param socker WebSocketManager instance
@@ -474,7 +476,12 @@ public class RecipesWindowCtrl {
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity().toString());
+            String unitName = "";
+            if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
+                unitName = ri.getUnit().toUnit().getDisplayName();
+            }
+            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity().toString() + " " + unitName);
+
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
@@ -508,23 +515,25 @@ public class RecipesWindowCtrl {
         //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
         SplitMenuButton addButton = new SplitMenuButton("Add Ingredient");
         recipeView.getChildren().add(addButton);
+
         addButton.setOnAction((a) -> {
             Optional<Ingredient> parsed = primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress();
-            parsed.ifPresent(ingredient -> recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                    ingredient, 0.0)));
-            updateRefresh();
+            // Use the dialog instead of hardcoding 0.0
+            parsed.ifPresent(this::openQuantityDialog);
         });
-        addButton.setOnShowing((a) -> storage.getIngredients().forEach(ingredient -> {
-            MenuItem menu = new MenuItem(ingredient.getName());
-            menu.setId(ingredient.getId().toString());
-            menu.setOnAction((actionEvent) -> {
-                recipeIngredients.add(new RecipeIngredient(currentRecipe,
-                        ingredient, 0.0));
-                System.out.println("Added a new ingredient \"" + ingredient.getName() + "\" to \"" + currentRecipe.getName() + "\"");
-                updateRefresh();
+
+        addButton.setOnShowing((a) -> {
+            addButton.getItems().clear(); // Clear to avoid duplicate menu items
+            storage.getIngredients().forEach(ingredient -> {
+                MenuItem menu = new MenuItem(ingredient.getName());
+                menu.setId(ingredient.getId().toString());
+                menu.setOnAction((actionEvent) -> {
+                    // Open our new dialog for the existing ingredient
+                    openQuantityDialog(ingredient);
+                });
+                addButton.getItems().add(menu);
             });
-            addButton.getItems().add(menu);
-        }));
+        });
         recipeView.requestLayout();
     }
 
@@ -714,7 +723,7 @@ public class RecipesWindowCtrl {
         for (RecipeIngredient ri : original.getIngredients()) {
             Ingredient oldIng = ri.getIngredient();
             Ingredient newIng = new Ingredient(oldIng.getName(), defaultNutritionalValue);
-            RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity());
+            RecipeIngredient newRi = new RecipeIngredient(clone, newIng, ri.getQuantity(), defaultUnit);
             ingredientsCopy.add(newRi);
         }
         clone.setIngredients(ingredientsCopy);
@@ -1057,6 +1066,46 @@ public class RecipesWindowCtrl {
                     .toList();
         }
         else return initList;
+    }
+
+    private void openQuantityDialog(Ingredient ingredient) {
+        try {
+            // 1. Setup the Loader
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/modules/QuantityUnitPopUp.fxml"));
+            Parent root = loader.load();
+
+            // 2. Setup the Window (Stage)
+            Stage popUpStage = new Stage();
+            popUpStage.initModality(Modality.APPLICATION_MODAL); // Blocks interaction with main window
+            popUpStage.initOwner(recipeView.getScene().getWindow()); // Links to main window
+            popUpStage.setTitle("Add Quantity for " + ingredient.getName());
+
+            // 3. Setup the Controller
+            QuantityUnitSelectionCtrl controller = loader.getController();
+            controller.setStage(popUpStage);
+
+            // 4. Show and Wait
+            popUpStage.setScene(new Scene(root));
+            popUpStage.showAndWait(); // Execution stops here until window is closed
+
+            // 5. Handle the Result
+            if (controller.isOkClicked()) {
+                RecipeIngredient newEntry = new RecipeIngredient(
+                        this.currentRecipe,  // The current recipe you are editing
+                        ingredient,           // The ingredient from your list/search
+                        controller.getQuantity(),
+                        controller.getUnit()
+                );
+
+                // Add to your recipe's internal list
+                currentRecipe.getIngredients().add(newEntry);
+
+                // Refresh the UI to show the new item
+                updateRefresh();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
