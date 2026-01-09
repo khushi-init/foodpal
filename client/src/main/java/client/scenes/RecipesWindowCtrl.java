@@ -525,9 +525,16 @@ public class RecipesWindowCtrl {
         recipeView.requestLayout();
     }
 
+    /**
+     * Drag and drop function, seperated as a helper. LoadSteps is already gigantic
+     * @param n The node, or in this case RecipeInstruction node to move and compare to
+     * @param currentIndex The current index of the this node/instruction
+     * @param recipeIngredients The list of recipeInredients, to be altered when dragging
+     */
     public void detectDrag(Node n, int currentIndex, List<String> recipeIngredients) {
         // Things to do when instructions is dragged
         // Basically just detect it as dragged, and copy the index to the 'clipboard'
+        // A clipboard is a required dataformat for the drag board...... These names man
         n.setOnDragDetected(event -> {
             Dragboard db = n.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent index = new ClipboardContent();
@@ -544,10 +551,18 @@ public class RecipesWindowCtrl {
             dragEvent.consume();
         });
 
-        // Change color of target to green for emphasis
+        // Change border of target to green line for emphasis
+        // This depends on if we move up or down
         n.setOnDragEntered(dragEvent -> {
             if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
-                n.setStyle("-fx-background-color: GREENYELLOW");
+                int initIndex = Integer.parseInt(dragEvent.getDragboard().getString());
+                String border = "-fx-border-style: solid outside; -fx-border-color: GREENYELLOW;";
+                if(initIndex < currentIndex) {
+                    // up right down left (0 0 3 0) = draw only top
+                    n.setStyle(border + "-fx-border-width: 0 0 3 0;");
+                } else if(initIndex > currentIndex) {
+                    n.setStyle(border + "-fx-border-width: 3 0 0 0;");
+                }
             }
         });
 
