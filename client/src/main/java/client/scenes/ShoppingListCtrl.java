@@ -133,6 +133,7 @@ public class ShoppingListCtrl {
                     String ingredientText = amount.isEmpty() ? name : name + " (" + amount + ")";
                     shoppingList.addIngredient(ingredientText);
                     showShoppingList();
+                    System.out.println("Ingredient \"" + ingredientText + "\" added to the shopping list");
                 }
             });
         });
@@ -186,6 +187,7 @@ public class ShoppingListCtrl {
         
         try {
             Files.write(filePath, file);
+            System.out.println("File written to " + filePath);
         }
         catch (IOException ex) {
             System.out.print("Invalid Path");
@@ -199,6 +201,7 @@ public class ShoppingListCtrl {
     private void onHandleReset() {
         shoppingList.resetList();
         showShoppingList();
+        System.out.println("Shopping list has been reset");
     }
 
     /**

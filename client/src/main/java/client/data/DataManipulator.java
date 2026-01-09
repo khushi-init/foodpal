@@ -47,6 +47,7 @@ public class DataManipulator {
             System.err.println("Recipe creation failed. Check server console for details.");
             return Optional.empty();
         }
+        System.out.println("Your recipe \"" + recipe.getName()+ "\" has been created successfully.");
         storage.getRecipes().add(savedRecipe);
         return Optional.of(savedRecipe);
     }
@@ -60,6 +61,7 @@ public class DataManipulator {
         Optional<Ingredient> response = server.addIngredient(ingredient);
         if (response.isEmpty()) return Optional.empty();
         storage.getIngredients().add(response.get());
+        System.out.println("Your ingredient \"" + ingredient.getName()+ "\" has been created successfully.");
         return response;
     }
 
@@ -76,7 +78,7 @@ public class DataManipulator {
         Recipe updated = server.updateRecipe(target);
         if (updated != null) {
             updateRecipe(updated);
-            System.out.println("Recipe saved successfully to: " + newName);
+            System.out.println("Recipe renamed successfully to: " + newName);
             return Optional.of(updated);
         }
         else{
@@ -102,6 +104,7 @@ public class DataManipulator {
      * Refresh the local recipe list
      */
     public void refreshRecipes() {
+        System.out.println("Refreshed recipe list");
         List<Recipe> serverResponse = server.getRecipes();
         storage.getRecipes().setAll(serverResponse);
     }
@@ -118,6 +121,7 @@ public class DataManipulator {
         }
         storage.getRecipes().remove(hit);
         // Delete recipe
+        System.out.println("Recipe \"" + hit.getName() + "\" deleted successfully");
         storage.getFavoriteIDs().remove(hit.getId());
         saveFave();
     }
@@ -138,6 +142,7 @@ public class DataManipulator {
 
         // 2. If successful, remove from the local list (LocalStorage)
         // The UI (ListView) will update automatically.
+        System.out.println("Ingredient \"" + ingredient.getName() + "\" deleted successfully");
         storage.getIngredients().remove(ingredient);
     }
 
@@ -159,9 +164,11 @@ public class DataManipulator {
         for (int i = 0; i < storage.getIngredients().size(); i++) {
             if (Objects.equals(storage.getIngredients().get(i).getId(), update.get().getId())) {
                 storage.getIngredients().set(i, update.get());
+                System.out.println("Ingredient \"" + replacement.getName() + "\" updated successfully");
                 return true;
             }
         }
+        errs.showGenericError("Ingredient updated on server but not found locally");
         return false;
     }
 

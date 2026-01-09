@@ -1,6 +1,8 @@
 package server.service;
 
+import commons.Ingredient;
 import commons.Recipe;
+import commons.RecipeIngredient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.database.IngredientRepository;
@@ -59,7 +61,7 @@ public class RecipeServiceTest {
 
     @Test
     public void createRecipeTest() {
-        Recipe incoming = new Recipe("New Recipe", null, null);
+        Recipe incoming = new Recipe("New Recipe",  new ArrayList<>(), new ArrayList<>());
         when(mockRecipeRepo.save(any(Recipe.class))).thenReturn(incoming);
 
         Recipe saved = sut.createRecipe(incoming);
@@ -70,10 +72,11 @@ public class RecipeServiceTest {
     @Test
     public void updateRecipeTest() {
         Recipe existing = new Recipe();
+        existing.setIngredients(new ArrayList<>());
         when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(existing));
         when(mockRecipeRepo.save(any(Recipe.class))).thenReturn(existing);
 
-        Optional<Recipe> result = sut.updateRecipe(id, new Recipe("Updated", null, null));
+        Optional<Recipe> result = sut.updateRecipe(id, new Recipe("Updated", new ArrayList<>(), new ArrayList<>()));
 
         assertTrue(result.isPresent());
     }
@@ -101,4 +104,39 @@ public class RecipeServiceTest {
         // ASSERT: Should be false because the list was empty
         assertFalse(result);
     }
+
+    @Test
+    public void testRemoveDeletedIngredients() {
+        // ARRANGE
+        Recipe existing = new Recipe();
+        existing.setIngredients(new ArrayList<>());
+
+        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Salt", null), 1.0));
+        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Pepper", null), 2.0));
+
+        Recipe incoming = new Recipe("Updated", new ArrayList<>(), new ArrayList<>());
+        incoming.getIngredients().add(new RecipeIngredient(incoming, new Ingredient("Salt", null), 1.0));
+
+        when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(existing));
+        when(mockRecipeRepo.save(any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // ACT
+        Optional<Recipe> result = sut.updateRecipe(id, incoming);
+
+        // ASSERT
+        assertTrue(result.isPresent());
+        assertEquals(1, result.get().getIngredients().size());
+        assertEquals("Salt",
+                result.get().getIngredients().getFirst().getIngredient().getName());
+    }
+
+
+    @Test
+    public void testGetIngredientName() {
+        RecipeIngredient ri =
+                new RecipeIngredient(null, new Ingredient("   ", null), 1.0);
+        String result = sut.getIngredientName(ri);
+        assertNull(result);
+    }
+
 }

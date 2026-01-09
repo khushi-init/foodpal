@@ -368,7 +368,6 @@ public class RecipesWindowCtrl {
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
             recipeView.getChildren().add(ingNode);
-
             Long ingredientId = (ri.getIngredient() != null) ? ri.getIngredient().getId() : null;
             long recipeId = currentRecipe.getId();
 
@@ -381,16 +380,18 @@ public class RecipesWindowCtrl {
                     if (!success) {
                         errorCtrl.showGenericError("Failed to delete ingredient from server.");
                     }
+                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" deleted successfully");
                     return;
                 }
                 openRecipe(currentRecipe);
             });
-            // Editing ingredient Logic!
-            ingCtrl.setEditIngredient(() -> {
+            ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
                 handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
                     ri.setQuantity(newQty);
                     ri.getIngredient().setName(newName);
                     openRecipe(currentRecipe);
+                    server.updateRecipe(currentRecipe);
+                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" updated successfully");
                 });
             });
         }
@@ -409,6 +410,7 @@ public class RecipesWindowCtrl {
             menu.setOnAction((actionEvent) -> {
                 recipeIngredients.add(new RecipeIngredient(currentRecipe,
                         ingredient, 0.0));
+                System.out.println("Added a new ingredient \"" + ingredient.getName() + "\" to \"" + currentRecipe.getName() + "\"");
                 updateRefresh();
             });
             addButton.getItems().add(menu);
@@ -492,7 +494,9 @@ public class RecipesWindowCtrl {
             // Edit Logic
             instCtrl.setEditInstruction(newInstruction -> {
                 // This code is run when a string is passed into the editInstruction consumer
-                System.out.println("Instruction edit from " + recipeInstructions.get(currentIndex) + " to " + newInstruction);
+                if(!instruction.equals("New Instruction")) {
+                    System.out.println("Instruction edited successfully");
+                }
                 recipeInstructions.set(currentIndex, newInstruction);
                 Recipe updated = server.updateRecipe(currentRecipe);
                 if (updated == null) {
@@ -520,6 +524,7 @@ public class RecipesWindowCtrl {
             recipeInstructions.add("New Instruction");
             newInstructionAdded = true;
             openRecipe(currentRecipe);
+            System.out.println("Added instruction");
         });
         recipeView.requestLayout();
     }
@@ -539,19 +544,17 @@ public class RecipesWindowCtrl {
     @FXML
     public void onCloneRecipe() {
         cancelSearch();
-        Recipe recipe = currentRecipe;
-        if (recipe == null) {
-            recipe = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
-        }
-        if (recipe == null) {
+        if (currentRecipe == null) {
+            currentRecipe = sidebarRecipeNamesList.getSelectionModel().getSelectedItem();
             return;
         }
-        String newName = createCopyName(recipe.getName());
-        Recipe clone = cloneRecipe(recipe, newName);
+        String newName = createCopyName(currentRecipe.getName());
+        Recipe clone = cloneRecipe(currentRecipe, newName);
         Recipe savedRecipe = server.addRecipe(clone);
         if(savedRecipe != null){
             storage.getRecipes().add(savedRecipe);
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
+            System.out.println("Cloned recipe \"" + currentRecipe.getName() + "\" to \"" + newName + "\"");
         } else {
             errorCtrl.showGenericError("Recipe not selected to clone.");
         }
@@ -720,7 +723,7 @@ public class RecipesWindowCtrl {
         if (selectedRecipes.isEmpty()) {
             return null; //return null if there are no selected recipes (i.e. the list of selected recipes is empty)
         }
-        return selectedRecipes.get(0);
+        return selectedRecipes.getFirst();
     }
 
     /**
@@ -728,14 +731,19 @@ public class RecipesWindowCtrl {
      *
      * @param recipe The recipe to be selected
      */
-
     public void setSelectedRecipe(Recipe recipe){
         if(!storage.getRecipes().contains(recipe)) return; //if the recipe is not in the list, do nothing
         MultipleSelectionModel<Recipe> selectionModel = sidebarRecipeNamesList.getSelectionModel();
         selectionModel.select(recipe);
     }
 
-
+    /**
+     * Displays a modal dialog for editing an ingredient and returns the entered values
+     *
+     * @param initialName ingredient name
+     * @param initialQuantity ingredient quantity
+     * @return Optional containing the name and quantity if confirmed, otherwise Optional is empty
+     */
     private Optional<Pair<String, String>> showIngredientPopUp(String initialName, String initialQuantity) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -771,6 +779,9 @@ public class RecipesWindowCtrl {
         }
     }
 
+    /**
+     * Opens a new window displaying the current shopping list.
+     */
     private void showShoppingList() {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -796,7 +807,10 @@ public class RecipesWindowCtrl {
         }
     }
 
-
+    /**
+     * Updates the current recipe
+     * @param updated the updated recipe, or null to leave unchanged
+     */
     private void applyUpdatedRecipe(Recipe updated) {
         if (updated == null) {
             return;
@@ -812,11 +826,11 @@ public class RecipesWindowCtrl {
             if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
                 storage.getFavoriteIDs().remove(currentRecipe.getId());
                 favoriteImage.setImage(unFavorite);
-                System.out.println("Removed from favorites!");
+                System.out.println("Removed \""+currentRecipe.getName()+"\" from favorites!");
             } else {
                 storage.getFavoriteIDs().add(currentRecipe.getId());
                 favoriteImage.setImage(favorite);
-                System.out.println("Added to favorites!");
+                System.out.println("Added \""+currentRecipe.getName()+"\" to favorites!");
             }
             // Regardless of change, put new favorites to file.
             dataManipulator.saveFave();

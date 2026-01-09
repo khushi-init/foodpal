@@ -232,7 +232,7 @@ public class ServerUtils {
     /**
      * Sends a DELETE request to the server to delete the ingredient of the provided id.
      * This will trigger the server-side cascading deletion to remove it from all recipes.
-     * * @param ingredientId - The id of the ingredient to destroy
+     * @param ingredientId - The id of the ingredient to destroy
      * @return - A boolean indicating whether the deletion was successful or not
      */
     public boolean deleteIngredient(Long ingredientId) {

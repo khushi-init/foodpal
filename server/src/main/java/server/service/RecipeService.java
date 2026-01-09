@@ -101,27 +101,72 @@ public class RecipeService {
             existing.setName(incoming.getName());
             existing.setPreparationSteps(incoming.getPreparationSteps());
 
-            if (incoming.getIngredients() != null) {
-                for (RecipeIngredient ri : incoming.getIngredients()) {
-                    String name = (ri.getIngredient() != null) ? ri.getIngredient().getName() : "";
+            // Delete ingredients that are in existing but not in incoming
+            removeDeletedIngredients(existing, incoming);
 
-                    if (name == null || name.trim().isEmpty()) continue;
+            for (RecipeIngredient ri : incoming.getIngredients()) {
+                String name = getIngredientName(ri);
 
-                    // Logic: Reuse existing ingredient or create new
-                    Ingredient ing = ingredientRepository.findByName(name)
-                            .orElseGet(() -> new Ingredient(name, defaultNutritionalValue));
+                // Logic: Reuse existing ingredient or create new
+                Ingredient ing = ingredientRepository.findByName(name)
+                        .orElseGet(() -> new Ingredient(name, defaultNutritionalValue));
 
-                    // Logic: Prevent duplicate ingredients in the same recipe
-                    boolean alreadyExists = existing.getIngredients().stream()
-                            .anyMatch(existingRi -> existingRi.getIngredient().getName().equals(name));
+                // Logic: Prevent duplicate ingredients in the same recipe
+                Optional<RecipeIngredient> existingMatchingIngredient = existing.getIngredients().stream()
+                        .filter(existingRi -> name.equals(existingRi.getIngredient().getName())).findFirst();
+                boolean alreadyExists = existingMatchingIngredient.isPresent();
 
-                    if (!alreadyExists) {
-                        existing.getIngredients().add(new RecipeIngredient(existing, ing, ri.getQuantity()));
-                    }
+                // Add new RecipeIngredient if it does not exist yet
+                if (!alreadyExists) {
+                    existing.getIngredients().add(new RecipeIngredient(existing, ing, ri.getQuantity()));
+                } else if (!ri.getQuantity().equals(existingMatchingIngredient.get().getQuantity())) {
+                    // Update the quantity if it has been changed
+                    existingMatchingIngredient.get().setQuantity(ri.getQuantity());
                 }
             }
+
             return recipeRepository.save(existing);
         });
+    }
+
+    /**
+     * Removes ingredients from the existing recipe that are no longer present in the incoming recipe.
+     * @param existing the recipe whose ingredients will be updated
+     * @param incoming the recipe containing the wanted set of ingredients
+     */
+    private void removeDeletedIngredients(Recipe existing, Recipe incoming) {
+        if (existing == null) {
+            return;
+        }
+
+        if (incoming == null || incoming.getIngredients() == null) {
+            // If incoming has no ingredients--> remove all existing ones
+            existing.getIngredients().clear();
+            return;
+        }
+        existing.getIngredients().removeIf(existingRi -> {
+            String existingName = getIngredientName(existingRi);
+            if (existingName == null) {
+                return false;
+            }
+
+            return incoming.getIngredients().stream()
+                    .noneMatch(incomingRi ->
+                            existingName.equals(getIngredientName(incomingRi)));
+        });
+    }
+
+    /**
+     *  Safely extracts and normalizes the ingredient name from a RecipeIngredient
+     * @param recipeIngredient the recipe ingredient from which to extract the name
+     * @return the trimmed ingredient name, or null if unavailable
+     */
+    String getIngredientName(RecipeIngredient recipeIngredient) {
+        if (recipeIngredient == null || recipeIngredient.getIngredient() == null) {
+            return null;
+        }
+        String name = recipeIngredient.getIngredient().getName();
+        return (name == null || name.trim().isEmpty()) ? null : name;
     }
 
     /**
