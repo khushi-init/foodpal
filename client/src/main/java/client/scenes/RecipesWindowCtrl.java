@@ -541,7 +541,7 @@ public class RecipesWindowCtrl {
             index.putString(String.valueOf(currentIndex));
             db.setContent(index);
             event.consume();
-
+            System.out.printf("Drag detected! Moving instruction at index " + index );
         });
         // Check for any other node (Button, label, whatever) if its eligible
         n.setOnDragOver(dragEvent -> {
