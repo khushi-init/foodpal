@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import client.data.WebSocketManager;
+import client.utils.*;
 import com.google.inject.Inject;
 
 import client.Main;
@@ -13,18 +14,7 @@ import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.searchUtils.Proposition;
-import client.utils.ErrorCtrl;
-import client.utils.IngredientPopUpCtrl;
-import client.utils.RecipeIngredientUICtrl;
-import client.utils.RecipeInstructionUICtrl;
-import client.utils.SearchCtrl;
-import client.utils.ServerUtils;
-import client.utils.ToBeAddedCtrl;
-import commons.Ingredient;
-import commons.NutritionalValue;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.ShoppingList;
+import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
