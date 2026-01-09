@@ -190,6 +190,9 @@ public class RecipesWindowCtrl {
         intializeSearchElements();
     }
 
+    /**
+     * Initializes the total servings field to be of type integer and adds listeners.
+     */
     private void initializeTotalServings() {
         // Set text field of servings amount selector to integers
         totalServingsField.setTextFormatter(new TextFormatter<> (e -> {
