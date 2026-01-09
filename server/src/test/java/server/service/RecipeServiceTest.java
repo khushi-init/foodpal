@@ -1,9 +1,6 @@
 package server.service;
 
-import commons.Ingredient;
-import commons.Recipe;
-import commons.TitleUpdate;
-import commons.RecipeIngredient;
+import commons.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -135,11 +132,11 @@ public class RecipeServiceTest {
         Recipe existing = new Recipe();
         existing.setIngredients(new ArrayList<>());
 
-        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Salt", null), 1.0));
-        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Pepper", null), 2.0));
+        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
+        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Pepper", null), 2.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
 
         Recipe incoming = new Recipe("Updated", new ArrayList<>(), new ArrayList<>());
-        incoming.getIngredients().add(new RecipeIngredient(incoming, new Ingredient("Salt", null), 1.0));
+        incoming.getIngredients().add(new RecipeIngredient(incoming, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
 
         when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(existing));
         when(mockRecipeRepo.save(any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -158,7 +155,7 @@ public class RecipeServiceTest {
     @Test
     public void testGetIngredientName() {
         RecipeIngredient ri =
-                new RecipeIngredient(null, new Ingredient("   ", null), 1.0);
+                new RecipeIngredient(null, new Ingredient("   ", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM));
         String result = sut.getIngredientName(ri);
         assertNull(result);
     }
