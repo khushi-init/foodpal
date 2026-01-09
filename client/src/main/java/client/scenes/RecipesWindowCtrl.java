@@ -1,10 +1,7 @@
 package client.scenes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import java.util.function.BiConsumer;
 
@@ -27,6 +24,7 @@ import commons.NutritionalValue;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.ShoppingList;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -98,6 +96,8 @@ public class RecipesWindowCtrl {
     @FXML
     private CheckBox favoriteCheck;
 
+    //Drag n drop delay
+    int processingDelay = 50;
 
     private boolean newInstructionAdded = false;
 
@@ -541,7 +541,7 @@ public class RecipesWindowCtrl {
             index.putString(String.valueOf(currentIndex));
             db.setContent(index);
             event.consume();
-            System.out.printf("Drag detected! Moving instruction at index " + index );
+            System.out.println("Drag detected! Moving instruction at index " + currentIndex);
         });
         // Check for any other node (Button, label, whatever) if its eligible
         n.setOnDragOver(dragEvent -> {
@@ -580,10 +580,21 @@ public class RecipesWindowCtrl {
             if(initIndex != currentIndex) {
                 String movedItem = recipeIngredients.remove(initIndex);
                 recipeIngredients.add(currentIndex,movedItem);
-                updateRefresh();
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() ->
+                                updateRefresh());
+                    }
+                },
+                        processingDelay
+                );
+
+                succes = true;
             }
             dragEvent.setDropCompleted(succes);
             dragEvent.consume();
+
         });
     }
     /**
