@@ -943,6 +943,7 @@ public class RecipesWindowCtrl {
             Parent root = loader.load();
 
             ShoppingListCtrl ctrl = loader.getController();
+            ctrl.setErrorCtrl(errorCtrl);
             ctrl.setAndShowShoppingList(shoppingList);
 
             Stage shoppingListStage = new Stage();

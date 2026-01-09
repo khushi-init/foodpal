@@ -193,6 +193,10 @@ public class ServerUtils {
                 // Write the file to the path
                 Files.write(filePath, response.readEntity(byte[].class));
                 System.out.println("Downloaded recipe " + recipeId + " to " + filePath);
+                errorCtrl.displayInfo("The download has been successful! " +
+                                "You can find it at " + filePath,
+                        "Close",
+                        "SUCCESS");
             }
 
         } catch (Exception e) {
