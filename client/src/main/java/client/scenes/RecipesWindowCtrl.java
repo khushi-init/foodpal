@@ -14,7 +14,6 @@ import client.Main;
 import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
-import client.utils.*;
 import client.utils.searchUtils.Proposition;
 import client.utils.ErrorCtrl;
 import client.utils.IngredientPopUpCtrl;
@@ -39,7 +38,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -47,10 +49,6 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
-import java.io.*;
-import java.util.*;
-
 
 
 public class RecipesWindowCtrl {
@@ -475,6 +473,9 @@ public class RecipesWindowCtrl {
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
             int currentIndex = i;
+
+            // Drag and drop trigger
+            detectDrag(ingNode, currentIndex, recipeInstructions);
             // Delete logic
             instCtrl.setDeleteCheck(() -> {
                 // This code runs when .run() is called on click in deleteCheck runnable
@@ -524,6 +525,52 @@ public class RecipesWindowCtrl {
         recipeView.requestLayout();
     }
 
+    public void detectDrag(Node n, int currentIndex, List<String> recipeIngredients) {
+        // Things to do when instructions is dragged
+        // Basically just detect it as dragged, and copy the index to the 'clipboard'
+        n.setOnDragDetected(event -> {
+            Dragboard db = n.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent index = new ClipboardContent();
+            index.putString(String.valueOf(currentIndex));
+            db.setContent(index);
+            event.consume();
+
+        });
+        // Check for any other node (Button, label, whatever) if its eligible
+        n.setOnDragOver(dragEvent -> {
+            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+                dragEvent.acceptTransferModes(TransferMode.MOVE);
+            }
+            dragEvent.consume();
+        });
+
+        // Change color of target to green for emphasis
+        n.setOnDragEntered(dragEvent -> {
+            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+                n.setStyle("-fx-background-color: GREENYELLOW");
+            }
+        });
+
+        // Reset style when leaving target
+        n.setOnDragExited(dragEvent -> {
+            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+                n.setStyle("");
+            }
+        });
+        //When dropped on another instruction, remove original, and set on new target index
+        n.setOnDragDropped(dragEvent -> {
+            boolean succes = false;
+            Dragboard db = dragEvent.getDragboard();
+            int initIndex = Integer.parseInt(db.getString());
+            if(initIndex != currentIndex) {
+                String movedItem = recipeIngredients.remove(initIndex);
+                recipeIngredients.add(currentIndex,movedItem);
+                updateRefresh();
+            }
+            dragEvent.setDropCompleted(succes);
+            dragEvent.consume();
+        });
+    }
     /**
      * Clears recipe view, making it look the same as when the app launches
      */
