@@ -1,29 +1,19 @@
 package client.scenes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import java.util.function.BiConsumer;
 
 import client.data.WebSocketManager;
+import client.utils.*;
 import com.google.inject.Inject;
 
 import client.Main;
 import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
-import client.utils.*;
 import client.utils.searchUtils.Proposition;
-import client.utils.ErrorCtrl;
-import client.utils.IngredientPopUpCtrl;
-import client.utils.RecipeIngredientUICtrl;
-import client.utils.RecipeInstructionUICtrl;
-import client.utils.SearchCtrl;
-import client.utils.ServerUtils;
-import client.utils.ToBeAddedCtrl;
 import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -37,7 +27,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -46,10 +39,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.springframework.messaging.simp.stomp.StompSession;
-
-import java.io.*;
-import java.util.*;
-
 
 
 public class RecipesWindowCtrl {
@@ -108,6 +97,8 @@ public class RecipesWindowCtrl {
     @FXML
     private CheckBox favoriteCheck;
 
+    //Drag n drop delay
+    int processingDelay = 50;
 
     private boolean newInstructionAdded = false;
 
@@ -596,6 +587,9 @@ public class RecipesWindowCtrl {
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
             int currentIndex = i;
+
+            // Drag and drop trigger
+            detectDrag(ingNode, currentIndex, recipeInstructions);
             // Delete logic
             instCtrl.setDeleteCheck(() -> {
                 // This code runs when .run() is called on click in deleteCheck runnable
@@ -648,6 +642,78 @@ public class RecipesWindowCtrl {
         recipeView.requestLayout();
     }
 
+    /**
+     * Drag and drop function, seperated as a helper. LoadSteps is already gigantic
+     * @param n The node, or in this case RecipeInstruction node to move and compare to
+     * @param currentIndex The current index of the this node/instruction
+     * @param recipeIngredients The list of recipeInredients, to be altered when dragging
+     */
+    public void detectDrag(Node n, int currentIndex, List<String> recipeIngredients) {
+        // Things to do when instructions is dragged
+        // Basically just detect it as dragged, and copy the index to the 'clipboard'
+        // A clipboard is a required dataformat for the drag board...... These names man
+        n.setOnDragDetected(event -> {
+            Dragboard db = n.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent index = new ClipboardContent();
+            index.putString(String.valueOf(currentIndex));
+            db.setContent(index);
+            event.consume();
+            System.out.println("Drag detected! Moving instruction at index " + currentIndex);
+        });
+        // Check for any other node (Button, label, whatever) if its eligible
+        n.setOnDragOver(dragEvent -> {
+            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+                dragEvent.acceptTransferModes(TransferMode.MOVE);
+            }
+            dragEvent.consume();
+        });
+
+        // Change border of target to green line for emphasis
+        // This depends on if we move up or down
+        n.setOnDragEntered(dragEvent -> {
+            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+                int initIndex = Integer.parseInt(dragEvent.getDragboard().getString());
+                String border = "-fx-border-style: solid outside; -fx-border-color: GREENYELLOW;";
+                if(initIndex < currentIndex) {
+                    // up right down left (0 0 3 0) = draw only top
+                    n.setStyle(border + "-fx-border-width: 0 0 3 0;");
+                } else if(initIndex > currentIndex) {
+                    n.setStyle(border + "-fx-border-width: 3 0 0 0;");
+                }
+            }
+        });
+
+        // Reset style when leaving target
+        n.setOnDragExited(dragEvent -> {
+            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+                n.setStyle("");
+            }
+        });
+        // When dropped on another instruction, remove original, and set on new target index
+        n.setOnDragDropped(dragEvent -> {
+            boolean succes = false;
+            Dragboard db = dragEvent.getDragboard();
+            int initIndex = Integer.parseInt(db.getString());
+            if(initIndex != currentIndex) {
+                String movedItem = recipeIngredients.remove(initIndex);
+                recipeIngredients.add(currentIndex,movedItem);
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() ->
+                                updateRefresh());
+                    }
+                },
+                        processingDelay
+                );
+
+                succes = true;
+            }
+            dragEvent.setDropCompleted(succes);
+            dragEvent.consume();
+
+        });
+    }
     /**
      * Clears recipe view, making it look the same as when the app launches
      */
