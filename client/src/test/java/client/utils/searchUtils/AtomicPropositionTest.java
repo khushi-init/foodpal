@@ -67,5 +67,20 @@ public class AtomicPropositionTest {
         assertTrue(prop.verifyArguments(SearchFunctions.MINING, prop.getArguments()));
     }
 
+    @Test
+    public void equalsTest(){
+        AtomicProposition prop2 = new AtomicProposition(prop.getFunction(), prop.getArguments());
+        assertEquals(prop2, prop);
+        prop2.setFunction(SearchFunctions.MAXING);
+        assertNotEquals(prop2, prop);
+    }
+
+    @Test
+    public void hashCodeTest(){
+        AtomicProposition prop2 = new AtomicProposition(prop.getFunction(), prop.getArguments());
+        assertEquals(prop2.hashCode(), prop.hashCode());
+        prop2.setFunction(SearchFunctions.MAXING);
+        assertNotEquals(prop2.hashCode(), prop.hashCode());
+    }
     
 }

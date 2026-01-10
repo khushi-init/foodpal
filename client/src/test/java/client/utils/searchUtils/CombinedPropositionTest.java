@@ -53,4 +53,20 @@ public class CombinedPropositionTest {
         assertDoesNotThrow(() -> prop.verifyArguments());
         assertTrue(prop.verifyArguments());
     }
+
+    @Test
+    public void equalsTest(){
+        CombinedProposition prop2 = new CombinedProposition(prop.getFunction(), prop.getArguments());
+        assertEquals(prop2, prop);
+        prop2.setFunction(SearchFunctions.OR);
+        assertNotEquals(prop2, prop);
+    }
+
+    @Test
+    public void hashCodeTest(){
+        CombinedProposition prop2 = new CombinedProposition(prop.getFunction(), prop.getArguments());
+        assertEquals(prop2.hashCode(), prop.hashCode());
+        prop2.setFunction(SearchFunctions.OR);
+        assertNotEquals(prop2.hashCode(), prop.hashCode());
+    }
 }
