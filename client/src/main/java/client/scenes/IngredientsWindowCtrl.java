@@ -1,5 +1,8 @@
 package client.scenes;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import client.IngredientListCell;
 import client.Main;
 import client.data.DataManipulator;
@@ -12,6 +15,7 @@ import commons.NutritionalValue;
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -20,13 +24,12 @@ import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public class IngredientsWindowCtrl {
 
@@ -36,6 +39,14 @@ public class IngredientsWindowCtrl {
     private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
     private PrimaryCtrl primaryCtrl;
     private ErrorCtrl errorCtrl;
+
+    // NutriScore points 
+    private static final double nutriScoreA = 1;
+    private static final double nutriScoreB = 4;
+    private static final double nutriScoreC = 7;
+    private static final double nutriScoreD = 10;
+
+    final int heightImage = 50;
 
     // FXML FIELDS (UI Elements)
 
@@ -284,50 +295,28 @@ public class IngredientsWindowCtrl {
             return;
         }
 
-        double points = pointsKcal(nv.kcal100g()) +
-                        pointsCarbs(nv.carbs100g()) +
-                        pointsFats(nv.fat100g()) -
-                        pointsProtein(nv.protein100g());
-
+        double points = nv.nutriScorePoints();
         String imagePath = nutriScoreImagePath(points);
-
-        ImageView imageView = new ImageView(
+        ImageView imageViewNutri = new ImageView(
                 new Image(getClass().getResource(imagePath).toExternalForm())
         );
 
-        ingredientDetailsView.getChildren().add(imageView);
+        //styling
+        imageViewNutri.setFitHeight(heightImage);
+        imageViewNutri.setPreserveRatio(true);
+        HBox imageContainer = new HBox(imageViewNutri);
+        imageContainer.setAlignment(Pos.CENTER_RIGHT);
+
+        ingredientDetailsView.getChildren().add(imageContainer);
+
     }
 
     private String nutriScoreImagePath(double points) {
-        if (points <= 1)  return "/client/images/NutriScoreA.png";
-        if (points <= 4)  return "/client/images/NutriScoreB.png";
-        if (points <= 7)  return "/client/images/NutriScoreC.png";
-        if (points <= 10) return "/client/images/NutriScoreD.png";
+        if (points <= nutriScoreA)  return "/client/images/NutriScoreA.png";
+        if (points <= nutriScoreB)  return "/client/images/NutriScoreB.png";
+        if (points <= nutriScoreC)  return "/client/images/NutriScoreC.png";
+        if (points <= nutriScoreD) return "/client/images/NutriScoreD.png";
         return "/client/images/NutriScoreE.png";
-    }
-
-
-    private int pointsKcal(double kcal) {
-        return pointsFromUpperBounds(kcal, 80, 160, 240, 320, 400, 480, 560, 640, 720);
-    }
-
-    private int pointsCarbs(double sugar) {
-        return pointsFromUpperBounds(sugar, 2, 5, 10, 15, 20);
-    }
-
-    private int pointsFats(double fat) {
-        return pointsFromUpperBounds(fat, 3, 8, 15, 25, 35);
-    }
-
-    private int pointsProtein(double protein) {
-        return pointsFromUpperBounds(protein, 3, 6, 10, 15);
-    }
-
-    private int pointsFromUpperBounds(double value, double... upperBounds) {
-        for (int i = 0; i < upperBounds.length; i++) {
-            if (value <= upperBounds[i]) return i;
-        }
-        return upperBounds.length;
     }
 
     // We need an update method to re-sort the ingredients list on updates
