@@ -8,6 +8,7 @@ import client.utils.CreateIngredientCtrl;
 import client.utils.ErrorCtrl;
 import client.utils.ServerUtils;
 import commons.Ingredient;
+import commons.NutritionalValue;
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -16,6 +17,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -136,6 +139,8 @@ public class IngredientsWindowCtrl {
         } else {
             recipesUsedInLabel.setText(String.format("%d recipe(s)", usage.get()));
         }
+
+        showNutriScore(ingredient);
     }
 
     /**
@@ -144,6 +149,8 @@ public class IngredientsWindowCtrl {
     public void clearDetails() {
         ingredientDetailsView.setVisible(false);
         ingredientDetailsView.setManaged(false);
+        // Remove any ImageView when clearing
+        ingredientDetailsView.getChildren().removeIf(node -> node instanceof ImageView);
     }
 
     /**
@@ -266,6 +273,61 @@ public class IngredientsWindowCtrl {
             if (!anyway) return;
         }
         dataManipulator.deleteIngredient(selected);
+    }
+
+    public void showNutriScore(Ingredient ingredient) {
+        // remove any existing ImageView to avoid duplicates
+        ingredientDetailsView.getChildren().removeIf(node -> node instanceof ImageView);
+
+        NutritionalValue nv = ingredient.getNutritionalValue();
+        if (nv == null || nv.kcal100g() == 0) {
+            return;
+        }
+
+        double points = pointsKcal(nv.kcal100g()) +
+                        pointsCarbs(nv.carbs100g()) +
+                        pointsFats(nv.fat100g()) -
+                        pointsProtein(nv.protein100g());
+
+        String imagePath = nutriScoreImagePath(points);
+
+        ImageView imageView = new ImageView(
+                new Image(getClass().getResource(imagePath).toExternalForm())
+        );
+
+        ingredientDetailsView.getChildren().add(imageView);
+    }
+
+    private String nutriScoreImagePath(double points) {
+        if (points <= 1)  return "/client/images/NutriScoreA.png";
+        if (points <= 4)  return "/client/images/NutriScoreB.png";
+        if (points <= 7)  return "/client/images/NutriScoreC.png";
+        if (points <= 10) return "/client/images/NutriScoreD.png";
+        return "/client/images/NutriScoreE.png";
+    }
+
+
+    private int pointsKcal(double kcal) {
+        return pointsFromUpperBounds(kcal, 80, 160, 240, 320, 400, 480, 560, 640, 720);
+    }
+
+    private int pointsCarbs(double sugar) {
+        return pointsFromUpperBounds(sugar, 2, 5, 10, 15, 20);
+    }
+
+    private int pointsFats(double fat) {
+        return pointsFromUpperBounds(fat, 3, 8, 15, 25, 35);
+    }
+
+    private int pointsProtein(double protein) {
+        return pointsFromUpperBounds(protein, 3, 6, 10, 15);
+    }
+
+    private int pointsFromUpperBounds(double value, double... upperBounds) {
+        for (int i = 0; i < upperBounds.length; i++) {
+            if (value <= upperBounds[i]) return i;
+        }
+        return upperBounds.length;
     }
 
     // We need an update method to re-sort the ingredients list on updates
