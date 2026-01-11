@@ -2,65 +2,70 @@ package commons;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NutritionalValueTest {
+    
+    //reusable NOT MAGIC NUMBERS
+    private final double z = 0.0;
+    private final double one = 1.0;
+    private final double four = 4.0;
+    private final double nine = 9.0;
+    private final double ten = 10.0;
+    private final double twenty = 20.0;
+    private final double thirty = 30.0;
+    private final double hundred = 100.0;
 
-    @Test
-    void NutriScoreCalculatesCorrectlyTest() {
-        var nv = new NutritionalValue(1, 1, 1);
-        assertEquals(17.0, nv.kcal100g());
+    // helper to reduce repetition
+    private NutritionalValue nv(double f, double p, double c) {
+        return new NutritionalValue(f, p, c);
+    }
 
-        assertEquals(90.0, new NutritionalValue(10, 0, 0).kcal100g());
-        assertEquals(40.0, new NutritionalValue(0, 10, 0).kcal100g());
-        assertEquals(40.0, new NutritionalValue(0, 0, 10).kcal100g());
+    // compute expected kcal
+    private double kcal(double f, double p, double c) {
+        final double kf = 9.0;
+        final double kp = 4.0;
+        final double kc = 4.0;
+        return f * kf + p * kp + c * kc;
     }
 
     @Test
-    void nutriScorePointsAllZeroTest() {
-        var nv = new NutritionalValue(0, 0, 0);
-        assertEquals(0.0, nv.nutriScorePoints());
+    void nutriScoreIsCorrect() {
+        assertEquals(kcal(one, one, one), nv(one, one, one).kcal100g());
+        assertEquals(kcal(ten, z, z), nv(ten, z, z).kcal100g());
+        assertEquals(kcal(z, ten, z), nv(z, ten, z).kcal100g());
+        assertEquals(kcal(z, z, ten), nv(z, z, ten).kcal100g());
     }
 
     @Test
-    void nutriScorePointsInBoundsTest() {
-        //values are in bounds
-        var nv = new NutritionalValue(9, 4, 4);
-        assertEquals(3.0, nv.nutriScorePoints());
+    void nutriScorePointsAllZero() {
+        assertEquals(z, nv(z, z, z).nutriScorePoints());
     }
 
     @Test
-    void nutriScorePointsAboveBoundsTest() {
-        //values are above bounds
-        var nv = new NutritionalValue(100, 100, 100);
-        assertEquals(15.0, nv.nutriScorePoints());
+    void nutriScorePointsKnownExample() {
+        final double expected = 3.0;
+        assertEquals(expected, nv(nine, four, four).nutriScorePoints());
+    }
+
+    @Test
+    void nutriScorePointsOutOfUpperBounds() {
+        final double expected = 15.0;
+        assertEquals(expected, nv(hundred, hundred, hundred).nutriScorePoints());
     }
 
     @Test
     void increasingFatDoesNotDecreaseScore() {
-        //fat should not reduce score
-        var lowFat = new NutritionalValue(1, 0, 0);
-        var highFat = new NutritionalValue(30, 0, 0);
-
-        assertTrue(highFat.nutriScorePoints() >= lowFat.nutriScorePoints());
-    }
-
-    @Test
-    void increasingProteinDoesNotIncreaseScore() {
-        //protein should increase or keep score
-        var base = new NutritionalValue(10, 0, 10);
-        var moreProtein = new NutritionalValue(10, 20, 10);
-
-        assertTrue(moreProtein.nutriScorePoints() <= base.nutriScorePoints());
+        assertTrue(nv(thirty, z, z).nutriScorePoints() >= nv(one, z, z).nutriScorePoints());
     }
 
     @Test
     void increasingCarbsDoesNotDecreaseScore() {
-        //carbs should not reduce score
-        var lowCarbs = new NutritionalValue(0, 0, 1);
-        var highCarbs = new NutritionalValue(0, 0, 30);
+        assertTrue(nv(z, z, thirty).nutriScorePoints() >= nv(z, z, one).nutriScorePoints());
+    }
 
-        assertTrue(highCarbs.nutriScorePoints() >= lowCarbs.nutriScorePoints());
+    @Test
+    void increasingProteinDoesNotIncreaseScore() {
+        assertTrue(nv(ten, twenty, ten).nutriScorePoints() <= nv(ten, z, ten).nutriScorePoints());
     }
 }

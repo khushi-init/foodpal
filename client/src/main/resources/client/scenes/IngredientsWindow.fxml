@@ -116,6 +116,8 @@
                                     <Label fx:id="recipesUsedInLabel" text="0 recipes" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #4CAF50;"/>
                                 </HBox>
 
+                                <HBox fx:id="nutriScoreBox" alignment="CENTER_RIGHT" maxWidth="Infinity" spacing="10"/>
+
                             </VBox>
                         </ScrollPane>
                     </center>

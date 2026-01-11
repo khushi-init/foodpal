@@ -15,7 +15,6 @@ import commons.NutritionalValue;
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -25,7 +24,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -78,6 +76,9 @@ public class IngredientsWindowCtrl {
     private Label kcalLabel;
     @FXML
     private Label recipesUsedInLabel;
+
+    @FXML
+    private HBox nutriScoreBox;
 
     private LocalStorage storage;
 
@@ -161,7 +162,7 @@ public class IngredientsWindowCtrl {
         ingredientDetailsView.setVisible(false);
         ingredientDetailsView.setManaged(false);
         // Remove any ImageView when clearing
-        ingredientDetailsView.getChildren().removeIf(node -> node instanceof ImageView);
+        nutriScoreBox.getChildren().clear();
     }
 
     /**
@@ -208,6 +209,7 @@ public class IngredientsWindowCtrl {
     /**
      * Runs when the green "plus" button is pressed. Prompts user to create an ingredient and adds it to the server.
      * If added to the server successfully, it is also added to the client-side local list.
+     * @return Optional containing the newly created Ingredient if successful
      */
     public Optional<Ingredient> handlePlusButtonPress() {
         Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:", "", "", "", "");
@@ -286,9 +288,13 @@ public class IngredientsWindowCtrl {
         dataManipulator.deleteIngredient(selected);
     }
 
+    /**
+     * Displays the NutriScore label (image) for the given ingredient
+     * Shows nothing if nutritional data is missing or has zero calories
+     */
     public void showNutriScore(Ingredient ingredient) {
         // remove any existing ImageView to avoid duplicates
-        ingredientDetailsView.getChildren().removeIf(node -> node instanceof ImageView);
+        nutriScoreBox.getChildren().clear();
 
         NutritionalValue nv = ingredient.getNutritionalValue();
         if (nv == null || nv.kcal100g() == 0) {
@@ -297,17 +303,15 @@ public class IngredientsWindowCtrl {
 
         double points = nv.nutriScorePoints();
         String imagePath = nutriScoreImagePath(points);
-        ImageView imageViewNutri = new ImageView(
+        ImageView imageView = new ImageView(
                 new Image(getClass().getResource(imagePath).toExternalForm())
         );
 
         //styling
-        imageViewNutri.setFitHeight(heightImage);
-        imageViewNutri.setPreserveRatio(true);
-        HBox imageContainer = new HBox(imageViewNutri);
-        imageContainer.setAlignment(Pos.CENTER_RIGHT);
+        imageView.setFitHeight(heightImage);
+        imageView.setPreserveRatio(true);
 
-        ingredientDetailsView.getChildren().add(imageContainer);
+        nutriScoreBox.getChildren().add(imageView);
 
     }
 
