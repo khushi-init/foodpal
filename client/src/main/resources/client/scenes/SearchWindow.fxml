@@ -55,14 +55,6 @@
                </HBox.margin>
             </Label>
             <Button fx:id="searchButton" alignment="CENTER" mnemonicParsing="false" text="Search" />
-            <Label fx:id="helpButton" alignment="BASELINE_CENTER" maxWidth="41.0" minWidth="20.0" onMouseClicked="#helpButtonClicked" prefHeight="26.0" prefWidth="41.0" text="❓" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="22.0" />
-               </font>
-               <HBox.margin>
-                  <Insets left="20.0" />
-               </HBox.margin>
-            </Label>
          </children>
       </HBox>
       <VBox fx:id="treeBox" prefHeight="359.0" prefWidth="640.0" />
