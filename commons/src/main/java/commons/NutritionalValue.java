@@ -29,7 +29,7 @@ public record NutritionalValue(
      * Calculates the NutriScore points based on nutritional values
      * @return the total points for NutriScore calculation
      */
-    public double nutriScorePoints() {
+    public int nutriScorePoints() {
         return pointsKcal(kcal100g()) +
                pointsCarbs(carbs100g) +
                pointsFats(fat100g) -
