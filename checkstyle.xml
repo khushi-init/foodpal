@@ -33,7 +33,7 @@
         </module>
         <module name="MissingJavadocMethod">
             <property name="severity" value="warning"/>
-            <property name="ignoreMethodNamesRegex" value="^(get|set|is|main|test).*$"/>
+            <property name="ignoreMethodNamesRegex" value="^(get|set|is|main).*$"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
         </module>
         <module name="JavadocMethod">

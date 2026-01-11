@@ -112,7 +112,7 @@ public enum SearchFunctions {
      * @param input The ArrayList of Objects
      * @return An ArrayList of Propositions
      */
-    public static ArrayList<Proposition> mapToPropositionList(ArrayList<Object> input){
+    private static ArrayList<Proposition> mapToPropositionList(ArrayList<Object> input){
         return new ArrayList<>(
                 input.stream()
                 .map(x -> (Proposition) x)
