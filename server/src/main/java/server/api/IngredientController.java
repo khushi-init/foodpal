@@ -84,6 +84,9 @@ public class IngredientController {
      */
     @PutMapping
     public ResponseEntity<Ingredient> updateIngredient(@RequestBody Ingredient ingredient) {
+        if (ingredient.getName() == null || ingredient.getName().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
         Optional<Ingredient> updated = ingredientService.updateIngredient(ingredient);
         return updated.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

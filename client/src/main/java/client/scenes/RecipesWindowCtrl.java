@@ -503,6 +503,10 @@ public class RecipesWindowCtrl {
             });
             ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
                 handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
+                    if (newName == null || newName.trim().isEmpty()) {
+                        errorCtrl.showGenericError("Ingredients can't have a blank name!");
+                        return;
+                    }
                     ri.setQuantity(newQty);
                     ri.getIngredient().setName(newName);
                     openRecipe(currentRecipe);
