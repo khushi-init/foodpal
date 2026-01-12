@@ -291,6 +291,7 @@ public class IngredientsWindowCtrl {
     /**
      * Displays the NutriScore label (image) for the given ingredient
      * Shows nothing if nutritional data is missing or has zero calories
+     * @param ingredient Ingredient for which we want to show nutri score
      */
     public void showNutriScore(Ingredient ingredient) {
         // remove any existing ImageView to avoid duplicates

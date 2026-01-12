@@ -30,6 +30,13 @@ public record NutritionalValue(
      * @return the total points for NutriScore calculation
      */
     public int nutriScorePoints() {
+        //nutri score is calculated based on points for each different nutritional value
+        //you get points for total calories --> the less the calories the fewer points = calories moves ingredient to a worse class
+        //fats and carbs --> the less the amount the fewer points = fats and carbs moves ingredient to a worse class
+        //protein --> the more protein the more points = protein moves ingredient to a better class
+        //bounds for each nutritional value are above, points for them are {0, 1, 2, 3, 4...}
+        //final calculation is calories points + fats points + carbs point - protein points
+        // final grade is calculated based on the points, which bounds are defined in the ingredientsWindowCtrl
         return pointsKcal(kcal100g()) +
                pointsCarbs(carbs100g) +
                pointsFats(fat100g) -
