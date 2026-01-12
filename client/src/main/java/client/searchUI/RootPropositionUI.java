@@ -11,14 +11,18 @@ public class RootPropositionUI implements ParentPropositionUI{
     private PropositionUI child;
     private SearchWindowCtrl sceneCtrl;
 
+    private final ErrorCtrl errorCtrl;
+
     /**
      * Constructor...
      * @param s the scene controller
+     * @param errorCtrl - An errorCtrl object for reporting errors.
      */
-    public RootPropositionUI(SearchWindowCtrl s){
+    public RootPropositionUI(SearchWindowCtrl s, ErrorCtrl errorCtrl){
         // this.child = null;
         this.child = new CombinedPropositionUI(this);
         this.child.setSelectedFunction(SearchFunctions.AND);
+        this.errorCtrl = errorCtrl;
         sceneCtrl = s;
     }
 
@@ -31,7 +35,6 @@ public class RootPropositionUI implements ParentPropositionUI{
      * @param child Dummy, here for compatibility
      */
     public void deleteChild(PropositionUI child){
-        ErrorCtrl errorCtrl = new ErrorCtrl();
         errorCtrl.showGenericError("Cannot delete root proposition!");
     }
 

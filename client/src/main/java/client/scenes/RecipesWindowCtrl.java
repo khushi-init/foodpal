@@ -5,11 +5,11 @@ import java.util.*;
 
 import java.util.function.BiConsumer;
 
+import client.MyFXML;
 import client.data.WebSocketManager;
 import client.utils.*;
 import com.google.inject.Inject;
 
-import client.Main;
 import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
@@ -45,7 +45,9 @@ public class RecipesWindowCtrl {
 
     private final Insets lineMargin = new Insets(0, 15, 0, 15);
 
-    private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
+    private final ServerUtils server;
+
+    private final MyFXML fxml;
 
     private final WebSocketManager socker;
 
@@ -105,8 +107,8 @@ public class RecipesWindowCtrl {
     // This is the Shopping List data that is used in the session.
     private final ShoppingList shoppingList = new ShoppingList();
 
-    private LocalStorage storage;
-    private DataManipulator dataManipulator;
+    private final LocalStorage storage;
+    private final DataManipulator dataManipulator;
 
     private final ErrorCtrl errorCtrl;
     private final SearchCtrl searchCtrl;
@@ -125,15 +127,21 @@ public class RecipesWindowCtrl {
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
      * @param s - The injected search control
+     * @param server - The injected serverUtils instance
+     * @param fxml - The injected MyFXML instance
      */
     @Inject
-    public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
+    public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c,
+                             PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator,
+                             SearchCtrl s, ServerUtils server, MyFXML fxml) {
         this.socker = socker;
         this.errorCtrl = c;
         this.primaryCtrl = p;
         this.storage = storage;
         this.dataManipulator = dataManipulator;
         this.searchCtrl = s;
+        this.server = server;
+        this.fxml = fxml;
     }
 
     /**
@@ -463,7 +471,7 @@ public class RecipesWindowCtrl {
 
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
-            Pair<RecipeIngredientUICtrl, Node> ing = Main.FXML.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
+            Pair<RecipeIngredientUICtrl, Node> ing = fxml.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
@@ -583,7 +591,7 @@ public class RecipesWindowCtrl {
 
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
-            Pair<RecipeInstructionUICtrl, Node> ing = Main.FXML.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
+            Pair<RecipeInstructionUICtrl, Node> ing = fxml.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
             int currentIndex = i;

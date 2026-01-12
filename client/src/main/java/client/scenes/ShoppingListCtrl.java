@@ -9,10 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import client.Main;
+import client.MyFXML;
 import client.utils.ErrorCtrl;
 import client.utils.ShoppingListIngredientPopUpCtrl;
 import client.utils.ShoppingListIngredientUICtrl;
+import com.google.inject.Inject;
 import commons.ShoppingList;
 import commons.ShoppingListIngredient;
 import javafx.fxml.FXML;
@@ -32,6 +33,8 @@ public class ShoppingListCtrl {
 
     private ErrorCtrl errorCtrl;
 
+    private final MyFXML fxml;
+
     @FXML
     private VBox shoppingListView;
 
@@ -39,6 +42,15 @@ public class ShoppingListCtrl {
 
     public void setErrorCtrl(ErrorCtrl errorCtrl) {
         this.errorCtrl = errorCtrl;
+    }
+
+    /**
+     * Constructor for ShoppingListCtrl
+     * @param fxml - Injected FXML module
+     */
+    @Inject
+    public ShoppingListCtrl(MyFXML fxml) {
+        this.fxml = fxml;
     }
 
     /**
@@ -73,7 +85,7 @@ public class ShoppingListCtrl {
     private void showIngredients(List<ShoppingListIngredient> ingredients, Map<String, Integer> counts) {
         for (int i = 0; i < ingredients.size(); i++) {
             Pair<ShoppingListIngredientUICtrl, Node> pair =
-                    Main.FXML.loadNode(
+                    fxml.loadNode(
                             ShoppingListIngredientUICtrl.class,
                             "client", "modules", "ShoppingListIngredient.fxml"
                     );

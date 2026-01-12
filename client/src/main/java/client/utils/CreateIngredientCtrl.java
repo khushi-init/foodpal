@@ -1,6 +1,7 @@
 package client.utils;
 
 import client.Main;
+import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import javafx.fxml.FXML;
@@ -30,7 +31,16 @@ public class CreateIngredientCtrl {
 
     private Ingredient parsed = null;
 
-    private final NeatUtils neatUtils = Main.INJECTOR.getInstance(NeatUtils.class);
+    private final NeatUtils neatUtils;
+
+    /**
+     * CreateIngredientCtrl constructor. At this point you should know what constructors do.
+     * @param neatUtils - Injected neatUtils instance
+     */
+    @Inject
+    public CreateIngredientCtrl(NeatUtils neatUtils) {
+        this.neatUtils = neatUtils;
+    }
 
     public void setStage(Stage stage) {
         this.stage = stage;

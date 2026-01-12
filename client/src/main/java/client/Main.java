@@ -28,10 +28,10 @@ import javafx.util.Pair;
 
 public class Main extends Application {
 
-    public static final Injector INJECTOR = createInjector(new MyModule());
-    public static final MyFXML FXML = new MyFXML(INJECTOR);
-    public static final int maxRetries = 5;
-    public static final int waitTimeMs = 1000;
+    public final Injector injector = createInjector(new MyModule());
+    public final MyFXML fxml = new MyFXML(injector);
+    public final int maxRetries = 5;
+    public final int waitTimeMs = 1000;
 
 
 
@@ -42,7 +42,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         System.out.println("Opening very cool amazing recipe app!");
-        ServerUtils serverUtils = INJECTOR.getInstance(ServerUtils.class);
+        ServerUtils serverUtils = injector.getInstance(ServerUtils.class);
 
         for (int i = 0; i < maxRetries; i++) {
             if (serverUtils.isServerAvailable()) {
@@ -66,11 +66,11 @@ public class Main extends Application {
         }
 
         // All scenes must be initialized here as such
-        Pair<RecipesWindowCtrl, Parent> recipesWindow = FXML.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
-        Pair<ShoppingListCtrl, Parent> shoppingList = FXML.load(ShoppingListCtrl.class, "client", "scenes", "ShoppingList.fxml");
-        Pair<IngredientsWindowCtrl, Parent> ingredientsWindow = FXML.load(IngredientsWindowCtrl.class, "client", "scenes", "IngredientsWindow.fxml");
-        Pair<SearchWindowCtrl, Parent> searchWindow = FXML.load(SearchWindowCtrl.class, "client", "scenes", "SearchWindow.fxml");
-        PrimaryCtrl prime = INJECTOR.getInstance(PrimaryCtrl.class);
+        Pair<RecipesWindowCtrl, Parent> recipesWindow = fxml.load(RecipesWindowCtrl.class, "client", "scenes", "RecipesWindow.fxml");
+        Pair<ShoppingListCtrl, Parent> shoppingList = fxml.load(ShoppingListCtrl.class, "client", "scenes", "ShoppingList.fxml");
+        Pair<IngredientsWindowCtrl, Parent> ingredientsWindow = fxml.load(IngredientsWindowCtrl.class, "client", "scenes", "IngredientsWindow.fxml");
+        Pair<SearchWindowCtrl, Parent> searchWindow = fxml.load(SearchWindowCtrl.class, "client", "scenes", "SearchWindow.fxml");
+        PrimaryCtrl prime = injector.getInstance(PrimaryCtrl.class);
         prime.init(primaryStage, recipesWindow, shoppingList, ingredientsWindow, searchWindow);
     }
 }

@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.utils.ErrorCtrl;
 import com.google.inject.Inject;
 
 import client.searchUI.*;
@@ -20,10 +21,11 @@ public class SearchWindowCtrl {
     /**
      * Constructor...
      * @param p primaryCtrl instance
+     * @param errorCtrl errorCtrl instance
      */
     @Inject
-    public SearchWindowCtrl(PrimaryCtrl p){
-        rootPropositionUI = new RootPropositionUI(this);
+    public SearchWindowCtrl(PrimaryCtrl p, ErrorCtrl errorCtrl){
+        rootPropositionUI = new RootPropositionUI(this, errorCtrl);
         primary = p;
     }
 

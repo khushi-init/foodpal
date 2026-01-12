@@ -1,7 +1,7 @@
 package client.scenes;
 
 import client.IngredientListCell;
-import client.Main;
+import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.CreateIngredientCtrl;
@@ -30,9 +30,10 @@ public class IngredientsWindowCtrl {
     // DEPENDENCIES (Injection)
 
     // ServerUtils is needed to fetch and save ingredient data
-    private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
-    private PrimaryCtrl primaryCtrl;
-    private ErrorCtrl errorCtrl;
+    private final ServerUtils server;
+    private final PrimaryCtrl primaryCtrl;
+    private final ErrorCtrl errorCtrl;
+    private final MyFXML fxml;
 
     // FXML FIELDS (UI Elements)
 
@@ -65,9 +66,9 @@ public class IngredientsWindowCtrl {
     @FXML
     private Label recipesUsedInLabel;
 
-    private LocalStorage storage;
+    private final LocalStorage storage;
 
-    private DataManipulator dataManipulator;
+    private final DataManipulator dataManipulator;
 
     /**
      * Injectable constructor is REQUIRED for Guice to provide dependencies.
@@ -77,11 +78,13 @@ public class IngredientsWindowCtrl {
      * @param dataManipulator - The injected data Manipulator
      */
     @Inject
-    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator) {
+    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml) {
         this.primaryCtrl = p;
         this.errorCtrl = c;
         this.storage = storage;
         this.dataManipulator = dataManipulator;
+        this.server = server;
+        this.fxml = fxml;
     }
 
     /**
@@ -209,7 +212,7 @@ public class IngredientsWindowCtrl {
      * @return - The parsed ingredient or an empty optional if parsing failed / was cancelled
      */
     public Optional<Ingredient> ingredientDataPrompt(String title, String descText, String defaultName, String defaultFat, String defaultProtein, String defaultCarbs) {
-        Pair<CreateIngredientCtrl, Parent> addIngPair = Main.FXML.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
+        Pair<CreateIngredientCtrl, Parent> addIngPair = fxml.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
 
         Parent root = addIngPair.getValue();
         CreateIngredientCtrl createIngCtr = addIngPair.getKey();

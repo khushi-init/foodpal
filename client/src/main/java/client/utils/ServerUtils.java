@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import client.Main;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;
@@ -49,9 +48,7 @@ public class ServerUtils {
     private  final int statusNoContent = 204;
     private  final int statusSameName = 409;
 
-    private final ErrorCtrl err = Main.INJECTOR.getInstance(ErrorCtrl.class);
-
-    private ErrorCtrl errorCtrl;
+    private final ErrorCtrl errorCtrl;
 
     /**
      * Constructor for server utils. Just look at it
@@ -163,11 +160,11 @@ public class ServerUtils {
             if (response.getStatus() == statusCreation) {
                 return Optional.of(response.readEntity(Ingredient.class));
             }
-            err.showErrorPopup("Server error handler", "Failed to create ingredient", "Server returned status " +
+            errorCtrl.showErrorPopup("Server error handler", "Failed to create ingredient", "Server returned status " +
                     response.getStatus());
             return Optional.empty();
         } catch (ProcessingException e) {
-            err.showErrorPopup("Server error handler", "Failed to create ingredient", "Failed to connect to server");
+            errorCtrl.showErrorPopup("Server error handler", "Failed to create ingredient", "Failed to connect to server");
             return Optional.empty();
         }
     }
