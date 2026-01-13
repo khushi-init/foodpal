@@ -1,6 +1,5 @@
 package client.utils;
 
-import client.Main;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.NutritionalValue;

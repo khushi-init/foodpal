@@ -76,6 +76,8 @@ public class IngredientsWindowCtrl {
      * @param c ErrorCtrl instance for displaying errors.
      * @param storage - The local storage injected.
      * @param dataManipulator - The injected data Manipulator
+     * @param server - Injected serverUtils instance
+     * @param fxml - Injected MyFXML instance
      */
     @Inject
     public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml) {
