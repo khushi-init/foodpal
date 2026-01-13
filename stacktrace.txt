@@ -23,9 +23,15 @@ java.lang.IllegalArgumentException: Function AND requires at least 1 child propo
 	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:652)
 	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:658)
 	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:663)
+<<<<<<< HEAD
 	at client.utils.SearchService.performComplexQuery(SearchCtrl.java:175)
 	at client.scenes.RecipesWindowCtrl.applyExternalSearch(RecipesWindowCtrl.java:250)
 	at client.scenes.PrimaryCtrl.applySearchToRecipesWindow(PrimaryCtrl.java:91)
+=======
+	at client.utils.SearchCtrl.performComplexQuery(SearchCtrl.java:175)
+	at client.scenes.RecipesWindowCtrl.applyExternalSearch(RecipesWindowCtrl.java:238)
+	at client.scenes.PrimaryCtrl.applySearchToRecipesWindow(PrimaryCtrl.java:93)
+>>>>>>> main
 	at client.scenes.SearchWindowCtrl.lambda$initialize$0(SearchWindowCtrl.java:36)
 	at javafx.base@25.0.1/com.sun.javafx.event.CompositeEventHandler.dispatchBubblingEvent(CompositeEventHandler.java:86)
 	at javafx.base@25.0.1/com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:232)
