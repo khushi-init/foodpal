@@ -1,7 +1,7 @@
 package client.searchUI;
 
 import client.scenes.SearchWindowCtrl;
-import client.utils.ErrorCtrl;
+import client.scenes.ErrorCtrl;
 import client.utils.searchUtils.Proposition;
 import client.utils.searchUtils.SearchFunctions;
 import javafx.scene.layout.Pane;

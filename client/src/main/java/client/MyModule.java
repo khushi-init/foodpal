@@ -19,7 +19,7 @@ import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.data.WebSocketManager;
 import client.scenes.*;
-import client.utils.ErrorCtrl;
+import client.scenes.ErrorCtrl;
 
 import client.utils.ServerUtils;
 import com.google.inject.Binder;

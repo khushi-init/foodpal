@@ -10,9 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import client.MyFXML;
-import client.utils.ErrorCtrl;
-import client.utils.ShoppingListIngredientPopUpCtrl;
-import client.utils.ShoppingListIngredientUICtrl;
+import client.popups.ShoppingListIngredientPopUpCtrl;
+import client.popups.ShoppingListIngredientUICtrl;
 import com.google.inject.Inject;
 import commons.ShoppingList;
 import commons.ShoppingListIngredient;

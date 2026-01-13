@@ -1,6 +1,5 @@
 package client.scenes;
 
-import client.utils.ErrorCtrl;
 import com.google.inject.Inject;
 
 import client.searchUI.*;

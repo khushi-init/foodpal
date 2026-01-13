@@ -4,8 +4,6 @@ import client.IngredientListCell;
 import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
-import client.utils.CreateIngredientCtrl;
-import client.utils.ErrorCtrl;
 import client.utils.ServerUtils;
 import commons.Ingredient;
 import jakarta.inject.Inject;

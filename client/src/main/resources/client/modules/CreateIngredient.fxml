@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="180" prefWidth="320" spacing="10" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.CreateIngredientCtrl">
+<VBox alignment="CENTER" prefHeight="180" prefWidth="320" spacing="10" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.CreateIngredientCtrl">
 
     <children>
         <Label fx:id="descLabel" text="Edit Ingredient" />

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="200.0" prefWidth="351.0" spacing="10" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.ShoppingListIngredientPopUpCtrl">
+<VBox alignment="CENTER" prefHeight="200.0" prefWidth="351.0" spacing="10" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.popups.ShoppingListIngredientPopUpCtrl">
 
     <children>
         <Label prefHeight="50.0" prefWidth="319.0" style="-fx-font-weight: bold;" text="Enter the ingredient information" textAlignment="CENTER" wrapText="true">

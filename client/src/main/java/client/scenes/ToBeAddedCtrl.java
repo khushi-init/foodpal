@@ -1,10 +1,12 @@
-package client.utils;
+package client.scenes;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import client.popups.ShoppingListIngredientPopUpCtrl;
+import client.popups.ShoppingListIngredientUICtrl;
 import commons.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

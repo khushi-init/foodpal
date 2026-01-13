@@ -1,5 +1,6 @@
-package client.utils;
+package client.scenes;
 
+import client.utils.NeatUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.NutritionalValue;

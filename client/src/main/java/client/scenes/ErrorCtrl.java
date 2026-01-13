@@ -1,4 +1,4 @@
-package client.utils;
+package client.scenes;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 

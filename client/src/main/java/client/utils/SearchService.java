@@ -12,7 +12,7 @@ import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.Ingredient;
 
-public class SearchCtrl {
+public class SearchService {
     private boolean favToggle;
 
     public void setFavToggle(boolean favToggle) {
@@ -63,11 +63,7 @@ public class SearchCtrl {
             }
         }
 
-        if(recipe.getName().toLowerCase().contains(query)){
-            return true;
-        }
-
-        return false;
+        return recipe.getName().toLowerCase().contains(query);
     }
 
     /**

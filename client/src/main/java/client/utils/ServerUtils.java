@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import client.scenes.ErrorCtrl;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;

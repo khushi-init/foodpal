@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 
 import client.MyFXML;
 import client.data.WebSocketManager;
+import client.popups.IngredientPopUpCtrl;
 import client.utils.*;
 import com.google.inject.Inject;
 
@@ -111,7 +112,7 @@ public class RecipesWindowCtrl {
     private final DataManipulator dataManipulator;
 
     private final ErrorCtrl errorCtrl;
-    private final SearchCtrl searchCtrl;
+    private final SearchService searchService;
 
     private final NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
@@ -133,13 +134,13 @@ public class RecipesWindowCtrl {
     @Inject
     public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c,
                              PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator,
-                             SearchCtrl s, ServerUtils server, MyFXML fxml) {
+                             SearchService s, ServerUtils server, MyFXML fxml) {
         this.socker = socker;
         this.errorCtrl = c;
         this.primaryCtrl = p;
         this.storage = storage;
         this.dataManipulator = dataManipulator;
-        this.searchCtrl = s;
+        this.searchService = s;
         this.server = server;
         this.fxml = fxml;
     }
@@ -315,7 +316,7 @@ public class RecipesWindowCtrl {
                 try{
                     ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                             favFilter(
-                                    searchCtrl.query(
+                                    searchService.query(
                                             searchField.getText(), storage.getRecipes()
                                     ),
                                     storage.getFavoriteIDs())
@@ -338,7 +339,7 @@ public class RecipesWindowCtrl {
         try{
             ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                     favFilter(
-                            searchCtrl.performComplexQuery(prop, storage.getRecipes()),
+                            searchService.performComplexQuery(prop, storage.getRecipes()),
                             storage.getFavoriteIDs()
                     )
 
@@ -356,7 +357,7 @@ public class RecipesWindowCtrl {
         cancelSearch();
         // Load only favorites or nah
         if (favoriteCheck.isSelected()) {
-            searchCtrl.setFavToggle(true);
+            searchService.setFavToggle(true);
             List<Recipe> favRecipes = new ArrayList<>();
             for (Recipe r : storage.getRecipes()) {
                 if (storage.getFavoriteIDs().contains(r.getId())) {
@@ -366,7 +367,7 @@ public class RecipesWindowCtrl {
             sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
             sidebarRecipeNamesList.getSelectionModel().select(0);
         } else {
-            searchCtrl.setFavToggle(false);
+            searchService.setFavToggle(false);
             sidebarRecipeNamesList.setItems(storage.getRecipes());
         }
     }
