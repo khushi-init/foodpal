@@ -2,7 +2,8 @@ package client.scenes;
 
 import java.io.IOException;
 import java.util.*;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
 import client.data.WebSocketManager;
@@ -50,6 +51,8 @@ public class RecipesWindowCtrl {
     private final WebSocketManager socker;
 
     private volatile StompSession.Subscription titleSubscription;
+    private volatile StompSession.Subscription recipeSubscription;
+    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor();
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -237,27 +240,36 @@ public class RecipesWindowCtrl {
         if (titleSubscription != null) {
             return;
         }
-        Thread subscribeThread = new Thread(() -> {
-            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
-                Platform.runLater(() -> {
-                    System.out.println("Title of recipe " + update.id() + " Changed!");
-                    dataManipulator.changeNameLocal(update.id(), update.newTitle());
-//                    dataManipulator.refreshRecipes();
-                    // A "softer" refresh is required to keep selection
-                    sidebarRecipeNamesList.refresh();
-                    if (currentRecipe.getId().equals(update.id())) {
-                        recipeNameField.setText(update.newTitle());
-                    }
-                });
-            });
-            if (titleSubscription == null ) {
-                Platform.runLater(() -> {
-                    errorCtrl.showGenericError("Could not subscribe to title changes, server might be down!");
-                });
-            }
-        });
-        subscribeThread.setDaemon(true);
-        subscribeThread.start();
+        // Thread subscribeThread = new Thread(() -> {
+        //     titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
+        //         Platform.runLater(() -> {
+        //             System.out.println("Title of recipe " + update.id() + " Changed!");
+        //             dataManipulator.changeNameLocal(update.id(), update.newTitle());
+        //             // dataManipulator.refreshRecipes();
+        //             // A "softer" refresh is required to keep selection
+        //             sidebarRecipeNamesList.refresh();
+        //             if(currentRecipe == null) return;
+        //             if (currentRecipe.getId().equals(update.id())) {
+        //                 recipeNameField.setText(update.newTitle());
+        //             }
+        //         });
+        //     });
+
+        //     recipeSubscription = socker.subscribe("/updates/recipe/" + currentRecipe.getId(), RecipeUpdate.class, update -> {
+        //         Platform.runLater(() -> {
+                    
+        //         });
+        //     });
+
+        //     if (titleSubscription == null ) {
+        //         Platform.runLater(() -> {
+        //             errorCtrl.showGenericError("Could not subscribe to title changes, server might be down!");
+        //         });
+        //     }
+        // });
+        // subscribeThread.setDaemon(true);
+        // subscribeThread.start();
+        initializeTitleSubscription();
         dataManipulator.refreshRecipes();
     }
 
@@ -271,6 +283,51 @@ public class RecipesWindowCtrl {
             titleSubscription = null;
             System.out.println("Unsubscribed from title updates.");
         }
+    }
+
+    /**
+     * Adds the title subscription the executor's thread.
+     * When a title change occurs, it is reflected in the sidebar.
+     */
+    public void initializeTitleSubscription(){
+        subscriptionExecutor.submit(() -> {
+            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    System.out.println("Title of recipe " + update.id() + " Changed!");
+                    dataManipulator.changeNameLocal(update.id(), update.newTitle());
+                    // dataManipulator.refreshRecipes();
+                    // A "softer" refresh is required to keep selection
+                    sidebarRecipeNamesList.refresh();
+                    if(currentRecipe == null) return;
+                    if (currentRecipe.getId().equals(update.id())) {
+                        recipeNameField.setText(update.newTitle());
+                    }
+                });
+            });
+        });
+    }
+
+    /**
+     * Subscribes to any update in the recipe with the specified ID, except for changes in the Ingredients.
+     * Note that changes in RecipeIngredient ARE propagated through this subscription
+     * @param id
+     */
+    public void initializeRecipeSubscription(Long id){
+        if(recipeSubscription != null) recipeSubscription.unsubscribe();
+        subscriptionExecutor.submit(() -> {
+            recipeSubscription = socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    System.out.println("Recipe " + update.id() + " changed.");
+                    dataManipulator.updateRecipe(update.recipe());
+                    if(currentRecipe.getId() == update.id()) currentRecipe = update.recipe();
+                    openRecipe(currentRecipe);
+                });
+            });
+        });
+    }
+
+    public void intitalizeIngredientByRecipeSubscription(Long recipeId){
+
     }
 
     /**
