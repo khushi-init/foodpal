@@ -5,6 +5,8 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;
+import commons.RecipeIngredient;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -97,6 +99,37 @@ public class DataManipulator {
             if (Objects.equals(storage.getRecipes().get(i).getId(), id)) {
                 storage.getRecipes().get(i).setName(newName);
                 break;
+            }
+        }
+    }
+
+    /**
+     * Applies changes from a recipe subscription. Replaces the recipe and updates all the ingredients
+     * @param newRecipe The changed recipe
+     */
+    public void updateRecipeLocal(Recipe newRecipe){
+        storage.getRecipes().removeIf(x -> newRecipe.getId() == x.getId());
+        storage.getRecipes().add(newRecipe);
+        System.out.println("updated recipe" + newRecipe.getId());
+        newRecipe.getIngredients().stream().forEach(x -> updateIngredientLocal(x.getIngredient()));
+    }
+
+    /**
+     * Updates the ingredient list and updates the ingredients within all recipes
+     * @param newIngredient The (changed) ingredient
+     */
+    public void updateIngredientLocal(Ingredient newIngredient){
+        //first check if the ingredient has actually changed
+        if(storage.getIngredients().stream().anyMatch(x -> newIngredient.equals(x))) return;
+        //if it has changed, remove the old instance and put in the new one
+        storage.getIngredients().removeIf(x -> newIngredient.getId() == x.getId());
+        storage.getIngredients().add(newIngredient);
+        //also change all the recipes that contain this ingredient
+        for(Recipe recipe: storage.getRecipes()){
+            for(RecipeIngredient ing: recipe.getIngredients()){
+                if(ing.getIngredient().getId() == newIngredient.getId()){
+                    ing.setIngredient(newIngredient);
+                }
             }
         }
     }

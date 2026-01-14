@@ -1,6 +1,6 @@
 package server.stomp;
 
-import commons.TitleUpdate;
+import commons.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -27,5 +27,15 @@ public class RecipeEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishRecipeNameChange(TitleUpdate update) {
         messaging.convertAndSend("/updates/title", update);
+    }
+
+    /**
+     * Sends an updated recipe to all clients subscribed to that specific recipe.
+     * @param update The updated recipe
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void publishRecipeChange(RecipeUpdate update){
+        System.out.println("Sending updated recipe with id " + update.id());
+        messaging.convertAndSend("/updates/recipe/" + Long.toString(update.recipe().getId()), update);
     }
 }

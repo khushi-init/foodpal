@@ -310,7 +310,7 @@ public class RecipesWindowCtrl {
     /**
      * Subscribes to any update in the recipe with the specified ID, except for changes in the Ingredients.
      * Note that changes in RecipeIngredient ARE propagated through this subscription
-     * @param id
+     * @param id Id of the recipe we want to subscribe to
      */
     public void initializeRecipeSubscription(Long id){
         if(recipeSubscription != null) recipeSubscription.unsubscribe();
@@ -324,10 +324,6 @@ public class RecipesWindowCtrl {
                 });
             });
         });
-    }
-
-    public void intitalizeIngredientByRecipeSubscription(Long recipeId){
-
     }
 
     /**
@@ -492,6 +488,7 @@ public class RecipesWindowCtrl {
                 favoriteImage.setImage(unFavorite);
             }
         }
+        initializeRecipeSubscription(recipe.getId());
 
         recipeNameField.setText(recipe.getName());
 

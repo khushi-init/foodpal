@@ -139,6 +139,7 @@ public class RecipeService {
             if (nameChange) {
                 eventPublisher.publishEvent(new TitleUpdate(id, incoming.getName()));
             }
+            eventPublisher.publishEvent(new RecipeUpdate(id, incoming));
             return saved;
         });
     }
@@ -202,6 +203,7 @@ public class RecipeService {
      * @param ingredientId The ID of the ingredient to remove.
      * @return true if the ingredient was found and removed, false otherwise.
      */
+    @Transactional
     public boolean removeIngredientFromRecipe(Long recipeId, Long ingredientId) {
         Optional<Recipe> recipeOpt = recipeRepository.findById(recipeId);
 
@@ -221,8 +223,17 @@ public class RecipeService {
             recipeRepository.save(recipe);
         }
 
+        eventPublisher.publishEvent(new RecipeUpdate(recipeId, recipe));
+        // eventPublisher.publishEvent(new RecipeUpdate(id, incoming));
+        // System.out.println("published ingredient removed from recipe " + recipeId);
+        // System.out.println("recipe is:" + recipe.toString());
+
         return removed;
     }
+
+    // public void publishRecipe(Recipe recipe){
+    //     eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
+    // }
 
 
 }
