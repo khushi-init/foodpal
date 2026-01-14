@@ -1015,29 +1015,22 @@ public class RecipesWindowCtrl {
      * Opens a new window displaying the current shopping list.
      */
     private void showShoppingList() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/client/scenes/ShoppingList.fxml")
-            );
-            Parent root = loader.load();
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/client/scenes/ShoppingList.fxml")
+        );
+        Pair<ShoppingListCtrl, Parent> shopListPair = fxml.load(ShoppingListCtrl.class, "client", "scenes", "ShoppingList.fxml");
+        Parent root = shopListPair.getValue();
 
-            ShoppingListCtrl ctrl = loader.getController();
-            ctrl.setErrorCtrl(errorCtrl);
-            ctrl.setAndShowShoppingList(shoppingList);
+        ShoppingListCtrl ctrl = shopListPair.getKey();
+        ctrl.setErrorCtrl(errorCtrl);
+        ctrl.setAndShowShoppingList(shoppingList);
 
-            Stage shoppingListStage = new Stage();
-            shoppingListStage.setTitle("Shopping List");
-            shoppingListStage.setScene(new Scene(root));
+        Stage shoppingListStage = new Stage();
+        shoppingListStage.setTitle("Shopping List");
+        shoppingListStage.setScene(new Scene(root));
 
-            shoppingListStage.show();
+        shoppingListStage.show();
 
-        } catch (IOException e) {
-            if (errorCtrl != null) {
-                errorCtrl.showGenericError(e);
-            } else {
-                e.printStackTrace();
-            }
-        }
     }
 
     /**

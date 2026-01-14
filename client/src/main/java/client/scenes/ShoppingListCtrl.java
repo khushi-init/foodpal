@@ -163,32 +163,27 @@ public class ShoppingListCtrl {
      * the first string containing the ingredient name and the second string containing the amount.
      */
     private Optional<Pair<String, String>> showIngredientPopUp() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/client/modules/AddIngredientToList.fxml")
-            );
-            Parent root = loader.load();
+        Pair<ShoppingListIngredientPopUpCtrl, Parent> ingListPair = fxml.load(ShoppingListIngredientPopUpCtrl.class, "client", "modules", "AddIngredientToList.fxml");
 
-            ShoppingListIngredientPopUpCtrl ctrl = loader.getController();
+        Parent root = ingListPair.getValue();
 
-            Stage popUpStage = new Stage();
-            popUpStage.initModality(Modality.APPLICATION_MODAL);
-            popUpStage.setTitle("Add to shopping list");
-            popUpStage.setScene(new Scene(root));
+        ShoppingListIngredientPopUpCtrl ctrl = ingListPair.getKey();
 
-            ctrl.setStage(popUpStage);
+        Stage popUpStage = new Stage();
+        popUpStage.initModality(Modality.APPLICATION_MODAL);
+        popUpStage.setTitle("Add to shopping list");
+        popUpStage.setScene(new Scene(root));
 
-            popUpStage.showAndWait();
+        ctrl.setStage(popUpStage);
 
-            if (ctrl.isOkClicked()) {
-                return Optional.of(new Pair<>(ctrl.getName(), ctrl.getQuantity()));
-            } else {
-                return Optional.empty();
-            }
+        popUpStage.showAndWait();
 
-        } catch (IOException e) {
+        if (ctrl.isOkClicked()) {
+            return Optional.of(new Pair<>(ctrl.getName(), ctrl.getQuantity()));
+        } else {
             return Optional.empty();
         }
+
     }
 
     /**
