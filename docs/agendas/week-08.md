@@ -16,7 +16,7 @@
     - Approval of last minutes - Did everyone read the last minutes ? Do you approve of these ?
     - Any announcements by the TA?
 
-2. **Formative review (10 mins)**
+2. **Formative review (8 mins)**
     - Discuss implemented features review.
 
 3. **Update on progress (8 mins)**
@@ -28,6 +28,7 @@
     - Fixing all implemented features.
     - What about the last epic?
     - Tests
+    - Read me file
 
 5. **Individual progress (5 mins)**
     - How is everybody doing on the weekly progress? Has anyone failed a week?
@@ -39,5 +40,8 @@
 6. **Demo to TA: Potentially shippable product (5 mins)**
     - TA's feedback 
 
-7. **Closing (2 mins)**
+7. **Last chair and minute taker (2 mins)**
+    - Who are going to lead the last minute, since everyone already has been chair and minute taker once?
+
+8. **Closing (2 mins)**
     - Any feedback/remarks?
