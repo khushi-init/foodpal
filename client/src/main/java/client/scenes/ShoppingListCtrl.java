@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import commons.ShoppingList;
 import commons.ShoppingListIngredient;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
