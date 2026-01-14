@@ -1,10 +1,11 @@
-package client.utils;
+package client.scenes;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
-import client.Main;
+import client.MyFXML;
 import client.popups.InfoPopCtrl;
 import client.popups.WarningPopCtrl;
+import com.google.inject.Inject;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -14,6 +15,18 @@ import javafx.util.Pair;
 import javafx.scene.layout.Region;
 
 public class ErrorCtrl {
+
+    private final MyFXML fxml;
+
+    /**
+     * Constructor for the ErrorCtrl class
+     * @param fxml - Injected fxml module
+     */
+    @Inject
+    public ErrorCtrl(MyFXML fxml) {
+        this.fxml = fxml;
+    }
+
     /**
     * Can be called to display a proper error message when the server is unavailable
     **/
@@ -87,7 +100,7 @@ public class ErrorCtrl {
      * @return - Whether 'anyway' was pressed
      */
     public boolean displayWarning(String warningText, String anywayText, String title) {
-        Pair<WarningPopCtrl, Parent> warningPopupPair = Main.FXML.load(WarningPopCtrl.class, "client", "modules", "Warning.fxml");
+        Pair<WarningPopCtrl, Parent> warningPopupPair = fxml.load(WarningPopCtrl.class, "client", "modules", "Warning.fxml");
 
         Parent root = warningPopupPair.getValue();
         WarningPopCtrl popUpCtrl = warningPopupPair.getKey();
@@ -112,7 +125,7 @@ public class ErrorCtrl {
      * @param title           - The text of the title.
      */
     public void displayInfo(String infoText, String closeButtonText, String title) {
-        Pair<InfoPopCtrl, Parent> infoPopUpPair = Main.FXML.load
+        Pair<InfoPopCtrl, Parent> infoPopUpPair = fxml.load
                 (InfoPopCtrl.class, "client", "modules", "Info.fxml");
 
         Parent root = infoPopUpPair.getValue();

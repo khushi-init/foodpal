@@ -9,14 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import client.Main;
-import client.utils.ErrorCtrl;
-import client.utils.ShoppingListIngredientPopUpCtrl;
-import client.utils.ShoppingListIngredientUICtrl;
+import client.MyFXML;
+import client.popups.ShoppingListIngredientPopUpCtrl;
+import client.popups.ShoppingListIngredientUICtrl;
+import com.google.inject.Inject;
 import commons.ShoppingList;
 import commons.ShoppingListIngredient;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -32,6 +31,8 @@ public class ShoppingListCtrl {
 
     private ErrorCtrl errorCtrl;
 
+    private final MyFXML fxml;
+
     @FXML
     private VBox shoppingListView;
 
@@ -39,6 +40,15 @@ public class ShoppingListCtrl {
 
     public void setErrorCtrl(ErrorCtrl errorCtrl) {
         this.errorCtrl = errorCtrl;
+    }
+
+    /**
+     * Constructor for ShoppingListCtrl
+     * @param fxml - Injected FXML module
+     */
+    @Inject
+    public ShoppingListCtrl(MyFXML fxml) {
+        this.fxml = fxml;
     }
 
     /**
@@ -73,7 +83,7 @@ public class ShoppingListCtrl {
     private void showIngredients(List<ShoppingListIngredient> ingredients, Map<String, Integer> counts) {
         for (int i = 0; i < ingredients.size(); i++) {
             Pair<ShoppingListIngredientUICtrl, Node> pair =
-                    Main.FXML.loadNode(
+                    fxml.loadNode(
                             ShoppingListIngredientUICtrl.class,
                             "client", "modules", "ShoppingListIngredient.fxml"
                     );
@@ -152,32 +162,27 @@ public class ShoppingListCtrl {
      * the first string containing the ingredient name and the second string containing the amount.
      */
     private Optional<Pair<String, String>> showIngredientPopUp() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/client/modules/AddIngredientToList.fxml")
-            );
-            Parent root = loader.load();
+        Pair<ShoppingListIngredientPopUpCtrl, Parent> ingListPair = fxml.load(ShoppingListIngredientPopUpCtrl.class, "client", "modules", "AddIngredientToList.fxml");
 
-            ShoppingListIngredientPopUpCtrl ctrl = loader.getController();
+        Parent root = ingListPair.getValue();
 
-            Stage popUpStage = new Stage();
-            popUpStage.initModality(Modality.APPLICATION_MODAL);
-            popUpStage.setTitle("Add to shopping list");
-            popUpStage.setScene(new Scene(root));
+        ShoppingListIngredientPopUpCtrl ctrl = ingListPair.getKey();
 
-            ctrl.setStage(popUpStage);
+        Stage popUpStage = new Stage();
+        popUpStage.initModality(Modality.APPLICATION_MODAL);
+        popUpStage.setTitle("Add to shopping list");
+        popUpStage.setScene(new Scene(root));
 
-            popUpStage.showAndWait();
+        ctrl.setStage(popUpStage);
 
-            if (ctrl.isOkClicked()) {
-                return Optional.of(new Pair<>(ctrl.getName(), ctrl.getQuantity()));
-            } else {
-                return Optional.empty();
-            }
+        popUpStage.showAndWait();
 
-        } catch (IOException e) {
+        if (ctrl.isOkClicked()) {
+            return Optional.of(new Pair<>(ctrl.getName(), ctrl.getQuantity()));
+        } else {
             return Optional.empty();
         }
+
     }
 
     /**

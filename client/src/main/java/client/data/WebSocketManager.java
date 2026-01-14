@@ -1,6 +1,6 @@
 package client.data;
 
-import client.utils.ErrorCtrl;
+import client.scenes.ErrorCtrl;
 import com.google.inject.Inject;
 import javafx.application.Platform;
 import org.jspecify.annotations.NonNull;
