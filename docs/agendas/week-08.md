@@ -32,6 +32,7 @@
 5. **Individual progress (5 mins)**
     - How is everybody doing on the weekly progress? Has anyone failed a week?
     - How is everyone doing on the total requirements? Does everybody have enough server lines?
+        - How are we going to divide the server tests?
     - Exams: how much time is everyone willing to spend on the project, considering the exams are approaching?
 
 
