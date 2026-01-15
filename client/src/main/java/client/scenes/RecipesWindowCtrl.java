@@ -290,8 +290,9 @@ public class RecipesWindowCtrl {
      * Sets the total servings label to the correct amount and resets the field.
      */
     private void updateTotalServingsUI() {
+        // total servings multiplied by recipescale
         totalServingsLabel.setText(
-                "Total servings: " + currentRecipe.getTotalServings()
+                "Total servings: " + currentRecipe.getTotalServings() * recipeScale
         );
 
         totalServingsField.setText("");
