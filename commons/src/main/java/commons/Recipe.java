@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 
+import static commons.FormalUnit.*;
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 @Entity
@@ -33,6 +34,11 @@ public class Recipe {
 
     @ElementCollection
     private List<String> preparationSteps;
+
+    private static final double thousand = 1000.0;
+    private static final double hundered= 100.0;
+    private static final double fifteen = 15.0;
+
 
     /**
      * JPA required no argument constructor
@@ -163,5 +169,42 @@ public class Recipe {
                 .append(" time(s)*\n");
 
         return output.toString();
+    }
+
+    public double convertToGrams(double quantity, Unit unit) {
+        return switch (unit) {
+            // Weight
+            case GRAM -> quantity;
+            case MILLIGRAM -> quantity / thousand;
+            case KILOGRAM -> quantity * thousand;
+
+            // Volume (Assuming 1ml = 1g)
+            case MILLILITER -> quantity;
+            case LITER -> quantity * thousand;
+            case TABLESPOON -> quantity * fifteen; // 1 tbsp is roughly 15g/15ml
+
+            default -> 0.0;
+        };
+    }
+
+    public double calculateRecipeKcalPer100g(Recipe recipe) {
+        double totalWeightInGrams = 0;
+        double totalCalories = 0;
+
+        for (RecipeIngredient ri : recipe.getIngredients()) {
+            Unit unit = ri.getUnit().toUnit();
+            if (unit != null) {
+                double weightGrams = convertToGrams(ri.getQuantity(), unit);
+
+                double kcalPer100g = ri.getIngredient().getNutritionalValue().kcal100g();
+                totalCalories += (weightGrams * kcalPer100g) / hundered;
+                totalWeightInGrams += weightGrams;
+            }
+        }
+
+        if (totalWeightInGrams <= 0) {
+            return 0;
+        }
+        return (totalCalories / totalWeightInGrams) * hundered;
     }
 }
