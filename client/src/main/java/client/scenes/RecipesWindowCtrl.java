@@ -1201,6 +1201,8 @@ public class RecipesWindowCtrl {
             if (!recipeStillExists) return;
             setSelectedRecipe(selectedRecipe);
 
+            dataManipulator.loadFavs();
+
         } catch (Exception e) {
             errorCtrl.showGenericError(e);
         }
