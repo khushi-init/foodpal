@@ -192,6 +192,9 @@ public class Recipe {
         double totalCalories = 0;
 
         for (RecipeIngredient ri : recipe.getIngredients()) {
+            if (ri.getUnit() == null) {
+                continue;
+            }
             Unit unit = ri.getUnit().toUnit();
             if (unit != null) {
                 double weightGrams = convertToGrams(ri.getQuantity(), unit);
