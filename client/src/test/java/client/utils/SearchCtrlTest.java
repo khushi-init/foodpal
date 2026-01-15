@@ -15,10 +15,10 @@ import commons.RecipeIngredient;
 
 public class SearchCtrlTest {
     Recipe recipe;
-    SearchCtrl searchCtrl;
+    SearchService searchCtrl;
     @BeforeEach
     public void setup(){
-        searchCtrl = new SearchCtrl();
+        searchCtrl = new SearchService();
         recipe = new Recipe("name", null, List.of("step1", "step2", "step3"));
         Ingredient ingredient1 = new Ingredient("testname", null);
         RecipeIngredient ri1 = new RecipeIngredient(recipe, ingredient1, 0.0, null);

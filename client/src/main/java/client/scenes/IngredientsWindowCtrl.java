@@ -1,13 +1,15 @@
 package client.scenes;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import client.IngredientListCell;
-import client.Main;
+import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
-import client.utils.CreateIngredientCtrl;
-import client.utils.ErrorCtrl;
 import client.utils.ServerUtils;
 import commons.Ingredient;
+import commons.NutritionalValue;
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -16,23 +18,32 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public class IngredientsWindowCtrl {
 
     // DEPENDENCIES (Injection)
 
     // ServerUtils is needed to fetch and save ingredient data
-    private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
-    private PrimaryCtrl primaryCtrl;
-    private ErrorCtrl errorCtrl;
+    private final ServerUtils server;
+    private final PrimaryCtrl primaryCtrl;
+    private final ErrorCtrl errorCtrl;
+    private final MyFXML fxml;
+
+    // NutriScore points
+    private final double nutriScoreA = 1;
+    private final double nutriScoreB = 4;
+    private final double nutriScoreC = 7;
+    private final double nutriScoreD = 10;
+
+    final int heightImage = 50;
 
     // FXML FIELDS (UI Elements)
 
@@ -65,9 +76,12 @@ public class IngredientsWindowCtrl {
     @FXML
     private Label recipesUsedInLabel;
 
-    private LocalStorage storage;
+    @FXML
+    private HBox nutriScoreBox;
 
-    private DataManipulator dataManipulator;
+    private final LocalStorage storage;
+
+    private final DataManipulator dataManipulator;
 
     /**
      * Injectable constructor is REQUIRED for Guice to provide dependencies.
@@ -75,13 +89,17 @@ public class IngredientsWindowCtrl {
      * @param c ErrorCtrl instance for displaying errors.
      * @param storage - The local storage injected.
      * @param dataManipulator - The injected data Manipulator
+     * @param server - Injected serverUtils instance
+     * @param fxml - Injected MyFXML instance
      */
     @Inject
-    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator) {
+    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml) {
         this.primaryCtrl = p;
         this.errorCtrl = c;
         this.storage = storage;
         this.dataManipulator = dataManipulator;
+        this.server = server;
+        this.fxml = fxml;
     }
 
     /**
@@ -136,6 +154,8 @@ public class IngredientsWindowCtrl {
         } else {
             recipesUsedInLabel.setText(String.format("%d recipe(s)", usage.get()));
         }
+
+        showNutriScore(ingredient);
     }
 
     /**
@@ -144,6 +164,8 @@ public class IngredientsWindowCtrl {
     public void clearDetails() {
         ingredientDetailsView.setVisible(false);
         ingredientDetailsView.setManaged(false);
+        // Remove any ImageView when clearing
+        nutriScoreBox.getChildren().clear();
     }
 
     /**
@@ -190,6 +212,7 @@ public class IngredientsWindowCtrl {
     /**
      * Runs when the green "plus" button is pressed. Prompts user to create an ingredient and adds it to the server.
      * If added to the server successfully, it is also added to the client-side local list.
+     * @return Optional containing the newly created Ingredient if successful
      */
     public Optional<Ingredient> handlePlusButtonPress() {
         Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:", "", "", "", "");
@@ -209,7 +232,7 @@ public class IngredientsWindowCtrl {
      * @return - The parsed ingredient or an empty optional if parsing failed / was cancelled
      */
     public Optional<Ingredient> ingredientDataPrompt(String title, String descText, String defaultName, String defaultFat, String defaultProtein, String defaultCarbs) {
-        Pair<CreateIngredientCtrl, Parent> addIngPair = Main.FXML.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
+        Pair<CreateIngredientCtrl, Parent> addIngPair = fxml.load(CreateIngredientCtrl.class, "client", "modules", "CreateIngredient.fxml");
 
         Parent root = addIngPair.getValue();
         CreateIngredientCtrl createIngCtr = addIngPair.getKey();
@@ -266,6 +289,42 @@ public class IngredientsWindowCtrl {
             if (!anyway) return;
         }
         dataManipulator.deleteIngredient(selected);
+    }
+
+    /**
+     * Displays the NutriScore label (image) for the given ingredient
+     * Shows nothing if nutritional data is missing or has zero calories
+     * @param ingredient Ingredient for which we want to show nutri score
+     */
+    public void showNutriScore(Ingredient ingredient) {
+        // remove any existing ImageView to avoid duplicates
+        nutriScoreBox.getChildren().clear();
+
+        NutritionalValue nv = ingredient.getNutritionalValue();
+        if (nv == null || nv.kcal100g() == 0) {
+            return;
+        }
+
+        double points = nv.nutriScorePoints();
+        String imagePath = nutriScoreImagePath(points);
+        ImageView imageView = new ImageView(
+                new Image(getClass().getResource(imagePath).toExternalForm())
+        );
+
+        //styling
+        imageView.setFitHeight(heightImage);
+        imageView.setPreserveRatio(true);
+
+        nutriScoreBox.getChildren().add(imageView);
+
+    }
+
+    private String nutriScoreImagePath(double points) {
+        if (points <= nutriScoreA)  return "/client/images/NutriScoreA.png";
+        if (points <= nutriScoreB)  return "/client/images/NutriScoreB.png";
+        if (points <= nutriScoreC)  return "/client/images/NutriScoreC.png";
+        if (points <= nutriScoreD) return "/client/images/NutriScoreD.png";
+        return "/client/images/NutriScoreE.png";
     }
 
     // We need an update method to re-sort the ingredients list on updates

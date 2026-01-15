@@ -1,9 +1,9 @@
 package client.scenes;
 
+import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
-import client.utils.ErrorCtrl;
-import client.utils.SearchCtrl;
+import client.utils.SearchService;
 import client.utils.ServerUtils;
 import commons.Recipe;
 import javafx.collections.FXCollections;
@@ -23,14 +23,15 @@ public class RecipesWindowCtrlTest {
     private LocalStorage storage;
     private DataManipulator dataManipulator;
     private ServerUtils server;
+    private MyFXML fxml;
 
     @BeforeEach
     public void setup() {
-        error = new ErrorCtrl();
+        error = new ErrorCtrl(null);
         server = new ServerUtils(error);
         storage = new LocalStorage(null);
         dataManipulator = new DataManipulator(storage, server, error);
-        window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchCtrl());
+        window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchService(), server, null);
     }
 
     private String invokeCreateCopyName(String baseName) throws Exception {

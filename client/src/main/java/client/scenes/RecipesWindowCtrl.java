@@ -6,11 +6,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
+import client.MyFXML;
 import client.data.WebSocketManager;
+import client.popups.IngredientPopUpCtrl;
 import client.utils.*;
 import com.google.inject.Inject;
 
-import client.Main;
 import client.RecipeListCell;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
@@ -46,7 +47,9 @@ public class RecipesWindowCtrl {
 
     private final Insets lineMargin = new Insets(0, 15, 0, 15);
 
-    private final ServerUtils server = Main.INJECTOR.getInstance(ServerUtils.class);
+    private final ServerUtils server;
+
+    private final MyFXML fxml;
 
     private final WebSocketManager socker;
 
@@ -109,11 +112,11 @@ public class RecipesWindowCtrl {
     // This is the Shopping List data that is used in the session.
     private final ShoppingList shoppingList = new ShoppingList();
 
-    private LocalStorage storage;
-    private DataManipulator dataManipulator;
+    private final LocalStorage storage;
+    private final DataManipulator dataManipulator;
 
     private final ErrorCtrl errorCtrl;
-    private final SearchCtrl searchCtrl;
+    private final SearchService searchService;
 
     private final NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
@@ -129,15 +132,21 @@ public class RecipesWindowCtrl {
      * @param storage - The local storage storing recipes and ingredients
      * @param dataManipulator - The data manipulator
      * @param s - The injected search control
+     * @param server - The injected serverUtils instance
+     * @param fxml - The injected MyFXML instance
      */
     @Inject
-    public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c, PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator, SearchCtrl s) {
+    public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c,
+                             PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator,
+                             SearchService s, ServerUtils server, MyFXML fxml) {
         this.socker = socker;
         this.errorCtrl = c;
         this.primaryCtrl = p;
         this.storage = storage;
         this.dataManipulator = dataManipulator;
-        this.searchCtrl = s;
+        this.searchService = s;
+        this.server = server;
+        this.fxml = fxml;
     }
 
     /**
@@ -331,7 +340,7 @@ public class RecipesWindowCtrl {
                 try{
                     ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                             favFilter(
-                                    searchCtrl.query(
+                                    searchService.query(
                                             searchField.getText(), storage.getRecipes()
                                     ),
                                     storage.getFavoriteIDs())
@@ -354,7 +363,7 @@ public class RecipesWindowCtrl {
         try{
             ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
                     favFilter(
-                            searchCtrl.performComplexQuery(prop, storage.getRecipes()),
+                            searchService.performComplexQuery(prop, storage.getRecipes()),
                             storage.getFavoriteIDs()
                     )
 
@@ -372,7 +381,7 @@ public class RecipesWindowCtrl {
         cancelSearch();
         // Load only favorites or nah
         if (favoriteCheck.isSelected()) {
-            searchCtrl.setFavToggle(true);
+            searchService.setFavToggle(true);
             List<Recipe> favRecipes = new ArrayList<>();
             for (Recipe r : storage.getRecipes()) {
                 if (storage.getFavoriteIDs().contains(r.getId())) {
@@ -382,7 +391,7 @@ public class RecipesWindowCtrl {
             sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
             sidebarRecipeNamesList.getSelectionModel().select(0);
         } else {
-            searchCtrl.setFavToggle(false);
+            searchService.setFavToggle(false);
             sidebarRecipeNamesList.setItems(storage.getRecipes());
         }
     }
@@ -500,7 +509,7 @@ public class RecipesWindowCtrl {
 
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
-            Pair<RecipeIngredientUICtrl, Node> ing = Main.FXML.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
+            Pair<RecipeIngredientUICtrl, Node> ing = fxml.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
@@ -532,6 +541,10 @@ public class RecipesWindowCtrl {
             });
             ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
                 handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
+                    if (newName == null || newName.trim().isEmpty()) {
+                        errorCtrl.showGenericError("Ingredients can't have a blank name!");
+                        return;
+                    }
                     ri.setQuantity(newQty);
                     ri.getIngredient().setName(newName);
                     openRecipe(currentRecipe);
@@ -620,7 +633,7 @@ public class RecipesWindowCtrl {
 
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
-            Pair<RecipeInstructionUICtrl, Node> ing = Main.FXML.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
+            Pair<RecipeInstructionUICtrl, Node> ing = fxml.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
             RecipeInstructionUICtrl instCtrl = ing.getKey();
             Node ingNode = ing.getValue();
             int currentIndex = i;
@@ -1039,29 +1052,22 @@ public class RecipesWindowCtrl {
      * Opens a new window displaying the current shopping list.
      */
     private void showShoppingList() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/client/scenes/ShoppingList.fxml")
-            );
-            Parent root = loader.load();
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/client/scenes/ShoppingList.fxml")
+        );
+        Pair<ShoppingListCtrl, Parent> shopListPair = fxml.load(ShoppingListCtrl.class, "client", "scenes", "ShoppingList.fxml");
+        Parent root = shopListPair.getValue();
 
-            ShoppingListCtrl ctrl = loader.getController();
-            ctrl.setErrorCtrl(errorCtrl);
-            ctrl.setAndShowShoppingList(shoppingList);
+        ShoppingListCtrl ctrl = shopListPair.getKey();
+        ctrl.setErrorCtrl(errorCtrl);
+        ctrl.setAndShowShoppingList(shoppingList);
 
-            Stage shoppingListStage = new Stage();
-            shoppingListStage.setTitle("Shopping List");
-            shoppingListStage.setScene(new Scene(root));
+        Stage shoppingListStage = new Stage();
+        shoppingListStage.setTitle("Shopping List");
+        shoppingListStage.setScene(new Scene(root));
 
-            shoppingListStage.show();
+        shoppingListStage.show();
 
-        } catch (IOException e) {
-            if (errorCtrl != null) {
-                errorCtrl.showGenericError(e);
-            } else {
-                e.printStackTrace();
-            }
-        }
     }
 
     /**

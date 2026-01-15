@@ -1,4 +1,4 @@
-package client.utils;
+package client.scenes;
 
 import commons.FormalUnit;
 import commons.InformalUnit;

@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="ingredientBox" alignment="CENTER_LEFT" maxHeight="30.0" minWidth="200.0" spacing="6" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.utils.ShoppingListIngredientUICtrl">
+<HBox fx:id="ingredientBox" alignment="CENTER_LEFT" maxHeight="30.0" minWidth="200.0" spacing="6" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.popups.ShoppingListIngredientUICtrl">
     <CheckBox fx:id="checkoffBox" mnemonicParsing="false" onAction="#handleCheckoffBox" />
     <Label fx:id="ingredientText" alignment="CENTER_LEFT" style="-fx-padding: 0 0 0 0;" text="aaa" textFill="#111827">
         <font>

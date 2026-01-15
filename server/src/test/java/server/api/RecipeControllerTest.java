@@ -8,6 +8,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import server.service.RecipeService;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import static org.springframework.http.HttpStatus.*;
@@ -145,7 +147,7 @@ public class RecipeControllerTest {
 
     @Test
     public void changeRecipeCorrectTest() {
-        Recipe updated = new Recipe("Updated Recipe Name", null, null);
+        Recipe updated = new Recipe("Updated Recipe Name", new ArrayList<>(), new ArrayList<>());
         updated.setId(id);
 
         // The service now returns an Optional<Recipe> in our refactored PutMapping

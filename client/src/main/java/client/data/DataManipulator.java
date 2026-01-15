@@ -1,6 +1,6 @@
 package client.data;
 
-import client.utils.ErrorCtrl;
+import client.scenes.ErrorCtrl;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;

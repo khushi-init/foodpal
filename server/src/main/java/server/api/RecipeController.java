@@ -1,6 +1,7 @@
 package server.api;
 
 import commons.Recipe;
+import commons.RecipeIngredient;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -116,6 +117,12 @@ public class RecipeController {
 
         if (incoming.getTotalServings() < 0) {
             return ResponseEntity.badRequest().build();
+        }
+
+        for (RecipeIngredient ri : incoming.getIngredients()) {
+            if (ri.getIngredient().getName() == null || ri.getIngredient().getName().trim().isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
         }
 
         Optional<Recipe> updated = recipeService.updateRecipe(id, incoming);

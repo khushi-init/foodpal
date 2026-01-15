@@ -1,4 +1,4 @@
-package client.utils;
+package client.popups;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
