@@ -71,6 +71,11 @@ public class RecipesWindowCtrl {
     private Label cancelSearchButton;
 
     @FXML
+    private Label scaleLabel;
+
+    @FXML TextField scaleTextField;
+
+    @FXML
     private TextField totalServingsField;
 
     @FXML
@@ -102,6 +107,9 @@ public class RecipesWindowCtrl {
 
     //Drag n drop delay
     int processingDelay = 50;
+
+    // global recipe scaling factor
+    double recipeScale = 1.0;
 
     private boolean newInstructionAdded = false;
 
@@ -184,12 +192,62 @@ public class RecipesWindowCtrl {
         });
 
         initializeTotalServings();
+        initializeScale();
 
         // Deactivate recipe specific buttons, since nothing is selected at the start.
         updateRecipeSelectionState(false);
 
         initializeSceneEvents();
         intializeSearchElements();
+    }
+
+    /**
+     * Initialize scale variable with a listener for changes
+     */
+    private void initializeScale() {
+        // New listener for scale
+        // Saves the servings amount
+        scaleTextField.setOnKeyReleased(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                try {
+                    updateScale(Double.parseDouble(scaleTextField.getText()));
+                    openRecipe(currentRecipe);
+                } catch (NumberFormatException err) {
+                    if (errorCtrl != null) {
+                        errorCtrl.showGenericError("Scale must be a number.");
+                    }
+                    return;
+                }
+                scaleTextField.getParent().requestFocus();
+            }
+        });
+        // Focused Property Listener, saves when the TextField loses focus
+        scaleTextField.focusedProperty().addListener((obs,
+                                                          oldFocused, newFocused) -> {
+            if (oldFocused && !newFocused) {
+                try {
+                    updateScale(Double.parseDouble(scaleTextField.getText()));
+                    openRecipe(currentRecipe);
+                } catch (NumberFormatException err) {
+                    if (errorCtrl != null) {
+                        errorCtrl.showGenericError("Scale must be a number.");
+                    }
+                }
+            }
+        });
+
+    }
+
+    /**
+     * Update the scale text
+     */
+    private void updateScale(double newScale) {
+        scaleLabel.setVisible(true);
+        scaleTextField.setVisible(true);
+        recipeScale = newScale;
+        if(currentRecipe != null) {
+            scaleTextField.setText(String.valueOf(recipeScale));
+        }
     }
 
     /**
@@ -392,6 +450,12 @@ public class RecipesWindowCtrl {
         totalServingsLabel.setDisable(!active);
         totalServingsLabel.setVisible(active);
 
+        scaleLabel.setDisable(!active);
+        scaleLabel.setVisible(active);
+
+        scaleTextField.setDisable(!active);
+        scaleTextField.setVisible(active);
+
         downloadButton.setDisable(!active);
         downloadButton.setVisible(active);
 
@@ -452,13 +516,14 @@ public class RecipesWindowCtrl {
 
         updateTotalServingsUI();
 
+        updateScale(recipeScale);
+
     }
 
     private final int fontSize = 16;
 
     /**
      * Loads the ingredients within a list to the recipeView UI element
-     *
      * @param recipeIngredients - A list of RecipeIngredients
      */
     public void loadIngredients(List<RecipeIngredient> recipeIngredients) {
@@ -476,11 +541,7 @@ public class RecipesWindowCtrl {
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
-            String unitName = "";
-            if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
-                unitName = ri.getUnit().toUnit().getDisplayName();
-            }
-            ingCtrl.setText("• " + ri.getIngredient().getName() + " " + ri.getQuantity().toString() + " " + unitName);
+            ingCtrl.setText(formatIngredientText(ri));
 
             ingCtrl.setIndex(i);
             VBox.setVgrow(ingNode, Priority.ALWAYS);
@@ -541,6 +602,28 @@ public class RecipesWindowCtrl {
         recipeView.requestLayout();
     }
 
+    /**
+     * Determines the text to be displayed within the recipe view
+     * @param ri The recipeIngredient to handle
+     * @return a string describing the recipeIngredient and its attributes
+     */
+    public String formatIngredientText(RecipeIngredient ri) {
+        String unitName = "";
+        boolean isInformal = false;
+        if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
+            unitName = ri.getUnit().toUnit().getDisplayName();
+            isInformal = ri.getUnit().toUnit() instanceof InformalUnit;
+
+        }
+        double quantity;
+        if(isInformal || recipeScale == 1.0) {
+            quantity = ri.getQuantity();
+        }
+        else {
+            quantity = ri.getQuantity() * recipeScale;
+        }
+        return "• " + ri.getIngredient().getName() + " " + quantity + " " + unitName;
+    }
     /**
      * Updates the current recipe and refreshes it to reflect changes made
      */
@@ -1180,5 +1263,7 @@ public class RecipesWindowCtrl {
             e.printStackTrace();
         }
     }
+
+
 
 }
