@@ -18,6 +18,7 @@ public class IngredientServiceTest {
     private IngredientService sut;
     private IngredientRepository mockIngredientRepo;
     private RecipeIngredientRepository mockRecipeIngredientRepo;
+    private RecipeService mockRecipeService;
 
     private final Long id = 1L;
 
@@ -25,7 +26,8 @@ public class IngredientServiceTest {
     public void setUp() {
         mockIngredientRepo = mock(IngredientRepository.class);
         mockRecipeIngredientRepo = mock(RecipeIngredientRepository.class);
-        sut = new IngredientService(mockIngredientRepo, mockRecipeIngredientRepo);
+        mockRecipeService = mock(RecipeService.class);
+        sut = new IngredientService(mockIngredientRepo, mockRecipeIngredientRepo, mockRecipeService);
     }
 
     @Test

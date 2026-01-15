@@ -110,7 +110,7 @@ public class DataManipulator {
     public void updateRecipeLocal(Recipe newRecipe){
         storage.getRecipes().removeIf(x -> newRecipe.getId() == x.getId());
         storage.getRecipes().add(newRecipe);
-        System.out.println("updated recipe" + newRecipe.getId());
+        System.out.println("Updated recipe" + newRecipe.getId());
         newRecipe.getIngredients().stream().forEach(x -> updateIngredientLocal(x.getIngredient()));
     }
 

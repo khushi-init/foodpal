@@ -224,16 +224,33 @@ public class RecipeService {
         }
 
         eventPublisher.publishEvent(new RecipeUpdate(recipeId, recipe));
-        // eventPublisher.publishEvent(new RecipeUpdate(id, incoming));
-        // System.out.println("published ingredient removed from recipe " + recipeId);
-        // System.out.println("recipe is:" + recipe.toString());
 
         return removed;
     }
 
-    // public void publishRecipe(Recipe recipe){
-    //     eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
-    // }
+    /**
+     * Sends an update over the websocket for all recipes that contain the specified ingredient
+     * @param ingredient The changed ingredient
+     */
+    @Transactional
+    public void updateRecipesWithChangedIngredient(Ingredient ingredient){
+        for(Recipe recipe: recipeRepository.findAll()){
+            if(recipe.getIngredients().stream().anyMatch(x -> ingredient.getId() == x.getIngredient().getId())){
+                eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
+            }
+        }
+    }
 
-
+    /**
+     * Sends an update over the websocket for all recipes that contain the deleted ingredient
+     * @param ingredientId The deleted ingredient
+     */
+    @Transactional
+    public void updateRecipesWithDeletedIngredient(Long ingredientId){
+        for(Recipe recipe: recipeRepository.findAll()){
+            if(recipe.getIngredients().removeIf(x -> x.getIngredient().getId().equals(ingredientId))){
+                eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
+            }
+        }
+    }
 }

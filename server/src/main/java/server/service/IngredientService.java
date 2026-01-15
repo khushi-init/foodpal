@@ -11,15 +11,18 @@ import java.util.Optional;
 public class IngredientService {
     private final IngredientRepository ingredientRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
+    private final RecipeService recipeService;
 
     /**
      * Ingredient Service Constructor method
      * @param ingredientRepository The ingredient repository to meddle with
      * @param recipeIngredientRepository The Recipe Ingredient repository to meddle with
+     * @param recipeService The RecipeService to meddle with
      */
-    public IngredientService(IngredientRepository ingredientRepository, RecipeIngredientRepository recipeIngredientRepository) {
+    public IngredientService(IngredientRepository ingredientRepository, RecipeIngredientRepository recipeIngredientRepository, RecipeService recipeService) {
         this.ingredientRepository = ingredientRepository;
         this.recipeIngredientRepository = recipeIngredientRepository;
+        this.recipeService = recipeService;
     }
 
     /**
@@ -69,6 +72,7 @@ public class IngredientService {
      * @throws IllegalArgumentException if the name is invalid
      */
     public Optional<Ingredient> updateIngredient(Ingredient ingredient) {
+        recipeService.updateRecipesWithChangedIngredient(ingredient);
         return Optional.of(ingredient)
                 .filter(i -> ingredientRepository.existsById(i.getId()))
                 .filter(this::validateIngredientName)
@@ -81,6 +85,7 @@ public class IngredientService {
      * @return true if deleted, false if the ingredient was not found
      */
     public boolean deleteIngredient(Long id) {
+        recipeService.updateRecipesWithDeletedIngredient(id);
         if (!ingredientRepository.existsById(id)) {
             return false;
         }
