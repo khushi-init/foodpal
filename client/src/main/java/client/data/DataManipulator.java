@@ -105,6 +105,7 @@ public class DataManipulator {
 
     /**
      * Applies changes from a recipe subscription. Replaces the recipe and updates all the ingredients
+     * If the recipe didn't exist yet, it is added
      * @param newRecipe The changed recipe
      */
     public void updateRecipeLocal(Recipe newRecipe){
@@ -154,6 +155,12 @@ public class DataManipulator {
         System.out.println("Refreshed recipe list");
         List<Recipe> serverResponse = server.getRecipes();
         storage.getRecipes().setAll(serverResponse);
+    }
+
+    public Recipe refreshRecipe(Long id){
+        Recipe updated = server.getRecipe(id);
+        updateRecipeLocal(updated);
+        return updated;
     }
 
     /**

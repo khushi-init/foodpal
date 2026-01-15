@@ -102,6 +102,7 @@ public class RecipesWindowCtrl {
 
     //Drag n drop delay
     int processingDelay = 50;
+    private final int fontSize = 16;
 
     private boolean newInstructionAdded = false;
 
@@ -151,7 +152,7 @@ public class RecipesWindowCtrl {
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
-                        openRecipe(newSelection);
+                        openRecipe(newSelection, true);
                     } else {
                         clearRecipeView();
                         updateRecipeSelectionState(false);
@@ -240,35 +241,6 @@ public class RecipesWindowCtrl {
         if (titleSubscription != null) {
             return;
         }
-        // Thread subscribeThread = new Thread(() -> {
-        //     titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
-        //         Platform.runLater(() -> {
-        //             System.out.println("Title of recipe " + update.id() + " Changed!");
-        //             dataManipulator.changeNameLocal(update.id(), update.newTitle());
-        //             // dataManipulator.refreshRecipes();
-        //             // A "softer" refresh is required to keep selection
-        //             sidebarRecipeNamesList.refresh();
-        //             if(currentRecipe == null) return;
-        //             if (currentRecipe.getId().equals(update.id())) {
-        //                 recipeNameField.setText(update.newTitle());
-        //             }
-        //         });
-        //     });
-
-        //     recipeSubscription = socker.subscribe("/updates/recipe/" + currentRecipe.getId(), RecipeUpdate.class, update -> {
-        //         Platform.runLater(() -> {
-                    
-        //         });
-        //     });
-
-        //     if (titleSubscription == null ) {
-        //         Platform.runLater(() -> {
-        //             errorCtrl.showGenericError("Could not subscribe to title changes, server might be down!");
-        //         });
-        //     }
-        // });
-        // subscribeThread.setDaemon(true);
-        // subscribeThread.start();
         initializeTitleSubscription();
         dataManipulator.refreshRecipes();
     }
@@ -295,7 +267,6 @@ public class RecipesWindowCtrl {
                 Platform.runLater(() -> {
                     System.out.println("Title of recipe " + update.id() + " Changed!");
                     dataManipulator.changeNameLocal(update.id(), update.newTitle());
-                    // dataManipulator.refreshRecipes();
                     // A "softer" refresh is required to keep selection
                     sidebarRecipeNamesList.refresh();
                     if(currentRecipe == null) return;
@@ -471,15 +442,20 @@ public class RecipesWindowCtrl {
      * Loads the contents of the provided recipe to the recipeView UI element
      *
      * @param recipe - The recipe to load
+     * @param updateRecipe True iff the recipe should be updated from the server
      */
-    public void openRecipe(Recipe recipe) {
+    public void openRecipe(Recipe recipe, boolean updateRecipe) {
         this.currentRecipe = recipe;
+        if(updateRecipe){
+            this.currentRecipe = dataManipulator.refreshRecipe(recipe.getId());
+            recipe = this.currentRecipe;
+        }
         recipeView.getChildren().clear();
-        loadIngredients(recipe.getIngredients());
+        loadIngredients(currentRecipe.getIngredients());
         Separator sep = new Separator();
         recipeView.getChildren().add(sep);
         VBox.setMargin(sep, lineMargin);
-        loadSteps(recipe.getPreparationSteps());
+        loadSteps(currentRecipe.getPreparationSteps());
         // Favorites
         if (currentRecipe != null && storage.getFavoriteIDs() != null) {
             if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
@@ -488,9 +464,9 @@ public class RecipesWindowCtrl {
                 favoriteImage.setImage(unFavorite);
             }
         }
-        initializeRecipeSubscription(recipe.getId());
+        initializeRecipeSubscription(currentRecipe.getId());
 
-        recipeNameField.setText(recipe.getName());
+        recipeNameField.setText(currentRecipe.getName());
 
         // Activate recipe specific buttons
         updateRecipeSelectionState(true);
@@ -499,7 +475,14 @@ public class RecipesWindowCtrl {
 
     }
 
-    private final int fontSize = 16;
+    /**
+     * Loads the content of the provided recipe to the recipeView UI element
+     * @param recipe Recipe to load
+     */
+    public void openRecipe(Recipe recipe){
+        openRecipe(recipe, false);
+    }
+
 
     /**
      * Loads the ingredients within a list to the recipeView UI element
