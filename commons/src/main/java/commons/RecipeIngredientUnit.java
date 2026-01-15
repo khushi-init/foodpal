@@ -34,6 +34,26 @@ public class RecipeIngredientUnit {
         this.informalUnitName = informalUnitName;
     }
 
+    public UnitType getType() {
+        return type;
+    }
+    public String getFormalUnitName() {
+        return formalUnitName;
+    }
+    public String getInformalUnitName() {
+        return informalUnitName;
+    }
+
+    public void setType(UnitType type) {
+        this.type = type;
+    }
+    public void setFormalUnitName(String name) {
+        this.formalUnitName = name;
+    }
+    public void setInformalUnitName(String name) {
+        this.informalUnitName = name;
+    }
+
     /**
      * Converts a concrete Unit object (formal or informal) into a
      * persistable RecipeIngredientUnit storage wrapper.
