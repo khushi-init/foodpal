@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 public interface RecipeIngredientRepository extends JpaRepository<RecipeIngredient, RecipeIngredientKey> {
 
     /**
@@ -19,6 +21,12 @@ public interface RecipeIngredientRepository extends JpaRepository<RecipeIngredie
     // This custom HQL query deletes all links associated with the given ingredient ID
     @Query("DELETE FROM RecipeIngredient ri WHERE ri.ingredient.id = :ingredientId")
     void deleteByIngredientId(@Param("ingredientId") long ingredientId);
+
+    @Query("SELECT ri.id FROM RecipeIngredient ri WHERE ri.ingredient.id = :ingredientId")
+    RecipeIngredientKey getIdFromIngredientId(@Param("ingredientId") long ingredientId);
+
+    @Override
+    Optional<RecipeIngredient> findById(RecipeIngredientKey recipeIngredientKey);
 
     @Query("SELECT COUNT(DISTINCT ri.recipe.id) FROM RecipeIngredient ri WHERE ri.ingredient.id = :ingredientId")
     int getRecipeUsageNumber(@Param("ingredientId") long ingredientId);
