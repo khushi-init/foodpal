@@ -40,7 +40,7 @@
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
         <Button mnemonicParsing="false" onAction="#handleCancel" prefWidth="80.0" text="Cancel" />
-        <Button mnemonicParsing="false" onAction="#handleOk" prefWidth="80.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;" text="OK" />
+        <Button mnemonicParsing="false" onAction="#handleOk" prefWidth="80.0" style="-fx-background-color: #0275d8; -fx-text-fill: white; -fx-font-weight: bold;" text="OK" />
     </HBox>
 
 </VBox>
