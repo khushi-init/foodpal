@@ -279,9 +279,6 @@ public class RecipesWindowCtrl {
                     // A "softer" refresh is required to keep selection
                     sidebarRecipeNamesList.refresh();
                     if(currentRecipe == null) return;
-                    if (currentRecipe.getId().equals(update.id())) {
-                        recipeNameField.setText(update.newTitle());
-                    }
                 });
             });
         });

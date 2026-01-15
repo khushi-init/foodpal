@@ -159,7 +159,7 @@ public class DataManipulator {
 
     public Recipe refreshRecipe(Long id){
         Recipe updated = server.getRecipe(id);
-        updateRecipeLocal(updated);
+        updateRecipe(updated);
         return updated;
     }
 
