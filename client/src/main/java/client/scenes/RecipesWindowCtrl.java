@@ -110,6 +110,7 @@ public class RecipesWindowCtrl {
 
     // global recipe scaling factor
     double recipeScale = 1.0;
+    double scaleLimit = 1000.0;
 
     private boolean newInstructionAdded = false;
 
@@ -242,11 +243,16 @@ public class RecipesWindowCtrl {
      * Update the scale text
      */
     private void updateScale(double newScale) {
-        scaleLabel.setVisible(true);
-        scaleTextField.setVisible(true);
-        recipeScale = newScale;
-        if(currentRecipe != null) {
-            scaleTextField.setText(String.valueOf(recipeScale));
+        if(newScale < scaleLimit) {
+            scaleLabel.setVisible(true);
+            scaleTextField.setVisible(true);
+            recipeScale = newScale;
+            if(currentRecipe != null) {
+                scaleTextField.setText(String.valueOf(recipeScale));
+            }
+        }
+        else {
+            errorCtrl.showGenericError("Scale limit ("+scaleLimit+") exceeded!");
         }
     }
 
