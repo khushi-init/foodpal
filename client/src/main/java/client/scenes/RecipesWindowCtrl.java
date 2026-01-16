@@ -198,7 +198,7 @@ public class RecipesWindowCtrl {
 
         // Deactivate recipe specific buttons, since nothing is selected at the start.
         updateRecipeSelectionState(false);
-
+        setupAddIngredientDropdown();
         initializeSceneEvents();
         intializeSearchElements();
 
@@ -1320,5 +1320,42 @@ public class RecipesWindowCtrl {
     }
 
 
+
+    @FXML
+    private MenuButton addIngredientMenu;
+
+    private void setupAddIngredientDropdown() {
+        addIngredientMenu.getItems().clear();
+
+        //if you want to add more languages, just copy item1 or item2 and change the parameters
+        MenuItem item1 = new MenuItem("English", icon("/client/images/flagUK.png"));
+        item1.setOnAction(e -> setSelectedOnMenuButton("English", "/client/images/flagUK.png"));
+
+        MenuItem item2 = new MenuItem("Dutch", icon("/client/images/flagNL.png"));
+        item2.setOnAction(e -> setSelectedOnMenuButton("Dutch", "/client/images/flagNL.png"));
+
+        MenuItem item3 = new MenuItem("Slovak", icon("/client/images/flagSK.png"));
+        item3.setOnAction(e -> setSelectedOnMenuButton("Slovak", "/client/images/flagSK.png"));
+
+        addIngredientMenu.getItems().addAll(item1, item2, item3);
+
+        // Initial state (what shows before user picks)
+        addIngredientMenu.setText("English");
+        addIngredientMenu.setGraphic(icon("/client/images/flagUK.png"));
+    }
+
+    private void setSelectedOnMenuButton(String label, String imagePath) {
+        addIngredientMenu.setText(label);
+        addIngredientMenu.setGraphic(icon(imagePath));
+        System.out.println(label + " selected");
+    }
+
+    private ImageView icon(String path) {
+        ImageView iv = new ImageView(new Image(getClass().getResourceAsStream(path)));
+        iv.setFitWidth(16);
+        iv.setFitHeight(16);
+        iv.setPreserveRatio(true);
+        return iv;
+    }
 
 }
