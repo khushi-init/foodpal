@@ -108,6 +108,8 @@ public class RecipesWindowCtrl {
 
     private boolean newInstructionAdded = false;
 
+    private boolean ignoreSideBarSelectionEvent = false;
+
     // This is the Shopping List data that is used in the session.
     private final ShoppingList shoppingList = new ShoppingList();
 
@@ -159,6 +161,7 @@ public class RecipesWindowCtrl {
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell(storage.getFavoriteIDs(), favorite));
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
+                    if(ignoreSideBarSelectionEvent) return;
                     if (newSelection != null) {
                         openRecipe(newSelection, true);
                     } else {
@@ -452,7 +455,9 @@ public class RecipesWindowCtrl {
     public void openRecipe(Recipe recipe, boolean updateRecipe) {
         this.currentRecipe = recipe;
         if(updateRecipe){
+            ignoreSideBarSelectionEvent = true;
             this.currentRecipe = dataManipulator.refreshRecipe(recipe.getId());
+            ignoreSideBarSelectionEvent = false;
             recipe = this.currentRecipe;
         }
         recipeView.getChildren().clear();
