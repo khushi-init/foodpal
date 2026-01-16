@@ -87,6 +87,9 @@ public class RecipesWindowCtrl {
     private Button toCart;
 
     @FXML
+    private ImageView kcalIcon;
+
+    @FXML
     private Label advancedSearchButton;
 
     // Favorite Injections
@@ -188,6 +191,13 @@ public class RecipesWindowCtrl {
 
         initializeSceneEvents();
         intializeSearchElements();
+
+        kcalIcon.setPickOnBounds(true);
+
+        Tooltip tooltip = new Tooltip("0 kcal/100g");
+        tooltip.setShowDelay(javafx.util.Duration.millis(processingDelay*2)); // Instant popup
+        Tooltip.install(kcalIcon, tooltip);
+        kcalIcon.setOnMouseEntered(e -> System.out.println("Mouse is over the leaf!"));
     }
 
     /**
@@ -220,6 +230,29 @@ public class RecipesWindowCtrl {
         });
     }
 
+    public void refreshNutritionTooltip(Recipe recipe) {
+        // If there's no recipe at all (sidebar cleared), hide the icon
+        if (recipe == null) {
+            kcalIcon.setVisible(false);
+            return;
+        }
+
+        // Ensure the icon is visible because a recipe IS selected
+        kcalIcon.setVisible(true);
+
+        // Calculate the density
+        double density = recipe.calculateRecipeKcalPer100g(recipe);
+
+        // Create the text (e.g., "0 kcal/100g" or "145 kcal/100g")
+        String tooltipText = String.format("%.0f kcal/100g", density);
+
+        Tooltip tooltip = new Tooltip(tooltipText);
+        tooltip.setShowDelay(javafx.util.Duration.millis(processingDelay));
+
+        // Force update the Tooltip
+        Tooltip.uninstall(kcalIcon, null);
+        Tooltip.install(kcalIcon, tooltip);
+    }
     /**
      * Sets the total servings label to the correct amount and resets the field.
      */
@@ -370,9 +403,6 @@ public class RecipesWindowCtrl {
         }
     }
 
-
-
-
     /**
      * Enables or disables all recipe-specific UI controls.
      * When inactive, buttons related to the currently selected recipe
@@ -450,6 +480,8 @@ public class RecipesWindowCtrl {
 
         updateTotalServingsUI();
 
+        refreshNutritionTooltip(currentRecipe);
+
     }
 
     private final int fontSize = 16;
@@ -488,7 +520,9 @@ public class RecipesWindowCtrl {
                 if (ingredientId != null) {
                     server.deleteIngredient(recipeId, ingredientId);
                 }
+                server.updateRecipe(currentRecipe);
                 openRecipe(currentRecipe);
+                refreshNutritionTooltip(currentRecipe);
             });
             ingCtrl.setEditIngredient(() -> {
                 showIngredientPopUp(ri.getIngredient().getName(), ri.getQuantity(), ri.getUnit())
@@ -497,7 +531,7 @@ public class RecipesWindowCtrl {
                                         ri.setQuantity(Double.parseDouble(result.getKey()));
                                         Unit selectedUnit = result.getValue();
                                         ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
-
+                                        refreshNutritionTooltip(currentRecipe);
                                         openRecipe(currentRecipe);
                                         server.updateRecipe(currentRecipe);
                                     } catch (NumberFormatException err) {
@@ -564,7 +598,7 @@ public class RecipesWindowCtrl {
         }
         applyUpdatedRecipe(updated);
         openRecipe(currentRecipe);
-
+        refreshNutritionTooltip(currentRecipe);
     }
 
 
@@ -745,6 +779,7 @@ public class RecipesWindowCtrl {
     public void clearRecipeView() {
         recipeView.getChildren().clear();
         recipeNameField.setText("");
+        refreshNutritionTooltip(null);
     }
 
     /**
@@ -1006,6 +1041,7 @@ public class RecipesWindowCtrl {
             popUpStage.showAndWait();
 
             if (ctrl.isOkClicked()) {
+                refreshNutritionTooltip(currentRecipe);
                 // Pair holds the Quantity String (Key) and the Unit Enum/Object (Value)
                 return Optional.of(new Pair<>(ctrl.getQuantity(), ctrl.getSelectedUnit()));
             }
@@ -1181,9 +1217,9 @@ public class RecipesWindowCtrl {
 
                 // Add to your recipe's internal list
                 currentRecipe.getIngredients().add(newEntry);
-
                 // Refresh the UI to show the new item
                 updateRefresh();
+                refreshNutritionTooltip(currentRecipe);
             }
         } catch (IOException e) {
             e.printStackTrace();
