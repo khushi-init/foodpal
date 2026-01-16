@@ -5,6 +5,7 @@ import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.SearchService;
 import client.utils.ServerUtils;
+import client.data.TranslationManager;
 import commons.Recipe;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,6 +25,7 @@ public class RecipesWindowCtrlTest {
     private DataManipulator dataManipulator;
     private ServerUtils server;
     private MyFXML fxml;
+    private TranslationManager tm;
 
     @BeforeEach
     public void setup() {
@@ -31,7 +33,8 @@ public class RecipesWindowCtrlTest {
         server = new ServerUtils(error);
         storage = new LocalStorage(null);
         dataManipulator = new DataManipulator(storage, server, error);
-        window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchService(), server, null);
+        tm = new TranslationManager();
+        window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchService(), server, null, tm);
     }
 
     private String invokeCreateCopyName(String baseName) throws Exception {

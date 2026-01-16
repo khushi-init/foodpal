@@ -7,6 +7,7 @@ import client.MyFXML;
 import client.data.WebSocketManager;
 import client.popups.IngredientPopUpCtrl;
 import client.utils.*;
+import client.data.TranslationManager;
 import com.google.inject.Inject;
 
 import client.RecipeListCell;
@@ -130,6 +131,8 @@ public class RecipesWindowCtrl {
 
     private final RecipeIngredientUnit defaultUnit = RecipeIngredientUnit.fromUnit(FormalUnit.GRAM);
 
+    private final TranslationManager tm;
+
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param socker WebSocketManager instance
@@ -144,7 +147,7 @@ public class RecipesWindowCtrl {
     @Inject
     public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c,
                              PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator,
-                             SearchService s, ServerUtils server, MyFXML fxml) {
+                             SearchService s, ServerUtils server, MyFXML fxml, TranslationManager tm) {
         this.socker = socker;
         this.errorCtrl = c;
         this.primaryCtrl = p;
@@ -153,12 +156,17 @@ public class RecipesWindowCtrl {
         this.searchService = s;
         this.server = server;
         this.fxml = fxml;
+        this.tm = tm;
     }
 
     /**
      * Initializes the sidebar items (Recipe names) to track the ObservableList items
      */
     public void initialize() {
+        tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
+            applyTexts();
+            refreshDynamicViews();
+        });
         dataManipulator.loadFavs();
         favorite = new Image(getClass().getResource("/client/images/favorite.png").toExternalForm());
         unFavorite = new Image(getClass().getResource("/client/images/not_favorite.png").toExternalForm());
@@ -198,7 +206,9 @@ public class RecipesWindowCtrl {
 
         // Deactivate recipe specific buttons, since nothing is selected at the start.
         updateRecipeSelectionState(false);
-        setupAddIngredientDropdown();
+        setUpLanguageDropdown();
+        applyTexts();
+        updateTotalServingsLabelText();
         initializeSceneEvents();
         intializeSearchElements();
 
@@ -321,11 +331,7 @@ public class RecipesWindowCtrl {
      * Sets the total servings label to the correct amount and resets the field.
      */
     private void updateTotalServingsUI() {
-        // total servings multiplied by recipescale
-        totalServingsLabel.setText(
-                "Total servings: " + currentRecipe.getTotalServings() * recipeScale
-        );
-
+        totalServingsLabel.setText(tm.tr("label.totalServings", currentRecipe.getTotalServings() * recipeScale));
         totalServingsField.setText("");
     }
 
@@ -357,7 +363,7 @@ public class RecipesWindowCtrl {
             });
             if (titleSubscription == null ) {
                 Platform.runLater(() -> {
-                    errorCtrl.showGenericError("Could not subscribe to title changes, server might be down!");
+                    errorCtrl.showGenericError(tm.tr("error.couldNotSubscribeTitle"));
                 });
             }
         });
@@ -507,8 +513,7 @@ public class RecipesWindowCtrl {
         recipeNameField.setVisible(active);
 
         if (!active) {
-            Label noRecipeSelectedLabel = new Label("You have not selected any recipe yet!\n" +
-                    "Select one in the list on the right or create your very own.");
+            Label noRecipeSelectedLabel = new Label(tm.tr("label.noRecipeSelected"));
             noRecipeSelectedLabel.setStyle(
                     "-fx-text-fill: #6b7280; " +
                             "-fx-font-size: 14; " +
@@ -564,12 +569,12 @@ public class RecipesWindowCtrl {
      * @param recipeIngredients - A list of RecipeIngredients
      */
     public void loadIngredients(List<RecipeIngredient> recipeIngredients) {
-        Label ingredientsLabel = new Label("Ingredients:");
+        Label ingredientsLabel = new Label(tm.tr("label.ingredients"));
         ingredientsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(ingredientsLabel);
 
         if (recipeIngredients.isEmpty()) {
-            recipeView.getChildren().add(new Label("This recipe does not have any ingredients yet!"));
+            recipeView.getChildren().add(new Label(tm.tr("label.noIngredients")));
         }
 
         for (int i = 0; i < recipeIngredients.size(); ++i) {
@@ -606,7 +611,7 @@ public class RecipesWindowCtrl {
                                         openRecipe(currentRecipe);
                                         server.updateRecipe(currentRecipe);
                                     } catch (NumberFormatException err) {
-                                        errorCtrl.showGenericError("Quantity must be a number.");
+                                        errorCtrl.showGenericError(tm.tr("error.quantityMustBeNumber"));
                                     }
                                 });
             });
@@ -625,7 +630,7 @@ public class RecipesWindowCtrl {
      * @return A string representing the unit name, or "No unit" if null.
      */
     private String getUnitDisplayName(RecipeIngredient ri) {
-        if (ri.getUnit() == null) return "No unit";
+        if (ri.getUnit() == null) return tm.tr("label.noUnit");
         Unit actualUnit = ri.getUnit().toUnit();
         if (actualUnit != null) return actualUnit.getDisplayName();
 
@@ -642,7 +647,7 @@ public class RecipesWindowCtrl {
      * Handles both the primary button action and the dropdown menu population.
      */
     private void setupAddIngredientButton() {
-        SplitMenuButton addButton = new SplitMenuButton("Add Ingredient");
+        SplitMenuButton addButton = new SplitMenuButton(tm.tr("button.addIngredient"));
         recipeView.getChildren().add(addButton);
         addButton.setOnAction(a -> {
             primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress()
@@ -725,12 +730,12 @@ public class RecipesWindowCtrl {
      */
     // This might look like code duplication now, but the way we handle ingredients and steps might change dramatically in the future
     public void loadSteps(List<String> recipeInstructions) {
-        Label stepsLabel = new Label("Steps:");
+        Label stepsLabel = new Label(tm.tr("label.steps"));
         stepsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(stepsLabel);
 
         if (recipeInstructions.isEmpty()) {
-            recipeView.getChildren().add(new Label("This recipe does not have any preparation steps yet!"));
+            recipeView.getChildren().add(new Label(tm.tr("label.noSteps")));
         }
 
         for (int i = 0; i < recipeInstructions.size(); ++i) {
@@ -759,7 +764,7 @@ public class RecipesWindowCtrl {
             // Edit Logic
             instCtrl.setEditInstruction(newInstruction -> {
                 // This code is run when a string is passed into the editInstruction consumer
-                if(!instruction.equals("New Instruction")) {
+                if(!instruction.equals(tm.tr("instruction.new"))) {
                     System.out.println("Instruction edited successfully");
                 }
                 recipeInstructions.set(currentIndex, newInstruction);
@@ -783,10 +788,10 @@ public class RecipesWindowCtrl {
             }
         }
         // Add logic
-        Button addButton = new Button("Add Instruction");
+        Button addButton = new Button(tm.tr("button.addInstruction"));
         recipeView.getChildren().add(addButton);
         addButton.setOnAction(e -> {
-            recipeInstructions.add("New Instruction");
+            recipeInstructions.add(tm.tr("label.newInstruction"));
             newInstructionAdded = true;
             openRecipe(currentRecipe);
             System.out.println("Added instruction");
@@ -894,7 +899,7 @@ public class RecipesWindowCtrl {
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
             System.out.println("Cloned recipe \"" + currentRecipe.getName() + "\" to \"" + newName + "\"");
         } else {
-            errorCtrl.showGenericError("Recipe not selected to clone.");
+            errorCtrl.showGenericError(tm.tr("error.noRecipeToClone"));
         }
     }
 
@@ -961,7 +966,7 @@ public class RecipesWindowCtrl {
     private void onAddRecipe() {
         cancelSearch();
         Recipe newRecipe = new Recipe(
-                "New Recipe",
+                tm.tr("recipe.new"),
                 0,
                 new ArrayList<>(),
                 new ArrayList<>()
@@ -1015,11 +1020,12 @@ public class RecipesWindowCtrl {
         int servings = Integer.parseInt(text);
 
         if (servings < 0) {
-            errorCtrl.showGenericError("The amount of servings must be greater than or equal to 0!");
+            errorCtrl.showGenericError(tm.tr("error.servingsNonNegative"));
             return;
         }
 
         currentRecipe.setTotalServings(servings);
+        updateTotalServingsLabelText();
 
         Recipe updatedRecipe = server.updateRecipe(currentRecipe);
         if (updatedRecipe != null) {
@@ -1125,7 +1131,7 @@ public class RecipesWindowCtrl {
 
             Stage popUpStage = new Stage();
             popUpStage.initModality(Modality.APPLICATION_MODAL);
-            popUpStage.setTitle("Edit Ingredient");
+            popUpStage.setTitle(tm.tr("title.addInstruction"));
             popUpStage.setScene(new Scene(root));
 
             ctrl.setStage(popUpStage);
@@ -1289,7 +1295,7 @@ public class RecipesWindowCtrl {
             Stage popUpStage = new Stage();
             popUpStage.initModality(Modality.APPLICATION_MODAL); // Blocks interaction with main window
             popUpStage.initOwner(recipeView.getScene().getWindow()); // Links to main window
-            popUpStage.setTitle("Add Quantity for " + ingredient.getName());
+            popUpStage.setTitle(tm.tr("title.addQuantityFor", ingredient.getName()));
 
             // 3. Setup the Controller
             QuantityUnitSelectionCtrl controller = loader.getController();
@@ -1324,38 +1330,75 @@ public class RecipesWindowCtrl {
     @FXML
     private MenuButton addIngredientMenu;
 
-    private void setupAddIngredientDropdown() {
-        addIngredientMenu.getItems().clear();
+    private MenuItem englishItem;
+    private MenuItem dutchItem;
 
-        //if you want to add more languages, just copy item1 or item2 and change the parameters
-        MenuItem item1 = new MenuItem("English", icon("/client/images/flagUK.png"));
-        item1.setOnAction(e -> setSelectedOnMenuButton("English", "/client/images/flagUK.png"));
+    private Locale currentLocale = Locale.ENGLISH;
 
-        MenuItem item2 = new MenuItem("Dutch", icon("/client/images/flagNL.png"));
-        item2.setOnAction(e -> setSelectedOnMenuButton("Dutch", "/client/images/flagNL.png"));
+    private final int size_flag = 16;
 
-        MenuItem item3 = new MenuItem("Slovak", icon("/client/images/flagSK.png"));
-        item3.setOnAction(e -> setSelectedOnMenuButton("Slovak", "/client/images/flagSK.png"));
 
-        addIngredientMenu.getItems().addAll(item1, item2, item3);
+    private void setUpLanguageDropdown() {
+        englishItem = new MenuItem("", icon("/client/images/flagUK.png"));
+        dutchItem   = new MenuItem("", icon("/client/images/flagNL.png"));
 
-        // Initial state (what shows before user picks)
-        addIngredientMenu.setText("English");
-        addIngredientMenu.setGraphic(icon("/client/images/flagUK.png"));
+        englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUK.png"));
+        dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
+
+        addIngredientMenu.getItems().setAll(englishItem, dutchItem);
+
+        // default
+        setLanguage(Locale.ENGLISH, "/client/images/flagUK.png");
     }
 
-    private void setSelectedOnMenuButton(String label, String imagePath) {
-        addIngredientMenu.setText(label);
-        addIngredientMenu.setGraphic(icon(imagePath));
-        System.out.println(label + " selected");
+    private void setLanguage(Locale locale, String flagPath) {
+        tm.setLanguage(locale);
+
+        // Update the dropdown button look based on language
+        addIngredientMenu.setGraphic(icon(flagPath));
+        addIngredientMenu.setText(tm.tr(locale.equals(Locale.ENGLISH) ? "menu.language.english" : "menu.language.dutch"));
+    }
+
+    private void refreshDynamicViews() {
+        recipeView.getChildren().clear();
+        if (currentRecipe != null) {
+            openRecipe(currentRecipe);
+        } else {
+            updateRecipeSelectionState(false);
+        }
+    }
+
+    private int getCurrentServings() {
+        return (currentRecipe == null) ? 0 : currentRecipe.getTotalServings();
     }
 
     private ImageView icon(String path) {
         ImageView iv = new ImageView(new Image(getClass().getResourceAsStream(path)));
-        iv.setFitWidth(16);
-        iv.setFitHeight(16);
+        iv.setFitWidth(size_flag);
+        iv.setFitHeight(size_flag);
         iv.setPreserveRatio(true);
         return iv;
     }
 
+
+    private void applyTexts() {
+        favoriteCheck.setText(tm.tr("checkbox.favorites"));
+        recipeNameField.setPromptText(tm.tr("prompt.recipeName"));
+        totalServingsField.setPromptText(tm.tr("prompt.servings"));
+        totalServingsLabel.setText(tm.tr("label.totalServings", getCurrentServings()));
+
+        englishItem.setText(tm.tr("menu.language.english"));
+        dutchItem.setText(tm.tr("menu.language.dutch"));
+    }
+
+    @FXML private Button shoppingListButton;
+    @FXML private Button ingredientsButton;
+
+    @FXML private Button add;
+    @FXML private Button remove;
+    @FXML private Button refresh;
+
+    private void updateTotalServingsLabelText() {
+        totalServingsLabel.setText(tm.tr("label.totalServings", getCurrentServings()));
+    }
 }
