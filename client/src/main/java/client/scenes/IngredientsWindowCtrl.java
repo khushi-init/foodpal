@@ -8,8 +8,10 @@ import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.utils.ServerUtils;
+import commons.InformalUnit;
 import commons.Ingredient;
 import commons.NutritionalValue;
+import commons.RecipeIngredient;
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -18,6 +20,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -43,6 +46,8 @@ public class IngredientsWindowCtrl {
     private final double nutriScoreC = 7;
     private final double nutriScoreD = 10;
 
+    private double ingredientScale = 1.0;
+
     final int heightImage = 50;
 
     // FXML FIELDS (UI Elements)
@@ -62,6 +67,12 @@ public class IngredientsWindowCtrl {
 
     @FXML
     private Button backButton;
+
+    @FXML
+    private Label ingScaleLabel;
+
+    @FXML
+    private TextField ingScaleTextField;
 
     @FXML
     private Label nameLabel;
@@ -327,5 +338,27 @@ public class IngredientsWindowCtrl {
         return "/client/images/NutriScoreE.png";
     }
 
+    /**
+     * Determines the text to be displayed within the recipe view
+     * @param ri The recipeIngredient to handle
+     * @return a string describing the recipeIngredient and its attributes
+     */
+    public String formatIngredientText(RecipeIngredient ri) {
+        String unitName = "";
+        boolean isInformal = false;
+        if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
+            unitName = ri.getUnit().toUnit().getDisplayName();
+            isInformal = ri.getUnit().toUnit() instanceof InformalUnit;
+
+        }
+        double quantity;
+        if(isInformal || ingredientScale == 1.0) {
+            quantity = ri.getQuantity();
+        }
+        else {
+            quantity = ri.getQuantity() * ingredientScale;
+        }
+        return "• " + ri.getIngredient().getName() + " " + quantity + " " + unitName;
+    }
     // We need an update method to re-sort the ingredients list on updates
 }
