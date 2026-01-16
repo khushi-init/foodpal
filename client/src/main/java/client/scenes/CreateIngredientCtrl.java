@@ -1,10 +1,12 @@
 package client.scenes;
 
+import client.data.TranslationManager;
 import client.utils.NeatUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.NutritionalValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -33,13 +35,21 @@ public class CreateIngredientCtrl {
 
     private final NeatUtils neatUtils;
 
+    public TranslationManager tm;
+
+    @FXML private Label nameLabel;
+    @FXML private Label fatLabel;
+    @FXML private Label proteinLabel;
+    @FXML private Label carbLabel;
+    @FXML private Button cancelButton;
     /**
      * CreateIngredientCtrl constructor. At this point you should know what constructors do.
      * @param neatUtils - Injected neatUtils instance
      */
     @Inject
-    public CreateIngredientCtrl(NeatUtils neatUtils) {
+    public CreateIngredientCtrl(NeatUtils neatUtils, TranslationManager tm) {
         this.neatUtils = neatUtils;
+        this.tm = tm;
     }
 
     public void setStage(Stage stage) {
@@ -90,4 +100,25 @@ public class CreateIngredientCtrl {
         proteinField.setText(protein);
         carbField.setText(carbs);
     }
+
+    private void applyTexts() {
+        fatLabel.setText(tm.tr("label.fatCreate"));
+        proteinLabel.setText(tm.tr("label.proteinCreate"));
+        carbLabel.setText(tm.tr("label.carbohydratesCreate"));
+        nameLabel.setText(tm.tr("label.nameCreate"));
+        cancelButton.setText(tm.tr("button.cancelCreate"));
+        fatField.setText(tm.tr("field.fatCreate"));
+        proteinField.setText(tm.tr("field.proteinCreate"));
+        carbField.setText(tm.tr("field.carbohydratesCreate"));
+    }
+
+    @FXML
+    public void initialize() {
+        applyTexts();
+        tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
+            applyTexts();
+        });
+    }
+
+
 }

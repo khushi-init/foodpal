@@ -16,16 +16,16 @@
             </columnConstraints>
 
             <children>
-                <Label text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="nameLabel" text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                 <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Fat:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label fx:id="fatLabel" text="Fat:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <TextField fx:id="fatField" promptText="Grams per 100g" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Protein:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label fx:id="proteinLabel" text="Protein:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                 <TextField fx:id="proteinField" promptText="Grams per 100g" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                <Label text="Carbohydrates:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label fx:id="carbLabel" text="Carbohydrates:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                 <TextField fx:id="carbField" promptText="Grams per 100g" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             </children>
          <rowConstraints>
@@ -38,7 +38,7 @@
 
         <HBox alignment="CENTER_RIGHT" spacing="10">
             <children>
-                <Button cancelButton="true" onAction="#handleCancel" text="Cancel" />
+                <Button fx:id="cancelButton" cancelButton="true" onAction="#handleCancel" text="Cancel" />
                 <Button defaultButton="true" onAction="#handleOk" text="OK" />
             </children>
         </HBox>

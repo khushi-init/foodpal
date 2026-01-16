@@ -1391,13 +1391,6 @@ public class RecipesWindowCtrl {
         dutchItem.setText(tm.tr("menu.language.dutch"));
     }
 
-    @FXML private Button shoppingListButton;
-    @FXML private Button ingredientsButton;
-
-    @FXML private Button add;
-    @FXML private Button remove;
-    @FXML private Button refresh;
-
     private void updateTotalServingsLabelText() {
         totalServingsLabel.setText(tm.tr("label.totalServings", getCurrentServings()));
     }

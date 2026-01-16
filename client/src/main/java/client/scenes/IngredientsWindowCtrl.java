@@ -7,6 +7,7 @@ import client.IngredientListCell;
 import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
+import client.data.TranslationManager;
 import client.utils.ServerUtils;
 import commons.InformalUnit;
 import commons.Ingredient;
@@ -94,6 +95,8 @@ public class IngredientsWindowCtrl {
 
     private final DataManipulator dataManipulator;
 
+    private final TranslationManager tm;
+
     /**
      * Injectable constructor is REQUIRED for Guice to provide dependencies.
      * @param p PrimaryCtrl instance for scene switching.
@@ -104,13 +107,14 @@ public class IngredientsWindowCtrl {
      * @param fxml - Injected MyFXML instance
      */
     @Inject
-    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml) {
+    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml, TranslationManager tm) {
         this.primaryCtrl = p;
         this.errorCtrl = c;
         this.storage = storage;
         this.dataManipulator = dataManipulator;
         this.server = server;
         this.fxml = fxml;
+        this.tm = tm;
     }
 
     /**
@@ -226,7 +230,7 @@ public class IngredientsWindowCtrl {
      * @return Optional containing the newly created Ingredient if successful
      */
     public Optional<Ingredient> handlePlusButtonPress() {
-        Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:", "", "", "", "");
+        Optional<Ingredient> parsed = ingredientDataPrompt(tm.tr("create.ingredient"), tm.tr("ingredient.create"), "", "", "", "");
         if (parsed.isEmpty()) return Optional.empty();
         dataManipulator.addIngredient(parsed.get());
         return parsed;
