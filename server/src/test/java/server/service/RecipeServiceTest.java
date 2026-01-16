@@ -103,6 +103,19 @@ public class RecipeServiceTest {
     }
 
     @Test
+    public void testServerWontPublishSameName() {
+        Recipe existing = new Recipe("Old Name", new ArrayList<>(), new ArrayList<>());
+        Recipe incoming = new Recipe("Old Name", new ArrayList<>(), new ArrayList<>());
+
+        when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(existing));
+        when(mockRecipeRepo.save(any(Recipe.class))).thenReturn(existing);
+
+        sut.updateRecipe(id, incoming);
+
+        verify(eventPublisher, times(0)).publishEvent(any(TitleUpdate.class));
+    }
+
+    @Test
     public void deleteRecipeTest() {
         when(mockRecipeRepo.existsById(id)).thenReturn(true);
 

@@ -3,8 +3,6 @@ package client.scenes;
 import java.io.IOException;
 import java.util.*;
 
-import java.util.function.BiConsumer;
-
 import client.MyFXML;
 import client.data.WebSocketManager;
 import client.popups.IngredientPopUpCtrl;
@@ -92,6 +90,9 @@ public class RecipesWindowCtrl {
 
     @FXML
     private Button toCart;
+
+    @FXML
+    private ImageView kcalIcon;
 
     @FXML
     private Label advancedSearchButton;
@@ -200,6 +201,13 @@ public class RecipesWindowCtrl {
 
         initializeSceneEvents();
         intializeSearchElements();
+
+        kcalIcon.setPickOnBounds(true);
+
+        Tooltip tooltip = new Tooltip("0 kcal/100g");
+        tooltip.setShowDelay(javafx.util.Duration.millis(processingDelay*2)); // Instant popup
+        Tooltip.install(kcalIcon, tooltip);
+        kcalIcon.setOnMouseEntered(e -> System.out.println("Mouse is over the leaf!"));
     }
 
     /**
@@ -286,6 +294,29 @@ public class RecipesWindowCtrl {
         });
     }
 
+    public void refreshNutritionTooltip(Recipe recipe) {
+        // If there's no recipe at all (sidebar cleared), hide the icon
+        if (recipe == null) {
+            kcalIcon.setVisible(false);
+            return;
+        }
+
+        // Ensure the icon is visible because a recipe IS selected
+        kcalIcon.setVisible(true);
+
+        // Calculate the density
+        double density = recipe.calculateRecipeKcalPer100g(recipe);
+
+        // Create the text (e.g., "0 kcal/100g" or "145 kcal/100g")
+        String tooltipText = String.format("%.0f kcal/100g", density);
+
+        Tooltip tooltip = new Tooltip(tooltipText);
+        tooltip.setShowDelay(javafx.util.Duration.millis(processingDelay));
+
+        // Force update the Tooltip
+        Tooltip.uninstall(kcalIcon, null);
+        Tooltip.install(kcalIcon, tooltip);
+    }
     /**
      * Sets the total servings label to the correct amount and resets the field.
      */
@@ -437,9 +468,6 @@ public class RecipesWindowCtrl {
         }
     }
 
-
-
-
     /**
      * Enables or disables all recipe-specific UI controls.
      * When inactive, buttons related to the currently selected recipe
@@ -523,6 +551,8 @@ public class RecipesWindowCtrl {
 
         updateTotalServingsUI();
 
+        refreshNutritionTooltip(currentRecipe);
+
         updateScale(recipeScale);
 
     }
@@ -558,55 +588,74 @@ public class RecipesWindowCtrl {
 
             ingCtrl.setDeleteIngredient(() -> { //remove ingredient from local recipe
                 currentRecipe.getIngredients().remove(ri);
-                openRecipe(currentRecipe);
-
-                if (ingredientId != null) { //if it also has id --> remove also from server
-                    boolean success = server.deleteIngredient(recipeId, ingredientId);
-                    if (!success) {
-                        errorCtrl.showGenericError("Failed to delete ingredient from server.");
-                    }
-                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" deleted successfully");
-                    return;
+                if (ingredientId != null) {
+                    server.deleteIngredient(recipeId, ingredientId);
                 }
+                server.updateRecipe(currentRecipe);
                 openRecipe(currentRecipe);
+                refreshNutritionTooltip(currentRecipe);
             });
-            ingCtrl.setEditIngredient(() -> {             // Editing ingredient Logic!
-                handleIngredientInput(ri.getIngredient().getName(), ri.getQuantity(), (newName, newQty) -> {
-                    if (newName == null || newName.trim().isEmpty()) {
-                        errorCtrl.showGenericError("Ingredients can't have a blank name!");
-                        return;
-                    }
-                    ri.setQuantity(newQty);
-                    ri.getIngredient().setName(newName);
-                    openRecipe(currentRecipe);
-                    server.updateRecipe(currentRecipe);
-                    System.out.println("Ingredient \"" + ri.getIngredient().getName() + "\" updated successfully");
-                });
+            ingCtrl.setEditIngredient(() -> {
+                showIngredientPopUp(ri.getIngredient().getName(), ri.getQuantity(), ri.getUnit())
+                                .ifPresent(result -> {
+                                    try {
+                                        ri.setQuantity(Double.parseDouble(result.getKey()));
+                                        Unit selectedUnit = result.getValue();
+                                        ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
+                                        refreshNutritionTooltip(currentRecipe);
+                                        openRecipe(currentRecipe);
+                                        server.updateRecipe(currentRecipe);
+                                    } catch (NumberFormatException err) {
+                                        errorCtrl.showGenericError("Quantity must be a number.");
+                                    }
+                                });
             });
         }
         //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
+        // Still called here, but logic is moved to a helper
+        setupAddIngredientButton();
+        recipeView.requestLayout();
+    }
+
+
+    /**
+     * Determines the display string for an ingredient's unit.
+     *
+     * @param ri The recipe ingredient to extract the unit name from.
+     * @return A string representing the unit name, or "No unit" if null.
+     */
+    private String getUnitDisplayName(RecipeIngredient ri) {
+        if (ri.getUnit() == null) return "No unit";
+        Unit actualUnit = ri.getUnit().toUnit();
+        if (actualUnit != null) return actualUnit.getDisplayName();
+
+        String informal = ri.getUnit().getInformalUnitName();
+        if (informal != null) return informal;
+
+        String formal = ri.getUnit().getFormalUnitName();
+        return (formal != null) ? formal : "";
+    }
+
+
+    /**
+     * Configures and adds the "Add Ingredient" button to the UI.
+     * Handles both the primary button action and the dropdown menu population.
+     */
+    private void setupAddIngredientButton() {
         SplitMenuButton addButton = new SplitMenuButton("Add Ingredient");
         recipeView.getChildren().add(addButton);
-
-        addButton.setOnAction((a) -> {
-            Optional<Ingredient> parsed = primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress();
-            // Use the dialog instead of hardcoding 0.0
-            parsed.ifPresent(this::openQuantityDialog);
+        addButton.setOnAction(a -> {
+            primaryCtrl.getIngredientsWindowCtrl().handlePlusButtonPress()
+                    .ifPresent(this::openQuantityDialog);
         });
-
-        addButton.setOnShowing((a) -> {
-            addButton.getItems().clear(); // Clear to avoid duplicate menu items
+        addButton.setOnShowing(a -> {
+            addButton.getItems().clear();
             storage.getIngredients().forEach(ingredient -> {
                 MenuItem menu = new MenuItem(ingredient.getName());
-                menu.setId(ingredient.getId().toString());
-                menu.setOnAction((actionEvent) -> {
-                    // Open our new dialog for the existing ingredient
-                    openQuantityDialog(ingredient);
-                });
+                menu.setOnAction(e -> openQuantityDialog(ingredient));
                 addButton.getItems().add(menu);
             });
         });
-        recipeView.requestLayout();
     }
 
     /**
@@ -642,32 +691,32 @@ public class RecipesWindowCtrl {
         }
         applyUpdatedRecipe(updated);
         openRecipe(currentRecipe);
-
+        refreshNutritionTooltip(currentRecipe);
     }
 
 
-    /**
-     * Handling input window for ingredient editing
-     * @param initName the initial name value to be displayed
-     * @param initQty  the initial quantity value to be displayed
-     * @param handler  the consumer that handles to call back to the value's usage
-     */
-    public void handleIngredientInput(String initName, double initQty, BiConsumer<String, Double> handler) {
-        showIngredientPopUp(initName, String.valueOf(initQty)).ifPresent(pair -> {
-            String name = pair.getKey();
-            String quantityText = pair.getValue();
-            double quantity;
-            try {
-                quantity = Double.parseDouble(quantityText);
-            } catch (NumberFormatException err) {
-                if (errorCtrl != null) {
-                    errorCtrl.showGenericError("Quantity must be a number.");
-                }
-                return;
-            }
-            handler.accept(name, quantity);
-        });
-    }
+//    /**
+//     * Handling input window for ingredient editing
+//     * @param initName the initial name value to be displayed
+//     * @param initQty  the initial quantity value to be displayed
+//     * @param handler  the consumer that handles to call back to the value's usage
+//     */
+//    public void handleIngredientInput(String initName, double initQty, BiConsumer<String, Double> handler) {
+//        showIngredientPopUp(initName, String.valueOf(initQty)).ifPresent(pair -> {
+//            String name = pair.getKey();
+//            String quantityText = pair.getValue();
+//            double quantity;
+//            try {
+//                quantity = Double.parseDouble(quantityText);
+//            } catch (NumberFormatException err) {
+//                if (errorCtrl != null) {
+//                    errorCtrl.showGenericError("Quantity must be a number.");
+//                }
+//                return;
+//            }
+//            handler.accept(name, quantity);
+//        });
+//    }
 
     /**
      * Loads the instructions within a list to the recipeView UI element
@@ -823,6 +872,7 @@ public class RecipesWindowCtrl {
     public void clearRecipeView() {
         recipeView.getChildren().clear();
         recipeNameField.setText("");
+        refreshNutritionTooltip(null);
     }
 
     /**
@@ -1066,13 +1116,11 @@ public class RecipesWindowCtrl {
      * @param initialQuantity ingredient quantity
      * @return Optional containing the name and quantity if confirmed, otherwise Optional is empty
      */
-    private Optional<Pair<String, String>> showIngredientPopUp(String initialName, String initialQuantity) {
+    private Optional<Pair<String, Unit>> showIngredientPopUp(String initialName, Double initialQuantity,
+                                                             RecipeIngredientUnit unit) {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/client/modules/IngredientPopUp.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/modules/IngredientPopUp.fxml"));
             Parent root = loader.load();
-
             IngredientPopUpCtrl ctrl = loader.getController();
 
             Stage popUpStage = new Stage();
@@ -1081,14 +1129,14 @@ public class RecipesWindowCtrl {
             popUpStage.setScene(new Scene(root));
 
             ctrl.setStage(popUpStage);
-            ctrl.setInitialValues(initialName, initialQuantity);
+            ctrl.setInitialValues(initialName, initialQuantity, unit);
 
             popUpStage.showAndWait();
 
             if (ctrl.isOkClicked()) {
-                return Optional.of(new Pair<>(ctrl.getName(), ctrl.getQuantity()));
-            } else {
-                return Optional.empty();
+                refreshNutritionTooltip(currentRecipe);
+                // Pair holds the Quantity String (Key) and the Unit Enum/Object (Value)
+                return Optional.of(new Pair<>(ctrl.getQuantity(), ctrl.getSelectedUnit()));
             }
 
         } catch (IOException e) {
@@ -1097,8 +1145,8 @@ public class RecipesWindowCtrl {
             } else {
                 e.printStackTrace();
             }
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     /**
@@ -1262,9 +1310,9 @@ public class RecipesWindowCtrl {
 
                 // Add to your recipe's internal list
                 currentRecipe.getIngredients().add(newEntry);
-
                 // Refresh the UI to show the new item
                 updateRefresh();
+                refreshNutritionTooltip(currentRecipe);
             }
         } catch (IOException e) {
             e.printStackTrace();
