@@ -1,7 +1,10 @@
 package client.popups;
 
+import client.data.TranslationManager;
+import com.google.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -9,11 +12,10 @@ import javafx.stage.Stage;
 
 public class WarningPopCtrl {
 
-    @FXML
-    private TextArea warningLabel;
-
-    @FXML
-    private Button buttonAnyway;
+    @FXML private Label titleLabel;
+    @FXML private TextArea warningLabel;
+    @FXML private Button buttonAnyway;
+    @FXML private Button cancelButton;
 
     private Stage stage;
 
@@ -22,6 +24,8 @@ public class WarningPopCtrl {
     }
 
     private boolean anyway = false;
+
+    private TranslationManager tm;
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -38,19 +42,25 @@ public class WarningPopCtrl {
     /**
      * Initializes the controller by disabling mouse and keyboard interactions on the warning label
      */
+    @FXML
     public void initialize() {
-        // Block mouse selection
+        titleLabel.setText(tm.tr("popup.warning.title"));
+        cancelButton.setText(tm.tr("button.cancel"));
+        buttonAnyway.setText(tm.tr("button.delete.anyway"));
+
         warningLabel.addEventFilter(MouseEvent.ANY, e -> {
             if (e.getEventType() == MouseEvent.MOUSE_DRAGGED ||
                     e.getEventType() == MouseEvent.MOUSE_PRESSED) {
                 e.consume();
             }
         });
-        // Block keyboard events
         warningLabel.addEventFilter(KeyEvent.ANY, e -> {
-            if (e.isShiftDown() || e.isShortcutDown()) {
-                e.consume();
-            }
+            if (e.isShiftDown() || e.isShortcutDown()) e.consume();
+        });
+
+        tm.bundleProperty().addListener((obs, o, n) -> {
+            titleLabel.setText(tm.tr("popup.warning.title"));
+            cancelButton.setText(tm.tr("button.cancel"));
         });
     }
 
@@ -74,6 +84,11 @@ public class WarningPopCtrl {
         if (stage != null) {
             stage.close();
         }
+    }
+
+    @Inject
+    public WarningPopCtrl(TranslationManager tm) {
+        this.tm = tm;
     }
 
 }

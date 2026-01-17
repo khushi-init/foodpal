@@ -1,5 +1,6 @@
 package client.searchUI;
 
+import client.data.TranslationManager;
 import client.scenes.SearchWindowCtrl;
 import client.scenes.ErrorCtrl;
 import client.utils.searchUtils.Proposition;
@@ -10,6 +11,7 @@ import javafx.scene.layout.VBox;
 public class RootPropositionUI implements ParentPropositionUI{
     private PropositionUI child;
     private SearchWindowCtrl sceneCtrl;
+    private TranslationManager tm;
 
     private final ErrorCtrl errorCtrl;
 
@@ -17,10 +19,12 @@ public class RootPropositionUI implements ParentPropositionUI{
      * Constructor...
      * @param s the scene controller
      * @param errorCtrl - An errorCtrl object for reporting errors.
+     *                  @param tm the translation manager used to localize UI text
      */
-    public RootPropositionUI(SearchWindowCtrl s, ErrorCtrl errorCtrl){
+    public RootPropositionUI(SearchWindowCtrl s, ErrorCtrl errorCtrl, TranslationManager tm){
         // this.child = null;
-        this.child = new CombinedPropositionUI(this);
+        this.tm=tm;
+        this.child = new CombinedPropositionUI(this, tm);
         this.child.setSelectedFunction(SearchFunctions.AND);
         this.errorCtrl = errorCtrl;
         sceneCtrl = s;

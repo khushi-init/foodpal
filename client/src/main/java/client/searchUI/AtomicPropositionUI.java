@@ -2,23 +2,29 @@ package client.searchUI;
 
 import java.util.ArrayList;
 
+import client.data.TranslationManager;
 import client.utils.searchUtils.AtomicProposition;
 import client.utils.searchUtils.Proposition;
 import client.utils.searchUtils.SearchFunctions;
+import com.google.inject.Inject;
 import javafx.geometry.Insets;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
 public class AtomicPropositionUI extends PropositionUI {
-    private ArrayList<TextField> argsInput; //an ArrayList of text inputs, one input for each argument
-    
+    private ArrayList<TextField> argsInput;//an ArrayList of text inputs, one input for each argument
+    private TranslationManager tm;
+
     /**
      * Constructor, initialize the TextField argument inputs
      * @param parent ...
+     *               @param tm the translation manager used to localize UI text
      */
-    public AtomicPropositionUI(ParentPropositionUI parent){
+    @Inject
+    public AtomicPropositionUI(ParentPropositionUI parent, TranslationManager tm){
         super(parent, SearchFunctions.getAtomicFunctions());
+        this.tm=tm;
         dropdown.setOnAction((event) -> {
             setArgumentsInput();
             updateView();

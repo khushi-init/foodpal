@@ -19,17 +19,13 @@
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="79.0" prefWidth="600.0" style="-fx-background-color: #0275d8; -fx-padding: 10;">
             <children>
-                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="Nutrional Value" />
+                <Label fx:id="name" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="Nutrional Value" />
                 <Region HBox.hgrow="ALWAYS" />
 
-                <Button fx:id="backButton" onAction="#onBackToRecipesClick" style="-fx-background-color: transparent; -fx-padding: 0;"> <graphic>
-                    <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
-                        <image>
-                            <Image url="@/client/images/back button.png" />
-                        </image>
-                    </ImageView>
-                </graphic>
-                </Button>
+                <Button fx:id="backButton"
+                        onAction="#onBackToRecipesClick"
+                        style="-fx-background-color: #f5f5f5;-fx-border-color: #bdbdbd;-fx-border-width: 1;-fx-border-radius: 6;-fx-background-radius: 6;-fx-text-fill: #212121;-fx-font-size: 14px;-fx-font-weight: bold;-fx-padding: 8 16;-fx-cursor: hand;"/>
+
             </children>
         </HBox>
     </top>
@@ -80,25 +76,25 @@
                                 </HBox>
 
                                 <HBox spacing="60" style="-fx-padding: 0 0 5 0; -fx-border-width: 0 0 1 0; -fx-border-color: #ccc;">
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #555;" text="Nutritional Information" />
+                                    <Label fx:id="nutriInfo" text="Nutritional Information" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #555;" />
                                     <Region HBox.hgrow="ALWAYS" />
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #555;" text="per 100g" />
+                                    <Label fx:id= "per100" text="per 100g" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #555;" />
                                 </HBox>
 
                                 <HBox spacing="10">
-                                    <Label style="-fx-font-size: 14px;" text="Protein:" />
+                                    <Label fx:id="protein" text="Protein:" style="-fx-font-size: 14px;"/>
                                     <Region HBox.hgrow="ALWAYS" />
                                     <Label fx:id="proteinLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="0.0 g" />
                                 </HBox>
 
                                 <HBox spacing="10">
-                                    <Label style="-fx-font-size: 14px;" text="Fat:" />
+                                    <Label fx:id="fats" text="Fat:" style="-fx-font-size: 14px;"/>
                                     <Region HBox.hgrow="ALWAYS" />
                                     <Label fx:id="fatLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="0.0 g" />
                                 </HBox>
 
                                 <HBox spacing="10">
-                                    <Label style="-fx-font-size: 14px;" text="Carbohydrates:" />
+                                    <Label fx:id="carbs" text="Carbohydrates:" style="-fx-font-size: 14px;"/>
                                     <Region HBox.hgrow="ALWAYS" />
                                     <Label fx:id="carbohydratesLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="0.0 g" />
                                 </HBox>
@@ -106,13 +102,13 @@
                                 <Region maxHeight="10" VBox.vgrow="ALWAYS" />
 
                                 <HBox spacing="10" style="-fx-padding: 10 0 0 0; -fx-border-width: 1 0 0 0; -fx-border-color: #ccc;">
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Inferred Kcal:" />
+                                    <Label fx:id= "kcalInf" text="Inferred Kcal:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
                                     <Region HBox.hgrow="ALWAYS" />
                                     <Label fx:id="kcalLabel" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0275d8;" text="0" />
                                 </HBox>
 
                                 <HBox spacing="10">
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Used in:" />
+                                    <Label fx:id="usedIn" text="Used in:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
                                     <Region HBox.hgrow="ALWAYS" />
                                     <Label fx:id="recipesUsedInLabel" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #4CAF50;" text="0 recipes" />
                                 </HBox>

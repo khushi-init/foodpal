@@ -45,6 +45,7 @@ public class CreateIngredientCtrl {
     /**
      * CreateIngredientCtrl constructor. At this point you should know what constructors do.
      * @param neatUtils - Injected neatUtils instance
+     *                  @param tm the translation manager used to localize UI text
      */
     @Inject
     public CreateIngredientCtrl(NeatUtils neatUtils, TranslationManager tm) {
@@ -107,9 +108,9 @@ public class CreateIngredientCtrl {
         carbLabel.setText(tm.tr("label.carbohydratesCreate"));
         nameLabel.setText(tm.tr("label.nameCreate"));
         cancelButton.setText(tm.tr("button.cancelCreate"));
-        fatField.setText(tm.tr("field.fatCreate"));
-        proteinField.setText(tm.tr("field.proteinCreate"));
-        carbField.setText(tm.tr("field.carbohydratesCreate"));
+        fatField.setPromptText((tm.tr("field.fatCreate")));
+        proteinField.setPromptText(tm.tr("field.proteinCreate"));
+        carbField.setPromptText(tm.tr("field.carbohydratesCreate"));
     }
 
     @FXML

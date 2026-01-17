@@ -143,8 +143,9 @@ public class RecipesWindowCtrl {
      * @param s - The injected search control
      * @param server - The injected serverUtils instance
      * @param fxml - The injected MyFXML instance
+     *             @param tm the translation manager used to localize UI text
      */
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    // CHECKSTYLE:OFF
     @Inject
     public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c,
                              PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator,
@@ -159,6 +160,7 @@ public class RecipesWindowCtrl {
         this.fxml = fxml;
         this.tm = tm;
     }
+    // CHECKSTYLE:ON
 
     /**
      * Initializes the sidebar items (Recipe names) to track the ObservableList items
@@ -1132,7 +1134,7 @@ public class RecipesWindowCtrl {
 
             Stage popUpStage = new Stage();
             popUpStage.initModality(Modality.APPLICATION_MODAL);
-            popUpStage.setTitle(tm.tr("title.addInstruction"));
+            popUpStage.setTitle(tm.tr("title.EditInstruction"));
             popUpStage.setScene(new Scene(root));
 
             ctrl.setStage(popUpStage);
@@ -1284,33 +1286,34 @@ public class RecipesWindowCtrl {
     }
 
     private void openQuantityDialog(Ingredient ingredient) {
-        try {
-            // 1. Setup the Loader
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/modules/QuantityUnitPopUp.fxml"));
-            Parent root = loader.load();
+        // 1. Setup the Loader
+        Pair<QuantityUnitSelectionCtrl, Parent> pair =
+                fxml.load(QuantityUnitSelectionCtrl.class, "client", "modules", "QuantityUnitPopUp.fxml");
 
-            // 2. Setup the Window (Stage)
-            Stage popUpStage = new Stage();
-            popUpStage.initModality(Modality.APPLICATION_MODAL); // Blocks interaction with main window
-            popUpStage.initOwner(recipeView.getScene().getWindow()); // Links to main window
-            popUpStage.setTitle(tm.tr("title.addQuantityFor", ingredient.getName()));
+        Parent root = pair.getValue();
+        QuantityUnitSelectionCtrl ctrl = pair.getKey();
 
-            // 3. Setup the Controller
-            QuantityUnitSelectionCtrl controller = loader.getController();
-            controller.setStage(popUpStage);
+        // 2. Setup the Window (Stage)
+        Stage popUpStage = new Stage();
+        popUpStage.initModality(Modality.APPLICATION_MODAL); // Blocks interaction with main window
+        popUpStage.initOwner(recipeView.getScene().getWindow()); // Links to main window
+        popUpStage.setTitle(tm.tr("title.addQuantityFor", ingredient.getName()));
 
-            // 4. Show and Wait
-            popUpStage.setScene(new Scene(root));
-            popUpStage.showAndWait(); // Execution stops here until window is closed
+        // 3. Setup the Controller
+        ctrl.setStage(popUpStage);
 
-            // 5. Handle the Result
-            if (controller.isOkClicked()) {
-                RecipeIngredient newEntry = new RecipeIngredient(
-                        this.currentRecipe,  // The current recipe you are editing
-                        ingredient,           // The ingredient from your list/search
-                        controller.getQuantity(),
-                        controller.getUnit()
-                );
+        // 4. Show and Wait
+        popUpStage.setScene(new Scene(root));
+        popUpStage.showAndWait(); // Execution stops here until window is closed
+
+        // 5. Handle the Result
+        if (ctrl.isOkClicked()) {
+            RecipeIngredient newEntry = new RecipeIngredient(
+                    this.currentRecipe,  // The current recipe you are editing
+                    ingredient,           // The ingredient from your list/search
+                    ctrl.getQuantity(),
+                    ctrl.getUnit()
+            );
 
                 // Add to your recipe's internal list
                 currentRecipe.getIngredients().add(newEntry);

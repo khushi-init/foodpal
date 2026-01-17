@@ -55,6 +55,7 @@ public class ShoppingListCtrl {
     /**
      * Constructor for ShoppingListCtrl
      * @param fxml - Injected FXML module
+     *             @param tm the translation manager used to localize UI text
      */
     @Inject
     public ShoppingListCtrl(MyFXML fxml, TranslationManager tm) {

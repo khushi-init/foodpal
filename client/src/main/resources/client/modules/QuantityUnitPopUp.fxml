@@ -19,17 +19,17 @@
     <HBox alignment="BOTTOM_LEFT" spacing="15.0">
 
         <VBox spacing="5.0">
-            <Label style="-fx-font-weight: bold;" text="Quantity" />
+            <Label fx:id="quantity" style="-fx-font-weight: bold;" text="Quantity" />
             <TextField fx:id="quantityField" prefHeight="35.0" prefWidth="120.0" promptText="e.g. 500" />
         </VBox>
 
         <VBox spacing="5.0">
-            <Label style="-fx-font-weight: bold;" text="Unit Type" />
+            <Label fx:id="unitType" style="-fx-font-weight: bold;" text="Unit Type" />
             <ComboBox fx:id="unitTypePicker" prefHeight="35.0" prefWidth="140.0" />
         </VBox>
 
         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label style="-fx-font-weight: bold;" text="Unit" />
+            <Label fx:id="unit" style="-fx-font-weight: bold;" text="Unit" />
             <StackPane alignment="CENTER_LEFT">
                 <ComboBox fx:id="formalUnitPicker" prefHeight="35.0" maxWidth="Infinity" />
                 <TextField fx:id="informalUnitField" prefHeight="35.0" maxWidth="Infinity" />
@@ -39,7 +39,7 @@
     </HBox>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
-        <Button mnemonicParsing="false" onAction="#handleCancel" prefWidth="80.0" text="Cancel" />
+        <Button fx:id="cancel" onAction="#handleCancel" prefWidth="80.0" text="Cancel" />
         <Button mnemonicParsing="false" onAction="#handleOk" prefWidth="80.0" style="-fx-background-color: #0275d8; -fx-text-fill: white; -fx-font-weight: bold;" text="OK" />
     </HBox>
 

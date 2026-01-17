@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.data.TranslationManager;
 import com.google.inject.Inject;
 
 import client.searchUI.*;
@@ -16,29 +17,38 @@ public class SearchWindowCtrl {
     private Button searchButton;
     @FXML
     private VBox treeBox;
-    
+    @FXML private Label titleLabel;
     @FXML
     private Label helpButton;
     
     private RootPropositionUI rootPropositionUI;
     private PrimaryCtrl primary;
 
+    private TranslationManager tm;
+
     
     /**
      * Constructor...
      * @param p primaryCtrl instance
      * @param errorCtrl errorCtrl instance
+     *                  @param tm the translation manager used to localize UI text
      */
     @Inject
-    public SearchWindowCtrl(PrimaryCtrl p, ErrorCtrl errorCtrl){
-        rootPropositionUI = new RootPropositionUI(this, errorCtrl);
+    public SearchWindowCtrl(PrimaryCtrl p, ErrorCtrl errorCtrl, TranslationManager tm) {
+        rootPropositionUI = new RootPropositionUI(this, errorCtrl, tm);
         primary = p;
+        this.tm=tm;
     }
 
     /**
      * Called by JavaFX, initializes the scene
      */
     public void initialize(){
+        applyTexts();
+
+        tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
+            applyTexts();
+        });
         updateView();
         searchButton.setOnAction(event -> {
             this.primary.applySearchToRecipesWindow(this.rootPropositionUI.mapToProposition());
@@ -60,17 +70,15 @@ public class SearchWindowCtrl {
     public void helpButtonClicked(){
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-        alert.setTitle("Search Help");
-        alert.setContentText(
-                "Atomic functions check if a recipe satisfies a certain condition,"
-                + " like the max. amount of steps or an ingredient that must be present."
-                + " The HAS function checks if the recipe contains the given string in"
-                + " any of its ingredients, steps or its name."
-                + "\n\nCombined functions let you combine conditions. For example,"
-                + " the HAS function is equivalent to AND(HASING, HASSTEP, HASNAME)."
-                + " Combined functions can be nested."
+        alert.setTitle(tm.tr("searchHelp"));
+        alert.setContentText(tm.tr("search.help.text")
         );
         alert.show();
+    }
+
+    private void applyTexts() {
+        titleLabel.setText(tm.tr("search.title"));
+        searchButton.setText(tm.tr("button.search"));
     }
 
 }

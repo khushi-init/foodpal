@@ -3,6 +3,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 
 import client.MyFXML;
+import client.data.TranslationManager;
 import client.popups.InfoPopCtrl;
 import client.popups.WarningPopCtrl;
 import com.google.inject.Inject;
@@ -17,23 +18,27 @@ import javafx.scene.layout.Region;
 public class ErrorCtrl {
 
     private final MyFXML fxml;
+    private TranslationManager tm;
 
     /**
      * Constructor for the ErrorCtrl class
      * @param fxml - Injected fxml module
+     *             @param tm the translation manager used to localize UI text
      */
     @Inject
-    public ErrorCtrl(MyFXML fxml) {
+    public ErrorCtrl(MyFXML fxml, TranslationManager tm) {
         this.fxml = fxml;
+        this.tm = tm;
     }
 
     /**
     * Can be called to display a proper error message when the server is unavailable
     **/
-    public void showServerUnavailableError(){
-        showErrorPopup("Error",
-                "Server unavailable",
-                "The server is offline or dealing with a DDOS attack"
+    public void showServerUnavailableError() {
+        showErrorPopup(
+                tm.tr("error.title"),
+                tm.tr("error.server.header"),
+                tm.tr("error.server.message")
         );
     }
 
@@ -50,17 +55,17 @@ public class ErrorCtrl {
             writeStackTraceSucces = false;
         }
 
-        String errorContextText = "The following exception was raised ";
-        if(writeStackTraceSucces){
-            errorContextText += "(for the full stack trace, see stacktrace.txt)";
-        } else {
-            errorContextText += "(stack trace unavailable)";
-        }
-        errorContextText += ":\n";
-        errorContextText += e.toString();
+        String errorContextText = tm.tr(
+                writeStackTraceSucces
+                        ? "error.generic.context.withStacktrace"
+                        : "error.generic.context.noStacktrace"
+        );
 
-        showErrorPopup("Error",
-                "Uh oh, that's an error.",
+        errorContextText += ":\n" + e.toString();
+
+        showErrorPopup(
+                tm.tr("error.title"),
+                tm.tr("error.generic.header"),
                 errorContextText
         );
     }
@@ -69,8 +74,9 @@ public class ErrorCtrl {
      * Initializes an error pupup window
      * @param message The String to be displayed
      */
-    public void showGenericError(String message){
-        showErrorPopup("Error",
+    public void showGenericError(String message) {
+        showErrorPopup(
+                tm.tr("error.title"),
                 "",
                 message
         );

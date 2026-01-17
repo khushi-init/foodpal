@@ -29,7 +29,8 @@ public class RecipesWindowCtrlTest {
 
     @BeforeEach
     public void setup() {
-        error = new ErrorCtrl(null);
+        tm = new TranslationManager();
+        error = new ErrorCtrl(null, tm);
         server = new ServerUtils(error);
         storage = new LocalStorage(null);
         dataManipulator = new DataManipulator(storage, server, error);
