@@ -1315,18 +1315,13 @@ public class RecipesWindowCtrl {
                     ctrl.getUnit()
             );
 
-                // Add to your recipe's internal list
-                currentRecipe.getIngredients().add(newEntry);
-                // Refresh the UI to show the new item
-                updateRefresh();
-                refreshNutritionTooltip(currentRecipe);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            // Add to your recipe's internal list
+            currentRecipe.getIngredients().add(newEntry);
+            // Refresh the UI to show the new item
+            updateRefresh();
+            refreshNutritionTooltip(currentRecipe);
         }
     }
-
-
 
     @FXML
     private MenuButton addIngredientMenu;
