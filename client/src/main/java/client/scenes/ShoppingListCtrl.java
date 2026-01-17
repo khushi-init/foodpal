@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import client.MyFXML;
+import client.data.TranslationManager;
 import client.popups.ShoppingListIngredientPopUpCtrl;
 import client.popups.ShoppingListIngredientUICtrl;
 import com.google.inject.Inject;
@@ -38,6 +39,15 @@ public class ShoppingListCtrl {
 
     private ShoppingList shoppingList;
 
+    public TranslationManager tm;
+
+    @FXML
+    private Button download;
+    @FXML
+    private Button reset;
+    @FXML
+    private Label shoppingListLabel;
+
     public void setErrorCtrl(ErrorCtrl errorCtrl) {
         this.errorCtrl = errorCtrl;
     }
@@ -47,8 +57,9 @@ public class ShoppingListCtrl {
      * @param fxml - Injected FXML module
      */
     @Inject
-    public ShoppingListCtrl(MyFXML fxml) {
+    public ShoppingListCtrl(MyFXML fxml, TranslationManager tm) {
         this.fxml = fxml;
+        this.tm = tm;
     }
 
     /**
@@ -60,7 +71,7 @@ public class ShoppingListCtrl {
 
         // Add label when the list is empty, otherwise fill the list.
         if (shoppingListIngredients.isEmpty()) {
-            Label emptyList = new Label("You have added no ingredients to the shopping list yet!");
+            Label emptyList = new Label(tm.tr("shoppinglist.empty"));
             shoppingListView.getChildren().add(emptyList);
         } else {
             Map<String, Integer> ingredientNameCounts = countIngredientNames(shoppingListIngredients);
@@ -138,7 +149,7 @@ public class ShoppingListCtrl {
     }
 
     private void addButton() {
-        Button addButton = new Button("Add Ingredient");
+        Button addButton = new Button(tm.tr("add.button.tobeadded"));
         shoppingListView.getChildren().add(addButton);
         addButton.setOnAction(e -> {
             Optional<Pair<String, String>> result = showIngredientPopUp();
@@ -170,7 +181,7 @@ public class ShoppingListCtrl {
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);
-        popUpStage.setTitle("Add to shopping list");
+        popUpStage.setTitle(tm.tr("button.addtoshoppinglist"));
         popUpStage.setScene(new Scene(root));
 
         ctrl.setStage(popUpStage);
@@ -191,7 +202,7 @@ public class ShoppingListCtrl {
     @FXML
     private void onHandleDownload() {
         String userDownloads = System.getProperty("user.home") + "/Downloads/";
-        String fileName = "Shopping List.md";
+        String fileName = tm.tr("shoppinglist.filename") + ".md";
         Path filePath = Paths.get(userDownloads + fileName);
 
         String shoppingListMarkdown = shoppingList.toMarkdown();
@@ -199,10 +210,11 @@ public class ShoppingListCtrl {
         
         try {
             Files.write(filePath, file);
-            errorCtrl.displayInfo("The download has been successful! " +
-                            "You can find it at " + filePath,
-                    "Close",
-                    "SUCCESS");
+            errorCtrl.displayInfo(
+                    tm.tr("download.success", filePath),
+                    tm.tr("button.close"),
+                    tm.tr("status.success")
+            );
         }
         catch (IOException ex) {
             System.out.print("Invalid Path");
@@ -242,6 +254,20 @@ public class ShoppingListCtrl {
             return withoutRecipe.substring(0, quantityStart).trim();
         }
         return withoutRecipe.trim();
+    }
+
+    private void applyTexts() {
+        download.setText(tm.tr("button.download"));
+        reset.setText(tm.tr("button.reset"));
+        shoppingListLabel.setText(tm.tr("label.shoppinglist"));
+    }
+
+    @FXML
+    public void initialize() {
+        applyTexts();
+        tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
+            applyTexts();
+        });
     }
 
 }

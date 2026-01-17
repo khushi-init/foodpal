@@ -52,7 +52,7 @@
 <!--        </module>-->
         <module name="ParameterNumber">
             <property name="severity" value="error"/>
-            <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+            <property name="tokens" value="METHOD_DEF"/>
             <property name="max" value="8"/>
         </module>
         <module name="CyclomaticComplexity">

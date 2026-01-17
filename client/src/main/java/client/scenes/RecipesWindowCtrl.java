@@ -144,6 +144,7 @@ public class RecipesWindowCtrl {
      * @param server - The injected serverUtils instance
      * @param fxml - The injected MyFXML instance
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @Inject
     public RecipesWindowCtrl(WebSocketManager socker, ErrorCtrl c,
                              PrimaryCtrl p, LocalStorage storage, DataManipulator dataManipulator,
@@ -1170,7 +1171,7 @@ public class RecipesWindowCtrl {
         ctrl.setAndShowShoppingList(shoppingList);
 
         Stage shoppingListStage = new Stage();
-        shoppingListStage.setTitle("Shopping List");
+        shoppingListStage.setTitle(tm.tr("label.shoppinglist"));
         shoppingListStage.setScene(new Scene(root));
 
         shoppingListStage.show();
@@ -1243,12 +1244,9 @@ public class RecipesWindowCtrl {
      * Handles button for to be added window
      */
     public void toggleToBeAdded() throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/client/modules/ToBeAdded.fxml")
-        );
-        Parent root = loader.load();
-
-        ToBeAddedCtrl ctrl = loader.getController();
+        Pair<ToBeAddedCtrl, Parent> addIngPair = fxml.load(ToBeAddedCtrl.class, "client", "modules", "ToBeAdded.fxml");
+        Parent root = addIngPair.getValue();
+        ToBeAddedCtrl ctrl =addIngPair.getKey();
 
         ctrl.setShoppingList(shoppingList);
         ctrl.setSourceRecipeName(getSelectedRecipe().getName());
@@ -1257,7 +1255,7 @@ public class RecipesWindowCtrl {
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);
-        popUpStage.setTitle("To Be Added");
+        popUpStage.setTitle(tm.tr("label.tobeadded"));
         popUpStage.setScene(new Scene(root));
         popUpStage.initOwner(recipeView.getScene().getWindow());
 
@@ -1335,7 +1333,7 @@ public class RecipesWindowCtrl {
 
     private Locale currentLocale = Locale.ENGLISH;
 
-    private final int size_flag = 16;
+    private final int sizeFlag = 16;
 
 
     private void setUpLanguageDropdown() {
@@ -1374,8 +1372,8 @@ public class RecipesWindowCtrl {
 
     private ImageView icon(String path) {
         ImageView iv = new ImageView(new Image(getClass().getResourceAsStream(path)));
-        iv.setFitWidth(size_flag);
-        iv.setFitHeight(size_flag);
+        iv.setFitWidth(sizeFlag);
+        iv.setFitHeight(sizeFlag);
         iv.setPreserveRatio(true);
         return iv;
     }
