@@ -1,5 +1,7 @@
 package client.popups;
 
+import client.data.TranslationManager;
+import com.google.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,6 +20,8 @@ public class InfoPopCtrl {
     private Button closeButton;
 
     private Stage stage;
+
+    private TranslationManager tm;
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -43,5 +47,20 @@ public class InfoPopCtrl {
         if (stage != null) {
             stage.close();
         }
+    }
+
+    @Inject
+    public InfoPopCtrl(TranslationManager tm) {
+        this.tm= tm;
+    }
+
+    @FXML
+    public void initialize() {
+        titleLabel.setText(tm.tr("popup.info.title"));
+        closeButton.setText(tm.tr("button.close"));
+        tm.bundleProperty().addListener((obs, o, n) -> {
+            titleLabel.setText(tm.tr("popup.info.title"));
+            closeButton.setText(tm.tr("button.close"));
+        });
     }
 }

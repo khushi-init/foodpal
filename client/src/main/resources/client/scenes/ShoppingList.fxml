@@ -16,7 +16,7 @@
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="40" style="-fx-background-color: #6ed157; -fx-padding: 10;">
             <children>
-                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="Shopping List" />
+                <Label fx:id="shoppingListLabel" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="Shopping List" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>
         </HBox>
@@ -45,12 +45,12 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#onHandleReset" text="Reset">
+                              <Button fx:id="reset" mnemonicParsing="false" onAction="#onHandleReset" text="Reset">
                                  <HBox.margin>
                                     <Insets left="20.0" right="5.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" onAction="#onHandleDownload" text="Download">
+                              <Button fx:id="download" mnemonicParsing="false" onAction="#onHandleDownload" text="Download">
                                  <HBox.margin>
                                     <Insets left="5.0" />
                                  </HBox.margin>

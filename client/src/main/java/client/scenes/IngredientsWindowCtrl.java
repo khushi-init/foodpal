@@ -7,6 +7,7 @@ import client.IngredientListCell;
 import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
+import client.data.TranslationManager;
 import client.utils.ServerUtils;
 import commons.InformalUnit;
 import commons.Ingredient;
@@ -88,11 +89,36 @@ public class IngredientsWindowCtrl {
     private Label recipesUsedInLabel;
 
     @FXML
+    private Label name;
+
+    @FXML
+    private Label nutriInfo;
+
+    @FXML
+    private Label per100;
+
+    @FXML
+    private Label protein;
+
+    @FXML
+    private Label fats;
+    @FXML
+    private Label carbs;
+    @FXML
+    private Label kcalInf;
+    @FXML
+    private Label usedIn;
+
+
+
+    @FXML
     private HBox nutriScoreBox;
 
     private final LocalStorage storage;
 
     private final DataManipulator dataManipulator;
+
+    private final TranslationManager tm;
 
     /**
      * Injectable constructor is REQUIRED for Guice to provide dependencies.
@@ -102,21 +128,28 @@ public class IngredientsWindowCtrl {
      * @param dataManipulator - The injected data Manipulator
      * @param server - Injected serverUtils instance
      * @param fxml - Injected MyFXML instance
+     *             @param tm the translation manager used to localize UI text
      */
     @Inject
-    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml) {
+    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml, TranslationManager tm) {
         this.primaryCtrl = p;
         this.errorCtrl = c;
         this.storage = storage;
         this.dataManipulator = dataManipulator;
         this.server = server;
         this.fxml = fxml;
+        this.tm = tm;
     }
 
     /**
      * Initializes the ingredient window UI.
      */
+    @FXML
     public void initialize(){
+        applyTexts();
+        tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
+            applyTexts();
+        });
 
         // logic to sort ingredients by name
         FXCollections.sort(storage.getIngredients(), (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
@@ -161,9 +194,9 @@ public class IngredientsWindowCtrl {
 
         Optional<Integer> usage = server.getIngredientUsage(ingredient.getId());
         if(usage.isEmpty()) {
-            recipesUsedInLabel.setText("N/A (Server Error)");
+            recipesUsedInLabel.setText(tm.tr("server.error.na"));
         } else {
-            recipesUsedInLabel.setText(String.format("%d recipe(s)", usage.get()));
+            recipesUsedInLabel.setText(String.format(("%d "+ tm.tr("recipe(s)")), usage.get()));
         }
 
         showNutriScore(ingredient);
@@ -187,7 +220,7 @@ public class IngredientsWindowCtrl {
      */
     public void handleEditNameClick(MouseEvent event) {
         Ingredient selected = sidebarIngredientNamesList.getSelectionModel().getSelectedItem();
-        Optional<Ingredient> edit = ingredientDataPrompt("Edit Ingredient", "Ingredient to edit:", selected.getName(),
+        Optional<Ingredient> edit = ingredientDataPrompt(tm.tr("edit.ingredient"), tm.tr("ingredient.to.edit"), selected.getName(),
                 String.valueOf(selected.getNutritionalValue().fat100g()),
                 String.valueOf(selected.getNutritionalValue().protein100g()),
                 String.valueOf(selected.getNutritionalValue().carbs100g()));
@@ -198,7 +231,7 @@ public class IngredientsWindowCtrl {
 
         boolean successful = dataManipulator.editIngredient(replacement);
         if (!successful) {
-            errorCtrl.showGenericError("Something went wrong when updating the ingredient :/");
+            errorCtrl.showGenericError(tm.tr("something.wrong"));
             return;
         }
         int index = 0;
@@ -226,7 +259,7 @@ public class IngredientsWindowCtrl {
      * @return Optional containing the newly created Ingredient if successful
      */
     public Optional<Ingredient> handlePlusButtonPress() {
-        Optional<Ingredient> parsed = ingredientDataPrompt("Create Ingredient", "Ingredient to create:", "", "", "", "");
+        Optional<Ingredient> parsed = ingredientDataPrompt(tm.tr("create.ingredient"), tm.tr("ingredient.create"), "", "", "", "");
         if (parsed.isEmpty()) return Optional.empty();
         dataManipulator.addIngredient(parsed.get());
         return parsed;
@@ -291,12 +324,19 @@ public class IngredientsWindowCtrl {
         }
         Optional<Integer> uses = server.getIngredientUsage(selected.getId());
         if (uses.isEmpty()) {
-            boolean anyway = errorCtrl.displayWarning("This ingredient might be used in some recipes. Deleting it could make them unusable!",
-                    "Delete Anyway", "WAIT!");
+            boolean anyway = errorCtrl.displayWarning(
+                    tm.tr("ingredient.delete.warning.unused"),
+                    tm.tr("button.delete.anyway"),
+                    tm.tr("status.wait")
+            );
             if (!anyway) return;
+
         } else if (uses.get() > 0) {
-            boolean anyway = errorCtrl.displayWarning("This ingredient is used in " + uses.get() + " recipe(s). Deleting it could make them unusable!",
-                    "Delete Anyway", "WAIT!");
+            boolean anyway = errorCtrl.displayWarning(
+                    tm.tr("ingredient.delete.warning.used", uses.get()),
+                    tm.tr("button.delete.anyway"),
+                    tm.tr("status.wait")
+            );
             if (!anyway) return;
         }
         dataManipulator.deleteIngredient(selected);
@@ -360,5 +400,21 @@ public class IngredientsWindowCtrl {
         }
         return "• " + ri.getIngredient().getName() + " " + quantity + " " + unitName;
     }
+    private void applyTexts() {
+        backButton.setText(tm.tr("button.back"));
+        name.setText(tm.tr("ingredient.name"));
+        nutriInfo.setText(tm.tr("ingredient.nutrition.info"));
+        per100.setText(tm.tr("ingredient.per.100g"));
+        protein.setText(tm.tr("ingredient.protein"));
+        fats.setText(tm.tr("ingredient.fats"));
+        carbs.setText(tm.tr("ingredient.carbohydrates"));
+        kcalInf.setText(tm.tr("ingredient.kcal"));
+        usedIn.setText(tm.tr("ingredient.used.in.recipes"));
+        nameLabel.setText(tm.tr("ingredient.name.Label"));
+
+
+    }
+
+
     // We need an update method to re-sort the ingredients list on updates
 }

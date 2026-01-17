@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import client.data.TranslationManager;
 import client.popups.ShoppingListIngredientPopUpCtrl;
 import client.popups.ShoppingListIngredientUICtrl;
+import com.google.inject.Inject;
 import commons.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,6 +29,19 @@ public class ToBeAddedCtrl {
     private boolean okClicked = false;
     private ShoppingList shoppingList;
     private Runnable openShoppingList;
+
+    @FXML
+    public Label toBeAdded;
+
+    @FXML
+    public Button addToShoppingList;
+
+    public TranslationManager tm;
+
+    @Inject
+    public ToBeAddedCtrl(TranslationManager tm) {
+        this.tm = tm;
+    }
 
     @FXML
     private void handleOk() {
@@ -96,7 +112,7 @@ public class ToBeAddedCtrl {
             }
         }
 
-        Button addButton = new Button("Add Ingredient");
+        Button addButton = new Button(tm.tr("add.button.tobeadded"));
         ingredientsBox.getChildren().add(addButton);
 
         addButton.setOnAction(e -> {
@@ -130,7 +146,7 @@ public class ToBeAddedCtrl {
 
             Stage popUpStage = new Stage();
             popUpStage.initModality(Modality.APPLICATION_MODAL);
-            popUpStage.setTitle("Add ingredient");
+            popUpStage.setTitle(tm.tr("add.button.tobeadded"));
             popUpStage.setScene(new Scene(root));
 
             ctrl.setStage(popUpStage);
@@ -176,5 +192,18 @@ public class ToBeAddedCtrl {
      */
     public void setSourceRecipeName(String sourceRecipeName) {
         this.sourceRecipeName = sourceRecipeName;
+    }
+
+    private void applyTexts() {
+        toBeAdded.setText(tm.tr("label.tobeadded"));
+        addToShoppingList.setText(tm.tr("button.addtoshoppinglist"));
+    }
+
+    @FXML
+    public void initialize() {
+        applyTexts();
+        tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
+            applyTexts();
+        });
     }
 }

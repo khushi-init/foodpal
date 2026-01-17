@@ -1,6 +1,8 @@
 package client.scenes;
 
+import client.data.TranslationManager;
 import client.utils.searchUtils.Proposition;
+import com.google.inject.Inject;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -18,6 +20,13 @@ public class PrimaryCtrl {
 
     private RecipesWindowCtrl recipesWindowCtrl;
     private IngredientsWindowCtrl ingredientsWindowCtrl;
+
+    private TranslationManager tm;
+
+    @Inject
+    public PrimaryCtrl(TranslationManager tm) {
+        this.tm = tm;
+    }
 
     /**
      * Initializes the primary control scene
@@ -55,7 +64,7 @@ public class PrimaryCtrl {
      * Show method for the recipeWindow. It switches the javafx scene to the recipeWindow Scene
      */
     public void showRecipesWindow() {
-        primaryStage.setTitle("Cool recipe app"); // Subject to change
+        primaryStage.setTitle(tm.tr("title")); // Subject to change
         recipesWindowCtrl.startup();
         primaryStage.setScene(recipesWindowScene);
     }
@@ -64,7 +73,7 @@ public class PrimaryCtrl {
      * Show method for the Shopping List scene.
      */
     public void showShoppingList() {
-        primaryStage.setTitle("Shopping List"); // Subject to change
+        primaryStage.setTitle(tm.tr("shoppinglist")); // Subject to change
         primaryStage.setScene(shoppingListWindow);
     }
 
@@ -72,7 +81,7 @@ public class PrimaryCtrl {
      * Show method for Ingredient window scene
      */
     public void showIngredientsWindow() {
-        primaryStage.setTitle("Ingredients List");
+        primaryStage.setTitle(tm.tr("ingredients.list"));
         recipesWindowCtrl.shutdown();
         primaryStage.setScene(ingredientsWindowScene);
     }
@@ -82,7 +91,7 @@ public class PrimaryCtrl {
      */
     public void showSearchWindow(){
         Stage newStage = new Stage();
-        newStage.setTitle("Search Foodpal");
+        newStage.setTitle(tm.tr("search.foodpal"));
         newStage.setScene(searchWindow);
         newStage.show();
     }

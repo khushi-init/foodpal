@@ -45,6 +45,7 @@ public class RecipeIngredient {
      * @param recipe the recipe
      * @param ingredient the ingredient
      * @param quantity quantity of the ingredient
+     *                 @param tm the translation manager used to localize UI text
      */
     public RecipeIngredient(Recipe recipe, Ingredient ingredient, Double quantity,  RecipeIngredientUnit unit) {
         this.id = new  RecipeIngredientKey();
