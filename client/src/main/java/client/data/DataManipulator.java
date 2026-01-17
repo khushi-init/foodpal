@@ -270,5 +270,17 @@ public class DataManipulator {
                 (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
     }
 
+    /**
+     * Refreshes the local ingredient list from the server and sorts it alphabetically.
+     */
+    public void refreshIngredients() {
+        System.out.println("Refreshed ingredient list");
+        List<Ingredient> serverResponse = server.getIngredients();
+        if (serverResponse != null) {
+            storage.getIngredients().setAll(serverResponse);
+            sortLocalIngredients();
+        }
+    }
+
 
 }

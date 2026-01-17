@@ -58,7 +58,7 @@
 
                         <Button fx:id="remove" onAction="#deleteIngredientButtonHandler" style="-fx-background-color: #d9534f; -fx-text-fill: white; -fx-font-size: 16;" text="-" />
 
-                        <Button fx:id="refresh" style="-fx-background-color: #0275d8; -fx-text-fill: white; -fx-font-size: 16;" text="⟳" />
+                        <Button fx:id="refresh" onAction="#refreshLocalIngredients" style="-fx-background-color: #0275d8; -fx-text-fill: white; -fx-font-size: 16;" text="⟳" />
                     </HBox>
 
                 </VBox>
