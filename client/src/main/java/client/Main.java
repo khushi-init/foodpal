@@ -17,6 +17,7 @@ package client;
 
 import static com.google.inject.Guice.createInjector;
 
+import client.data.TranslationManager;
 import client.scenes.*;
 import client.utils.ServerUtils;
 import com.google.inject.Injector;
@@ -32,6 +33,7 @@ public class Main extends Application {
     public final MyFXML fxml = new MyFXML(injector);
     public final int maxRetries = 5;
     public final int waitTimeMs = 1000;
+    public TranslationManager tm;
 
 
 

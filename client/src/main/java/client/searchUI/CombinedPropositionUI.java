@@ -2,6 +2,7 @@ package client.searchUI;
 
 import java.util.ArrayList;
 
+import client.data.TranslationManager;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
@@ -13,31 +14,45 @@ public class CombinedPropositionUI extends PropositionUI implements ParentPropos
     private Button addAtomicButton;
     private Button addCombinedButton;
 
+    private TranslationManager tm;
+
     /**
      * Constructor, initialize add buttons
      * @param parent ...
+     *               @param tm the translation manager used to localize UI text
      */
-    public CombinedPropositionUI(ParentPropositionUI parent){
+    public CombinedPropositionUI(ParentPropositionUI parent, TranslationManager tm) {
         super(parent, SearchFunctions.getCombinedFunctions());
-        this.children = new ArrayList<PropositionUI>();
+        this.tm = tm;
+
+        this.children = new ArrayList<>();
         setSelectedFunction(SearchFunctions.AND);
-        this.addAtomicButton = new Button("+ Atomic");
-        this.addAtomicButton.setOnAction((event) -> {
-            //on click, add a new atomic proposition (with this as its parent) to children and rerender the tree
-            this.children.add(new AtomicPropositionUI(this));
+
+        this.addAtomicButton = new Button();
+        this.addCombinedButton = new Button();
+
+        applyTexts();
+        tm.bundleProperty().addListener((obs, oldB, newB) -> applyTexts());
+
+        addAtomicButton.setOnAction(event -> {
+            children.add(new AtomicPropositionUI(this, tm));
             updateView();
         });
-        this.addCombinedButton = new Button("+ Combined");
-        this.addCombinedButton.setOnAction((event) -> {
-            //on click, add a new combined proposition (with this as its parent) to children and rerender the tree
-            this.children.add(new CombinedPropositionUI(this));
+
+        addCombinedButton.setOnAction(event -> {
+            children.add(new CombinedPropositionUI(this, tm));
             updateView();
         });
     }
-    
+
+    private void applyTexts() {
+        addAtomicButton.setText(tm.tr("search.button.addAtomic"));
+        addCombinedButton.setText(tm.tr("search.button.addCombined"));
+    }
+
     @Override
     public VBox getView() {
-        
+
         VBox view = new VBox(1);
         view.setPadding(boxInsets);
         view.setPadding(new Insets(topMargin, 0, 0, indentation));

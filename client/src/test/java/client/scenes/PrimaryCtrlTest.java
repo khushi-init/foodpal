@@ -15,16 +15,19 @@
  */
 package client.scenes;
 
+import client.data.TranslationManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class PrimaryCtrlTest {
 
     private PrimaryCtrl sut;
+    private TranslationManager tm;
 
     @BeforeEach
     public void setup() {
-        sut = new PrimaryCtrl();
+        tm = new TranslationManager();
+        sut = new PrimaryCtrl(tm);
     }
 
     @Test

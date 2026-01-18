@@ -1,17 +1,27 @@
 package client.scenes;
 
+import client.data.TranslationManager;
+import com.google.inject.Inject;
 import commons.FormalUnit;
 import commons.InformalUnit;
 import commons.RecipeIngredientUnit;
 import commons.Unit;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class QuantityUnitSelectionCtrl {
+    private TranslationManager tm;
 
     @FXML private TextField quantityField;
+    @FXML private Label headerLabel;
+    @FXML private Label quantity;
+    @FXML private Label unitType;
+    @FXML private Button cancel;
+    @FXML private Label unit;
 
     // Matched to FXML fx:id="unitTypePicker"
     @FXML private ComboBox<String> unitTypePicker;
@@ -28,8 +38,12 @@ public class QuantityUnitSelectionCtrl {
 
     @FXML
     public void initialize() {
+        applyTexts();
+        tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
+            applyTexts();
+        });
         // 1. Setup the Unit Type Picker (Formal vs Informal selection)
-        unitTypePicker.getItems().addAll("Formal", "Informal");
+        unitTypePicker.getItems().addAll(tm.tr("formal"), tm.tr("informal"));
         unitTypePicker.getSelectionModel().selectFirst();
 
         // 2. Populate the Formal Units dropdown with Enum values
@@ -38,7 +52,7 @@ public class QuantityUnitSelectionCtrl {
 
         // 3. Listener to swap UI visibility based on unitTypePicker selection
         unitTypePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            boolean isFormal = "Formal".equals(newVal);
+            boolean isFormal = tm.tr("formal").equals(newVal);
 
             // Toggle visibility
             formalUnitPicker.setVisible(isFormal);
@@ -67,7 +81,7 @@ public class QuantityUnitSelectionCtrl {
 
             Unit selectedUnit;
             // Use unitTypePicker value to decide which input to read
-            if ("Formal".equals(unitTypePicker.getValue())) {
+            if (tm.tr("formal").equals(unitTypePicker.getValue())) {
                 selectedUnit = formalUnitPicker.getValue();
             } else {
                 selectedUnit = new InformalUnit(informalUnitField.getText());
@@ -93,7 +107,7 @@ public class QuantityUnitSelectionCtrl {
         }
 
         // Validate Unit
-        boolean isFormal = "Formal".equals(unitTypePicker.getValue());
+        boolean isFormal = tm.tr("formal").equals(unitTypePicker.getValue());
         if (isFormal && formalUnitPicker.getValue() == null) {
             return false;
         }
@@ -112,5 +126,19 @@ public class QuantityUnitSelectionCtrl {
     }
     public RecipeIngredientUnit getUnit() {
         return resultUnit;
+    }
+
+    @Inject
+    public QuantityUnitSelectionCtrl(TranslationManager tm) {
+        this.tm = tm;
+    }
+
+    private void applyTexts() {
+        headerLabel.setText(tm.tr("ingredinetquantity"));
+        quantity.setText(tm.tr("quantity"));
+        unitType.setText(tm.tr("unitType"));
+        cancel.setText(tm.tr("button.cancelCreate"));
+        unit.setText(tm.tr("unit"));
+
     }
 }

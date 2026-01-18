@@ -17,6 +17,7 @@ package client;
 
 import client.data.DataManipulator;
 import client.data.LocalStorage;
+import client.data.TranslationManager;
 import client.data.WebSocketManager;
 import client.scenes.*;
 import client.scenes.ErrorCtrl;
@@ -40,5 +41,6 @@ public class MyModule implements Module {
         binder.bind(ServerUtils.class).in(Scopes.SINGLETON);
         binder.bind(SearchWindowCtrl.class).in(Scopes.SINGLETON);
         binder.bind(WebSocketManager.class).in(Scopes.SINGLETON);
+        binder.bind(TranslationManager.class).in(Scopes.SINGLETON);
     }
 }

@@ -21,7 +21,7 @@ public class RecipeIngredient {
 
     // CascadeTpe.PERSIST --> if you use a new Ingredient when trying to create an instance of RecipeIngredient,
     // it saves the new Ingredient first
-    // CascadeTpe.PERSIST --> if you update Ingredniet it updates RecipeIngredient
+    // CascadeTpe.PERSIST --> if you update Ingredient it updates RecipeIngredient
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @MapsId("ingredientId")  // Maps the Ingredient's ID to the 'ingredientId' field in RecipeIngredientKey
     @JoinColumn(name = "ingredient_id")
@@ -45,6 +45,7 @@ public class RecipeIngredient {
      * @param recipe the recipe
      * @param ingredient the ingredient
      * @param quantity quantity of the ingredient
+     *                 @param tm the translation manager used to localize UI text
      */
     public RecipeIngredient(Recipe recipe, Ingredient ingredient, Double quantity,  RecipeIngredientUnit unit) {
         this.id = new  RecipeIngredientKey();

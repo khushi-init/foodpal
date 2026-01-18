@@ -5,12 +5,15 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;
+import javafx.collections.FXCollections;
+
 import commons.RecipeIngredient;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.*;
 
 public class DataManipulator {
@@ -64,6 +67,7 @@ public class DataManipulator {
         if (response.isEmpty()) return Optional.empty();
         storage.getIngredients().add(response.get());
         System.out.println("Your ingredient \"" + ingredient.getName()+ "\" has been created successfully.");
+        sortLocalIngredients();
         return response;
     }
 
@@ -191,6 +195,7 @@ public class DataManipulator {
 
         if (!successful) {
             // Show error using injected ErrorCtrl
+            sortLocalIngredients();
             errs.showGenericError("Failed to delete ingredient from the server.");
             return;
         }
@@ -199,6 +204,7 @@ public class DataManipulator {
         // The UI (ListView) will update automatically.
         System.out.println("Ingredient \"" + ingredient.getName() + "\" deleted successfully");
         storage.getIngredients().remove(ingredient);
+        sortLocalIngredients();
     }
 
     /**
@@ -212,6 +218,7 @@ public class DataManipulator {
 
         if (update.isEmpty()) {
             errs.showGenericError("Failed to update ingredient in the server");
+            sortLocalIngredients();
             return false;
         }
 
@@ -220,9 +227,11 @@ public class DataManipulator {
             if (Objects.equals(storage.getIngredients().get(i).getId(), update.get().getId())) {
                 storage.getIngredients().set(i, update.get());
                 System.out.println("Ingredient \"" + replacement.getName() + "\" updated successfully");
+                sortLocalIngredients();
                 return true;
             }
         }
+        sortLocalIngredients();
         errs.showGenericError("Ingredient updated on server but not found locally");
         return false;
     }
@@ -296,6 +305,26 @@ public class DataManipulator {
             ids.add(r.getId());
         }
         return ids;
+    }
+
+    private void sortLocalIngredients() {
+        Collator collator = Collator.getInstance(Locale.ENGLISH);
+        //Set strength to PRIMARY so it ignores case and accents (á == a)
+        collator.setStrength(Collator.PRIMARY);
+        FXCollections.sort(storage.getIngredients(),
+                (i1, i2) -> collator.compare(i1.getName(), i2.getName()));
+    }
+
+    /**
+     * Refreshes the local ingredient list from the server and sorts it alphabetically.
+     */
+    public void refreshIngredients() {
+        System.out.println("Refreshed ingredient list");
+        List<Ingredient> serverResponse = server.getIngredients();
+        if (serverResponse != null) {
+            storage.getIngredients().setAll(serverResponse);
+            sortLocalIngredients();
+        }
     }
 
 

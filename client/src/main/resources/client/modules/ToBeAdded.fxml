@@ -17,7 +17,7 @@
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="20" style="-fx-background-color: #6ed157; -fx-padding: 10;">
             <children>
-                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;" text="To be added" />
+                <Label fx:id="toBeAdded" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;" text="To be added" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>
         </HBox>
@@ -41,7 +41,7 @@
         <SplitPane prefHeight="30" prefWidth="600" style="-fx-background-color: #fafafa;" stylesheets="@/client/scenes/scrollfix.css">
             <items>
                 <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10;">
-                    <Button text="Add to shopping list" onAction="#addToShoppingList"/>
+                    <Button fx:id="addToShoppingList" onAction="#addToShoppingList"/>
                 </HBox>
             </items>
         </SplitPane>
