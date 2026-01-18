@@ -187,6 +187,11 @@
                               </ImageView>
                            </graphic>
                         </Button>
+                                <MenuButton fx:id="languageMenu" managed="false" prefHeight="26.0" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;" visible="false">
+                                    <HBox.margin>
+                                        <Insets left="1.0" right="1.0" />
+                                    </HBox.margin>
+                                </MenuButton>
 
                             </children>
                      <BorderPane.margin>
