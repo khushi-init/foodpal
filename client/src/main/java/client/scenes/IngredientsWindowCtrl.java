@@ -212,6 +212,11 @@ public class IngredientsWindowCtrl {
         nutriScoreBox.getChildren().clear();
     }
 
+    @FXML
+    public void refreshLocalIngredients() {
+        dataManipulator.refreshIngredients();
+    }
+
     /**
      * Handles the click on the edit/pencil icon next to the ingredient name.
      * Prompts user to edit ingredient by calling ingredientDataPrompt, updates the ingredient with the new one using
