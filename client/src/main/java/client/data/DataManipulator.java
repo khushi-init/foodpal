@@ -104,18 +104,6 @@ public class DataManipulator {
     }
 
     /**
-     * Applies changes from a recipe subscription. Replaces the recipe and updates all the ingredients
-     * If the recipe didn't exist yet, it is added
-     * @param newRecipe The changed recipe
-     */
-    public void updateRecipeLocal(Recipe newRecipe){
-        storage.getRecipes().removeIf(x -> newRecipe.getId() == x.getId());
-        storage.getRecipes().add(newRecipe);
-        System.out.println("Updated recipe" + newRecipe.getId());
-        newRecipe.getIngredients().stream().forEach(x -> updateIngredientLocal(x.getIngredient()));
-    }
-
-    /**
      * Updates the ingredient list and updates the ingredients within all recipes
      * @param newIngredient The (changed) ingredient
      */
@@ -123,12 +111,12 @@ public class DataManipulator {
         //first check if the ingredient has actually changed
         if(storage.getIngredients().stream().anyMatch(x -> newIngredient.equals(x))) return;
         //if it has changed, remove the old instance and put in the new one
-        storage.getIngredients().removeIf(x -> newIngredient.getId() == x.getId());
+        storage.getIngredients().removeIf(x -> newIngredient.getId().equals(x.getId()));
         storage.getIngredients().add(newIngredient);
         //also change all the recipes that contain this ingredient
         for(Recipe recipe: storage.getRecipes()){
             for(RecipeIngredient ing: recipe.getIngredients()){
-                if(ing.getIngredient().getId() == newIngredient.getId()){
+                if(ing.getIngredient().getId().equals(newIngredient.getId())){
                     ing.setIngredient(newIngredient);
                 }
             }
@@ -140,12 +128,25 @@ public class DataManipulator {
      * @param updated - The recipe to update
      */
     public void updateRecipe(Recipe updated) {
+        boolean isUpdated = false;
         for (int i = 0; i < storage.getRecipes().size(); i++) {
             if (Objects.equals(storage.getRecipes().get(i).getId(), updated.getId())) {
                 storage.getRecipes().set(i, updated);
+                isUpdated = true;
                 break;
             }
         }
+        if(!isUpdated){
+            storage.getRecipes().add(updated);
+        }
+    }
+
+    /**
+     * Deletes the recipe with the specified ID, iff it exists
+     * @param id
+     */
+    public void deleteRecipeLocal(Long id){
+        System.out.println(storage.getRecipes().removeIf(x -> x.getId().equals(id)));
     }
 
     /**

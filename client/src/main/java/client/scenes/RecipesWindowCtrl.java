@@ -54,6 +54,9 @@ public class RecipesWindowCtrl {
 
     private volatile StompSession.Subscription titleSubscription;
     private volatile StompSession.Subscription recipeSubscription;
+    private volatile StompSession.Subscription recipeAdditionSubscription;
+    private volatile StompSession.Subscription recipeDeletionSubscription;
+
     private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor();
 
     @FXML
@@ -253,6 +256,8 @@ public class RecipesWindowCtrl {
             return;
         }
         initializeTitleSubscription();
+        initializeRecipeAdditionSubscription();
+        initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
     }
 
@@ -266,6 +271,19 @@ public class RecipesWindowCtrl {
             titleSubscription = null;
             System.out.println("Unsubscribed from title updates.");
         }
+        if(recipeSubscription != null){
+            recipeSubscription.unsubscribe();
+            recipeSubscription = null;
+        }
+        if(recipeAdditionSubscription != null){
+            recipeAdditionSubscription.unsubscribe();
+            recipeAdditionSubscription = null;
+        }
+        if(recipeDeletionSubscription != null){
+            recipeDeletionSubscription.unsubscribe();
+            recipeDeletionSubscription = null;
+        }
+        
     }
 
     /**
@@ -298,8 +316,46 @@ public class RecipesWindowCtrl {
                 Platform.runLater(() -> {
                     System.out.println("Recipe " + update.id() + " changed.");
                     dataManipulator.updateRecipe(update.recipe());
-                    if(currentRecipe.getId() == update.id()) currentRecipe = update.recipe();
+                    if(currentRecipe.getId().equals(update.id())) currentRecipe = update.recipe();
                     openRecipe(currentRecipe);
+                });
+            });
+        });
+    }
+
+    /**
+     * Subscribes to all new recipes, and locally stores the new recipes using the DataManipulator
+     */
+    public void initializeRecipeAdditionSubscription(){
+        if(recipeAdditionSubscription != null) recipeAdditionSubscription.unsubscribe();
+        subscriptionExecutor.submit(() -> {
+            recipeAdditionSubscription = socker.subscribe("/updates/recipe-addition", RecipeAddition.class, update -> {
+                Platform.runLater(() -> {
+                    ignoreSideBarSelectionEvent = true;
+                    dataManipulator.updateRecipe(update.recipe());
+                    sidebarRecipeNamesList.getSelectionModel().select(currentRecipe);
+                    ignoreSideBarSelectionEvent = false;
+                });
+            });
+        });
+    }
+
+    /**
+     * Subscribes to all deleted recipes, and locally deletes the recipe with the specified id using the DataManipulator
+     */
+    public void initializeRecipeDeletionSubscription(){
+        if(recipeDeletionSubscription != null) recipeDeletionSubscription.unsubscribe();
+        subscriptionExecutor.submit(() -> {
+            recipeDeletionSubscription = socker.subscribe("/updates/recipe-deletion", RecipeDeletion.class, update -> {
+                Platform.runLater(() -> {
+                    ignoreSideBarSelectionEvent = true;
+                    if(currentRecipe != null && update.id().equals(currentRecipe.getId())){
+                        clearRecipeView();
+                        sidebarRecipeNamesList.getSelectionModel().clearSelection();
+                        errorCtrl.showErrorPopup("Recipe deleted", "", "Someone deleted the recipe you were viewing ):");
+                    }
+                    dataManipulator.deleteRecipeLocal(update.id());
+                    ignoreSideBarSelectionEvent = false;
                 });
             });
         });
@@ -454,12 +510,14 @@ public class RecipesWindowCtrl {
      */
     public void openRecipe(Recipe recipe, boolean updateRecipe) {
         this.currentRecipe = recipe;
+        ignoreSideBarSelectionEvent = true;
         if(updateRecipe){
-            ignoreSideBarSelectionEvent = true;
             this.currentRecipe = dataManipulator.refreshRecipe(recipe.getId());
-            ignoreSideBarSelectionEvent = false;
             recipe = this.currentRecipe;
         }
+        sidebarRecipeNamesList.getSelectionModel().select(currentRecipe);
+        ignoreSideBarSelectionEvent = false;
+
         recipeView.getChildren().clear();
         loadIngredients(currentRecipe.getIngredients());
         Separator sep = new Separator();
@@ -802,9 +860,11 @@ public class RecipesWindowCtrl {
         Recipe clone = cloneRecipe(currentRecipe, newName);
         Recipe savedRecipe = server.addRecipe(clone);
         if(savedRecipe != null){
+            ignoreSideBarSelectionEvent = true;
             storage.getRecipes().add(savedRecipe);
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
-            System.out.println("Cloned recipe \"" + currentRecipe.getName() + "\" to \"" + newName + "\"");
+            ignoreSideBarSelectionEvent = false;
+            openRecipe(savedRecipe);
         } else {
             errorCtrl.showGenericError("Recipe not selected to clone.");
         }
@@ -880,7 +940,12 @@ public class RecipesWindowCtrl {
         );
         //calls the fixed ServerUtils method addRecipe
         Optional<Recipe> savedRecipe = dataManipulator.addRecipe(newRecipe);
-        savedRecipe.ifPresent(recipe -> sidebarRecipeNamesList.getSelectionModel().select(recipe));
+        savedRecipe.ifPresent(recipe -> {
+            ignoreSideBarSelectionEvent = true;
+            sidebarRecipeNamesList.getSelectionModel().select(recipe);
+            ignoreSideBarSelectionEvent = false;
+            openRecipe(recipe);
+        });
     }
 
     /**
@@ -955,7 +1020,11 @@ public class RecipesWindowCtrl {
         if (hit == null) {
             return;
         }
+        ignoreSideBarSelectionEvent = true;
         dataManipulator.deleteRecipe(hit);
+        ignoreSideBarSelectionEvent = false;
+        if(getSelectedRecipe() == null) return;
+        openRecipe(getSelectedRecipe());
     }
 
     @FXML

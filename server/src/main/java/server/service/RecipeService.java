@@ -63,6 +63,7 @@ public class RecipeService {
      * @param incoming The recipe data provided by the user.
      * @return The saved Recipe object with populated associations.
      */
+    @Transactional
     public Recipe createRecipe(Recipe incoming) {
         Recipe recipe = new Recipe();
         recipe.setName(incoming.getName());
@@ -87,7 +88,7 @@ public class RecipeService {
             }
             recipe.setIngredients(ingredients);
         }
-
+        eventPublisher.publishEvent(new RecipeAddition(recipe));
         return recipeRepository.save(recipe);
     }
 
@@ -189,9 +190,12 @@ public class RecipeService {
      * @param id The ID of the recipe to delete.
      * @return true if the recipe was found and deleted, false otherwise.
      */
+    @Transactional
     public boolean deleteRecipe(Long id) {
         if (recipeRepository.existsById(id)) {
             recipeRepository.deleteById(id);
+            eventPublisher.publishEvent(new RecipeDeletion(id));
+            System.out.println("DELETED RECIPE " + id);
             return true;
         }
         return false;

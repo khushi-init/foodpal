@@ -38,4 +38,24 @@ public class RecipeEventListener {
         System.out.println("Sending updated recipe with id " + update.id());
         messaging.convertAndSend("/updates/recipe/" + Long.toString(update.recipe().getId()), update);
     }
+
+    /**
+     * Sends a new recipe to all clients subscribed to recipe additions
+     * @param update RecipeAddition containing the new recipe
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void publishRecipeAddition(RecipeAddition update){
+        System.out.println("Sending added recipe with id " + update.recipe().getId());
+        messaging.convertAndSend("/updates/recipe-addition", update);
+    }
+
+    /**
+     * Sends the id of a deleted recipe to all clients subscribed to recipe deletions
+     * @param update RecipeDeletion containing the ID of the deleted recipe
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void publishRecipeDeletion(RecipeDeletion update){
+        System.out.println("Sending deleted recipe with id " + update.id());
+        messaging.convertAndSend("/updates/recipe-deletion", update);
+    }
 }
