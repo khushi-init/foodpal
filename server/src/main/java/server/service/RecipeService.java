@@ -8,7 +8,6 @@ import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -254,8 +253,7 @@ public class RecipeService {
     public void updateRecipesWithDeletedIngredient(Long ingredientId){
         for(Recipe recipe: recipeRepository.findAll()){
             boolean removed = recipe.getIngredients()
-                .removeIf(x -> x.getIngredient().getId().equals(ingredientId));
-
+                    .removeIf(x -> x.getIngredient().getId().equals(ingredientId));
             if (removed) {
                 recipeRepository.save(recipe);
             }
