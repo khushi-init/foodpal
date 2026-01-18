@@ -8,6 +8,7 @@ import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -252,9 +253,12 @@ public class RecipeService {
     @Transactional
     public void updateRecipesWithDeletedIngredient(Long ingredientId){
         for(Recipe recipe: recipeRepository.findAll()){
-            if(recipe.getIngredients().removeIf(x -> x.getIngredient().getId().equals(ingredientId))){
-                eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
-            }
+            recipe.setIngredients(
+                new ArrayList<>(
+                    recipe.getIngredients().stream().filter(x -> !x.getIngredient().getId().equals(ingredientId)).toList()
+                )
+            );
+            recipeRepository.save(recipe);
         }
     }
 }
