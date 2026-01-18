@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.*;
 
 public class DataManipulator {
@@ -266,8 +267,11 @@ public class DataManipulator {
     }
 
     private void sortLocalIngredients() {
+        Collator collator = Collator.getInstance(Locale.ENGLISH);
+        //Set strength to PRIMARY so it ignores case and accents (á == a)
+        collator.setStrength(Collator.PRIMARY);
         FXCollections.sort(storage.getIngredients(),
-                (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
+                (i1, i2) -> collator.compare(i1.getName(), i2.getName()));
     }
 
     /**
