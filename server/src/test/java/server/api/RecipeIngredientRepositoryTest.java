@@ -45,7 +45,7 @@ public class RecipeIngredientRepositoryTest {
         dummyIngredient = new Ingredient("Carrot", new NutritionalValue(dummyNutriValue, dummyNutriValue, dummyNutriValue));
         dummyRecipeIngredient = new RecipeIngredient(null, dummyIngredient, dummyQuantity,
                 new RecipeIngredientUnit(UnitType.FORMAL, FormalUnit.GRAM.getDisplayName(), null));
-        dummyRecipe = new Recipe("Carrot Stew", List.of(dummyRecipeIngredient), new ArrayList<>());
+        dummyRecipe = new Recipe("Carrot Stew", new ArrayList<RecipeIngredient>(List.of(dummyRecipeIngredient)), new ArrayList<>());
         dummyRecipeIngredient.setRecipe(dummyRecipe);
     }
 

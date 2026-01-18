@@ -253,12 +253,12 @@ public class RecipeService {
     @Transactional
     public void updateRecipesWithDeletedIngredient(Long ingredientId){
         for(Recipe recipe: recipeRepository.findAll()){
-            recipe.setIngredients(
-                new ArrayList<>(
-                    recipe.getIngredients().stream().filter(x -> !x.getIngredient().getId().equals(ingredientId)).toList()
-                )
-            );
-            recipeRepository.save(recipe);
+            boolean removed = recipe.getIngredients()
+                .removeIf(x -> x.getIngredient().getId().equals(ingredientId));
+
+            if (removed) {
+                recipeRepository.save(recipe);
+            }
         }
     }
 }
