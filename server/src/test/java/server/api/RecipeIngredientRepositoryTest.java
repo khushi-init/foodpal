@@ -4,20 +4,18 @@ import commons.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import server.database.IngredientRepository;
 import server.database.RecipeIngredientRepository;
 import server.database.RecipeRepository;
-import server.service.IngredientService;
+import server.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@Import(IngredientService.class)
+@SpringBootTest
 public class RecipeIngredientRepositoryTest {
 
     @Autowired
