@@ -152,6 +152,7 @@ public class RecipesWindowCtrl {
 
     private CustomMenuItem englishItem;
     private CustomMenuItem dutchItem;
+    private CustomMenuItem slovakItem;
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param socker WebSocketManager instance
@@ -1462,20 +1463,25 @@ public class RecipesWindowCtrl {
         // 1. Create Labels (Nodes) that can detect hover
         Label engLabel = new Label("English", icon("/client/images/flagUK.png"));
         Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
+        Label skLabel = new Label("Slovencina", icon("/client/images/flagSK.png"));
 
         // Set styling so the hover area fills the menu width
         engLabel.setMinWidth(hundredtwenty);
         nlLabel.setMinWidth(hundredtwenty);
         engLabel.setPadding(new Insets(five, ten, five, ten));
         nlLabel.setPadding(new Insets(five, ten, five, ten));
+        skLabel.setPadding(new Insets(five, ten, five, ten));
+
 
         // 2. Initialize the CustomMenuItems with these labels
         englishItem = new CustomMenuItem(engLabel);
         dutchItem = new CustomMenuItem(nlLabel);
+        slovakItem = new CustomMenuItem(skLabel);
 
         // 3. Attach Hover Listeners directly to the Labels
         engLabel.setOnMouseEntered(e -> tm.setLanguage(Locale.ENGLISH));
         nlLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("nl")));
+        skLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("sk")));
 
         // 4. Revert to the "Official" language when the menu is closed
         addIngredientMenu.setOnHidden(e -> tm.setLanguage(activeLocale));
@@ -1483,19 +1489,22 @@ public class RecipesWindowCtrl {
         // 5. Standard Click Logic (Actions)
         englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUK.png"));
         dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
+        slovakItem.setOnAction(e -> setLanguage(new Locale("sk"), "/client/images/flagSK.png"));
 
-        addIngredientMenu.getItems().setAll(englishItem, dutchItem);
+        addIngredientMenu.getItems().setAll(englishItem, dutchItem, slovakItem);
 
         // Default starting state
         setLanguage(Locale.ENGLISH, "/client/images/flagUK.png");
 
         MenuItem visualEng = new MenuItem("", icon("/client/images/flagUK.png"));
         MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
+        MenuItem visualSk = new MenuItem("", icon("/client/images/flagSK.png"));
 
         visualEng.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagUK.png")));
         visualNl.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagNL.png")));
+        visualSk.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagSK.png")));
 
-        languageMenu.getItems().setAll(visualEng, visualNl);
+        languageMenu.getItems().setAll(visualEng, visualNl, visualSk);
         languageMenu.setGraphic(icon("/client/images/flagUK.png")); //initial language = english
         languageMenu.setText("");
 
@@ -1509,7 +1518,9 @@ public class RecipesWindowCtrl {
 
         // Update the dropdown button look based on language
         addIngredientMenu.setGraphic(icon(flagPath));
-        addIngredientMenu.setText(tm.tr(locale.equals(Locale.ENGLISH) ? "menu.language.english" : "menu.language.dutch"));
+        addIngredientMenu.setText(
+                tm.tr("menu.language." + locale.getLanguage())
+        );
 
         languageMenu.setText(""); //we can add the language name if we want??
     }
@@ -1542,13 +1553,14 @@ public class RecipesWindowCtrl {
         totalServingsLabel.setText(tm.tr("label.totalServings", getCurrentServings()));
 
         // Update the labels inside the custom items
-        ((Label) englishItem.getContent()).setText(tm.tr("menu.language.english"));
-        ((Label) dutchItem.getContent()).setText(tm.tr("menu.language.dutch"));
+        ((Label) englishItem.getContent()).setText(tm.tr("menu.language.en"));
+        ((Label) dutchItem.getContent()).setText(tm.tr("menu.language.nl"));
+        ((Label) slovakItem.getContent()).setText(tm.tr("menu.language.sk"));
 
         // Update the main dropdown button text based on the PREVIEW language
-        String currentKey = tm.getCurrentLocale().equals(Locale.ENGLISH) ?
-                "menu.language.english" : "menu.language.dutch";
-        addIngredientMenu.setText(tm.tr(currentKey));
+        englishItem.setText(tm.tr("menu.language.en"));
+        dutchItem.setText(tm.tr("menu.language.nl"));
+        slovakItem.setText(tm.tr("menu.language.sk"));
     }
 
     private void updateTotalServingsLabelText() {
