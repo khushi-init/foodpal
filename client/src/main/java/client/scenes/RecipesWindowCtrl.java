@@ -40,7 +40,6 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.springframework.messaging.simp.stomp.StompSession;
 
 
 public class RecipesWindowCtrl {
@@ -53,12 +52,8 @@ public class RecipesWindowCtrl {
 
     private final WebSocketManager socker;
 
-    private volatile StompSession.Subscription titleSubscription;
-    private volatile StompSession.Subscription recipeSubscription;
-    private volatile StompSession.Subscription recipeAdditionSubscription;
-    private volatile StompSession.Subscription recipeDeletionSubscription;
-
     private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor();
+    private Long previousRecipeSubscription = -1L;
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -359,10 +354,8 @@ public class RecipesWindowCtrl {
      * THIS MUST ALWAYS BE RUN WHEN RECIPEWINDOW COMES INTO VIEW
      */
     public void startup() {
-        if (titleSubscription != null) {
-            return;
-        }
         initializeTitleSubscription();
+        if (previousRecipeSubscription != -1) initializeRecipeSubscription(previousRecipeSubscription, true);
         initializeRecipeAdditionSubscription();
         initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
@@ -373,23 +366,11 @@ public class RecipesWindowCtrl {
      * It ensures the app isn't subscribed into any unnecessary updates
      */
     public void shutdown() {
-        if (titleSubscription != null) {
-            titleSubscription.unsubscribe();
-            titleSubscription = null;
-            System.out.println("Unsubscribed from title updates.");
-        }
-        if(recipeSubscription != null){
-            recipeSubscription.unsubscribe();
-            recipeSubscription = null;
-        }
-        if(recipeAdditionSubscription != null){
-            recipeAdditionSubscription.unsubscribe();
-            recipeAdditionSubscription = null;
-        }
-        if(recipeDeletionSubscription != null){
-            recipeDeletionSubscription.unsubscribe();
-            recipeDeletionSubscription = null;
-        }
+        // Unsubscribe from all websockets
+        socker.unsubscribe("/updates/title");
+        socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
+        socker.unsubscribe("/updates/recipe-addition");
+        socker.unsubscribe("/updates/recipe-deletion");
 
     }
 
@@ -399,7 +380,7 @@ public class RecipesWindowCtrl {
      */
     public void initializeTitleSubscription(){
         subscriptionExecutor.submit(() -> {
-            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
+            socker.subscribe("/updates/title", TitleUpdate.class, update -> {
                 Platform.runLater(() -> {
                     System.out.println("Title of recipe " + update.id() + " Changed!");
                     dataManipulator.changeNameLocal(update.id(), update.newTitle());
@@ -408,11 +389,6 @@ public class RecipesWindowCtrl {
                     if(currentRecipe == null) return;
                 });
             });
-            if (titleSubscription == null ) {
-                Platform.runLater(() -> {
-                    errorCtrl.showGenericError(tm.tr("error.couldNotSubscribeTitle"));
-                });
-            }
         });
     }
 
@@ -420,11 +396,14 @@ public class RecipesWindowCtrl {
      * Subscribes to any update in the recipe with the specified ID, except for changes in the Ingredients.
      * Note that changes in RecipeIngredient ARE propagated through this subscription
      * @param id Id of the recipe we want to subscribe to
+     * @param forceResubscribe Forces resubscription to the websocket even if its to the same recipe
      */
-    public void initializeRecipeSubscription(Long id){
-        if(recipeSubscription != null) recipeSubscription.unsubscribe();
+    public void initializeRecipeSubscription(Long id, boolean forceResubscribe){
+        if (previousRecipeSubscription.equals(id) && !forceResubscribe) return;
+        // Unsubscribe from previous recipe
+        if (previousRecipeSubscription != -1) socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
         subscriptionExecutor.submit(() -> {
-            recipeSubscription = socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
+            socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
                 Platform.runLater(() -> {
                     System.out.println("Recipe " + update.id() + " changed.");
                     dataManipulator.updateRecipe(update.recipe());
@@ -433,15 +412,15 @@ public class RecipesWindowCtrl {
                 });
             });
         });
+        previousRecipeSubscription = id;
     }
 
     /**
      * Subscribes to all new recipes, and locally stores the new recipes using the DataManipulator
      */
-    public void initializeRecipeAdditionSubscription(){
-        if(recipeAdditionSubscription != null) recipeAdditionSubscription.unsubscribe();
+    public void initializeRecipeAdditionSubscription() {
         subscriptionExecutor.submit(() -> {
-            recipeAdditionSubscription = socker.subscribe("/updates/recipe-addition", RecipeAddition.class, update -> {
+            socker.subscribe("/updates/recipe-addition", RecipeAddition.class, update -> {
                 Platform.runLater(() -> {
                     ignoreSideBarSelectionEvent = true;
                     dataManipulator.updateRecipe(update.recipe());
@@ -456,9 +435,8 @@ public class RecipesWindowCtrl {
      * Subscribes to all deleted recipes, and locally deletes the recipe with the specified id using the DataManipulator
      */
     public void initializeRecipeDeletionSubscription(){
-        if(recipeDeletionSubscription != null) recipeDeletionSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
-            recipeDeletionSubscription = socker.subscribe("/updates/recipe-deletion", RecipeDeletion.class, update -> {
+            socker.subscribe("/updates/recipe-deletion", RecipeDeletion.class, update -> {
                 Platform.runLater(() -> {
                     ignoreSideBarSelectionEvent = true;
                     if(currentRecipe != null && update.id().equals(currentRecipe.getId())){
@@ -646,7 +624,7 @@ public class RecipesWindowCtrl {
                 favoriteImage.setImage(unFavorite);
             }
         }
-        initializeRecipeSubscription(currentRecipe.getId());
+        initializeRecipeSubscription(currentRecipe.getId(), false);
 
         recipeNameField.setText(currentRecipe.getName());
 

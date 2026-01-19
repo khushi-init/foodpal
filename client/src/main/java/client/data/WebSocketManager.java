@@ -65,6 +65,7 @@ public class WebSocketManager {
      * @param <T> - The type of updatePackets used in the Subsubscription
      */
     public <T> StompSession.Subscription performSubscription(String topic, Subsubscription<T> details) {
+        System.out.println("Subscribed to " + topic);
         return session.subscribe(topic, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
