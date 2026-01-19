@@ -140,6 +140,9 @@ public class RecipeService {
             if (nameChange) {
                 eventPublisher.publishEvent(new TitleUpdate(id, incoming.getName()));
             }
+
+            existing.setTotalServings(incoming.getTotalServings());
+
             eventPublisher.publishEvent(new RecipeUpdate(id, incoming));
             return saved;
         });
