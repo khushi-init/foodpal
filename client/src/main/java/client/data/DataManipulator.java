@@ -7,6 +7,8 @@ import commons.Ingredient;
 import commons.Recipe;
 import javafx.collections.FXCollections;
 
+import commons.RecipeIngredient;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -106,16 +108,49 @@ public class DataManipulator {
     }
 
     /**
+     * Updates the ingredient list and updates the ingredients within all recipes
+     * @param newIngredient The (changed) ingredient
+     */
+    public void updateIngredientLocal(Ingredient newIngredient){
+        //first check if the ingredient has actually changed
+        if(storage.getIngredients().stream().anyMatch(x -> newIngredient.equals(x))) return;
+        //if it has changed, remove the old instance and put in the new one
+        storage.getIngredients().removeIf(x -> newIngredient.getId().equals(x.getId()));
+        storage.getIngredients().add(newIngredient);
+        //also change all the recipes that contain this ingredient
+        for(Recipe recipe: storage.getRecipes()){
+            for(RecipeIngredient ing: recipe.getIngredients()){
+                if(ing.getIngredient().getId().equals(newIngredient.getId())){
+                    ing.setIngredient(newIngredient);
+                }
+            }
+        }
+    }
+
+    /**
      * Replaces the recipe with the same id in the local list with the updates one
      * @param updated - The recipe to update
      */
     public void updateRecipe(Recipe updated) {
+        boolean isUpdated = false;
         for (int i = 0; i < storage.getRecipes().size(); i++) {
             if (Objects.equals(storage.getRecipes().get(i).getId(), updated.getId())) {
                 storage.getRecipes().set(i, updated);
+                isUpdated = true;
                 break;
             }
         }
+        if(!isUpdated){
+            storage.getRecipes().add(updated);
+        }
+    }
+
+    /**
+     * Deletes the recipe with the specified ID, iff it exists
+     * @param id
+     */
+    public void deleteRecipeLocal(Long id){
+        System.out.println(storage.getRecipes().removeIf(x -> x.getId().equals(id)));
     }
 
     /**
@@ -125,6 +160,12 @@ public class DataManipulator {
         System.out.println("Refreshed recipe list");
         List<Recipe> serverResponse = server.getRecipes();
         storage.getRecipes().setAll(serverResponse);
+    }
+
+    public Recipe refreshRecipe(Long id){
+        Recipe updated = server.getRecipe(id);
+        updateRecipe(updated);
+        return updated;
     }
 
     /**

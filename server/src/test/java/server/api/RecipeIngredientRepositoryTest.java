@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+
 import server.database.IngredientRepository;
 import server.database.RecipeIngredientRepository;
 import server.database.RecipeRepository;
-import server.service.IngredientService;
+import server.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Import(IngredientService.class)
+@Import({IngredientService.class, RecipeService.class})
 public class RecipeIngredientRepositoryTest {
 
     @Autowired
@@ -44,7 +45,7 @@ public class RecipeIngredientRepositoryTest {
         dummyIngredient = new Ingredient("Carrot", new NutritionalValue(dummyNutriValue, dummyNutriValue, dummyNutriValue));
         dummyRecipeIngredient = new RecipeIngredient(null, dummyIngredient, dummyQuantity,
                 new RecipeIngredientUnit(UnitType.FORMAL, FormalUnit.GRAM.getDisplayName(), null));
-        dummyRecipe = new Recipe("Carrot Stew", List.of(dummyRecipeIngredient), new ArrayList<>());
+        dummyRecipe = new Recipe("Carrot Stew", new ArrayList<RecipeIngredient>(List.of(dummyRecipeIngredient)), new ArrayList<>());
         dummyRecipeIngredient.setRecipe(dummyRecipe);
     }
 

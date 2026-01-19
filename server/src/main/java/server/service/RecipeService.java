@@ -63,6 +63,7 @@ public class RecipeService {
      * @param incoming The recipe data provided by the user.
      * @return The saved Recipe object with populated associations.
      */
+    @Transactional
     public Recipe createRecipe(Recipe incoming) {
         Recipe recipe = new Recipe();
         recipe.setName(incoming.getName());
@@ -87,7 +88,7 @@ public class RecipeService {
             }
             recipe.setIngredients(ingredients);
         }
-
+        eventPublisher.publishEvent(new RecipeAddition(recipe));
         return recipeRepository.save(recipe);
     }
 
@@ -142,6 +143,7 @@ public class RecipeService {
 
             existing.setTotalServings(incoming.getTotalServings());
 
+            eventPublisher.publishEvent(new RecipeUpdate(id, incoming));
             return saved;
         });
     }
@@ -191,9 +193,12 @@ public class RecipeService {
      * @param id The ID of the recipe to delete.
      * @return true if the recipe was found and deleted, false otherwise.
      */
+    @Transactional
     public boolean deleteRecipe(Long id) {
         if (recipeRepository.existsById(id)) {
             recipeRepository.deleteById(id);
+            eventPublisher.publishEvent(new RecipeDeletion(id));
+            System.out.println("DELETED RECIPE " + id);
             return true;
         }
         return false;
@@ -205,6 +210,7 @@ public class RecipeService {
      * @param ingredientId The ID of the ingredient to remove.
      * @return true if the ingredient was found and removed, false otherwise.
      */
+    @Transactional
     public boolean removeIngredientFromRecipe(Long recipeId, Long ingredientId) {
         Optional<Recipe> recipeOpt = recipeRepository.findById(recipeId);
 
@@ -224,8 +230,36 @@ public class RecipeService {
             recipeRepository.save(recipe);
         }
 
+        eventPublisher.publishEvent(new RecipeUpdate(recipeId, recipe));
+
         return removed;
     }
 
+    /**
+     * Sends an update over the websocket for all recipes that contain the specified ingredient
+     * @param ingredient The changed ingredient
+     */
+    @Transactional
+    public void updateRecipesWithChangedIngredient(Ingredient ingredient){
+        for(Recipe recipe: recipeRepository.findAll()){
+            if(recipe.getIngredients().stream().anyMatch(x -> ingredient.getId() == x.getIngredient().getId())){
+                eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
+            }
+        }
+    }
 
+    /**
+     * Sends an update over the websocket for all recipes that contain the deleted ingredient
+     * @param ingredientId The deleted ingredient
+     */
+    @Transactional
+    public void updateRecipesWithDeletedIngredient(Long ingredientId){
+        for(Recipe recipe: recipeRepository.findAll()){
+            boolean removed = recipe.getIngredients()
+                    .removeIf(x -> x.getIngredient().getId().equals(ingredientId));
+            if (removed) {
+                recipeRepository.save(recipe);
+            }
+        }
+    }
 }

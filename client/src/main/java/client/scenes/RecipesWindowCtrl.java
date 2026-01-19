@@ -2,6 +2,8 @@ package client.scenes;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import client.MyFXML;
 import client.data.WebSocketManager;
@@ -52,6 +54,11 @@ public class RecipesWindowCtrl {
     private final WebSocketManager socker;
 
     private volatile StompSession.Subscription titleSubscription;
+    private volatile StompSession.Subscription recipeSubscription;
+    private volatile StompSession.Subscription recipeAdditionSubscription;
+    private volatile StompSession.Subscription recipeDeletionSubscription;
+
+    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor();
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -109,12 +116,15 @@ public class RecipesWindowCtrl {
 
     //Drag n drop delay
     int processingDelay = 50;
+    private final int fontSize = 16;
 
     // global recipe scaling factor
     double recipeScale = 1.0;
     double scaleLimit = 1000.0;
 
     private boolean newInstructionAdded = false;
+
+    private boolean ignoreSideBarSelectionEvent = false;
 
     // This is the Shopping List data that is used in the session.
     private final ShoppingList shoppingList = new ShoppingList();
@@ -177,8 +187,9 @@ public class RecipesWindowCtrl {
         sidebarRecipeNamesList.setCellFactory(lc -> new RecipeListCell(storage.getFavoriteIDs(), favorite));
         sidebarRecipeNamesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
+                    if(ignoreSideBarSelectionEvent) return;
                     if (newSelection != null) {
-                        openRecipe(newSelection);
+                        openRecipe(newSelection, true);
                     } else {
                         clearRecipeView();
                         updateRecipeSelectionState(false);
@@ -351,27 +362,9 @@ public class RecipesWindowCtrl {
         if (titleSubscription != null) {
             return;
         }
-        Thread subscribeThread = new Thread(() -> {
-            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
-                Platform.runLater(() -> {
-                    System.out.println("Title of recipe " + update.id() + " Changed!");
-                    dataManipulator.changeNameLocal(update.id(), update.newTitle());
-//                    dataManipulator.refreshRecipes();
-                    // A "softer" refresh is required to keep selection
-                    sidebarRecipeNamesList.refresh();
-                    if (currentRecipe.getId().equals(update.id())) {
-                        recipeNameField.setText(update.newTitle());
-                    }
-                });
-            });
-            if (titleSubscription == null ) {
-                Platform.runLater(() -> {
-                    errorCtrl.showGenericError(tm.tr("error.couldNotSubscribeTitle"));
-                });
-            }
-        });
-        subscribeThread.setDaemon(true);
-        subscribeThread.start();
+        initializeTitleSubscription();
+        initializeRecipeAdditionSubscription();
+        initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
     }
 
@@ -385,6 +378,99 @@ public class RecipesWindowCtrl {
             titleSubscription = null;
             System.out.println("Unsubscribed from title updates.");
         }
+        if(recipeSubscription != null){
+            recipeSubscription.unsubscribe();
+            recipeSubscription = null;
+        }
+        if(recipeAdditionSubscription != null){
+            recipeAdditionSubscription.unsubscribe();
+            recipeAdditionSubscription = null;
+        }
+        if(recipeDeletionSubscription != null){
+            recipeDeletionSubscription.unsubscribe();
+            recipeDeletionSubscription = null;
+        }
+        
+    }
+
+    /**
+     * Adds the title subscription the executor's thread.
+     * When a title change occurs, it is reflected in the sidebar.
+     */
+    public void initializeTitleSubscription(){
+        subscriptionExecutor.submit(() -> {
+            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    System.out.println("Title of recipe " + update.id() + " Changed!");
+                    dataManipulator.changeNameLocal(update.id(), update.newTitle());
+                    // A "softer" refresh is required to keep selection
+                    sidebarRecipeNamesList.refresh();
+                    if(currentRecipe == null) return;
+                });
+            });
+            if (titleSubscription == null ) {
+                Platform.runLater(() -> {
+                    errorCtrl.showGenericError(tm.tr("error.couldNotSubscribeTitle"));
+                });
+            }
+        });
+    }
+
+    /**
+     * Subscribes to any update in the recipe with the specified ID, except for changes in the Ingredients.
+     * Note that changes in RecipeIngredient ARE propagated through this subscription
+     * @param id Id of the recipe we want to subscribe to
+     */
+    public void initializeRecipeSubscription(Long id){
+        if(recipeSubscription != null) recipeSubscription.unsubscribe();
+        subscriptionExecutor.submit(() -> {
+            recipeSubscription = socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    System.out.println("Recipe " + update.id() + " changed.");
+                    dataManipulator.updateRecipe(update.recipe());
+                    if(currentRecipe.getId().equals(update.id())) currentRecipe = update.recipe();
+                    openRecipe(currentRecipe);
+                });
+            });
+        });
+    }
+
+    /**
+     * Subscribes to all new recipes, and locally stores the new recipes using the DataManipulator
+     */
+    public void initializeRecipeAdditionSubscription(){
+        if(recipeAdditionSubscription != null) recipeAdditionSubscription.unsubscribe();
+        subscriptionExecutor.submit(() -> {
+            recipeAdditionSubscription = socker.subscribe("/updates/recipe-addition", RecipeAddition.class, update -> {
+                Platform.runLater(() -> {
+                    ignoreSideBarSelectionEvent = true;
+                    dataManipulator.updateRecipe(update.recipe());
+                    sidebarRecipeNamesList.getSelectionModel().select(currentRecipe);
+                    ignoreSideBarSelectionEvent = false;
+                });
+            });
+        });
+    }
+
+    /**
+     * Subscribes to all deleted recipes, and locally deletes the recipe with the specified id using the DataManipulator
+     */
+    public void initializeRecipeDeletionSubscription(){
+        if(recipeDeletionSubscription != null) recipeDeletionSubscription.unsubscribe();
+        subscriptionExecutor.submit(() -> {
+            recipeDeletionSubscription = socker.subscribe("/updates/recipe-deletion", RecipeDeletion.class, update -> {
+                Platform.runLater(() -> {
+                    ignoreSideBarSelectionEvent = true;
+                    if(currentRecipe != null && update.id().equals(currentRecipe.getId())){
+                        clearRecipeView();
+                        sidebarRecipeNamesList.getSelectionModel().clearSelection();
+                        errorCtrl.showErrorPopup("Recipe deleted", "", "Someone deleted the recipe you were viewing ):");
+                    }
+                    dataManipulator.deleteRecipeLocal(update.id());
+                    ignoreSideBarSelectionEvent = false;
+                });
+            });
+        });
     }
 
     /**
@@ -534,15 +620,24 @@ public class RecipesWindowCtrl {
      * Loads the contents of the provided recipe to the recipeView UI element
      *
      * @param recipe - The recipe to load
+     * @param updateRecipe True iff the recipe should be updated from the server
      */
-    public void openRecipe(Recipe recipe) {
+    public void openRecipe(Recipe recipe, boolean updateRecipe) {
         this.currentRecipe = recipe;
+        ignoreSideBarSelectionEvent = true;
+        if(updateRecipe){
+            this.currentRecipe = dataManipulator.refreshRecipe(recipe.getId());
+            recipe = this.currentRecipe;
+        }
+        sidebarRecipeNamesList.getSelectionModel().select(currentRecipe);
+        ignoreSideBarSelectionEvent = false;
+
         recipeView.getChildren().clear();
-        loadIngredients(recipe.getIngredients());
+        loadIngredients(currentRecipe.getIngredients());
         Separator sep = new Separator();
         recipeView.getChildren().add(sep);
         VBox.setMargin(sep, lineMargin);
-        loadSteps(recipe.getPreparationSteps());
+        loadSteps(currentRecipe.getPreparationSteps());
         // Favorites
         if (currentRecipe != null && storage.getFavoriteIDs() != null) {
             if (storage.getFavoriteIDs().contains(currentRecipe.getId())) {
@@ -551,8 +646,9 @@ public class RecipesWindowCtrl {
                 favoriteImage.setImage(unFavorite);
             }
         }
+        initializeRecipeSubscription(currentRecipe.getId());
 
-        recipeNameField.setText(recipe.getName());
+        recipeNameField.setText(currentRecipe.getName());
 
         // Activate recipe specific buttons
         updateRecipeSelectionState(true);
@@ -565,7 +661,13 @@ public class RecipesWindowCtrl {
 
     }
 
-    private final int fontSize = 16;
+    /**
+     * Loads the content of the provided recipe to the recipeView UI element
+     * @param recipe Recipe to load
+     */
+    public void openRecipe(Recipe recipe){
+        openRecipe(recipe, false);
+    }
 
     /**
      * Loads the ingredients within a list to the recipeView UI element
@@ -898,9 +1000,11 @@ public class RecipesWindowCtrl {
         Recipe clone = cloneRecipe(currentRecipe, newName);
         Recipe savedRecipe = server.addRecipe(clone);
         if(savedRecipe != null){
+            ignoreSideBarSelectionEvent = true;
             storage.getRecipes().add(savedRecipe);
             sidebarRecipeNamesList.getSelectionModel().select(savedRecipe);
-            System.out.println("Cloned recipe \"" + currentRecipe.getName() + "\" to \"" + newName + "\"");
+            ignoreSideBarSelectionEvent = false;
+            openRecipe(savedRecipe);
         } else {
             errorCtrl.showGenericError(tm.tr("error.noRecipeToClone"));
         }
@@ -976,7 +1080,12 @@ public class RecipesWindowCtrl {
         );
         //calls the fixed ServerUtils method addRecipe
         Optional<Recipe> savedRecipe = dataManipulator.addRecipe(newRecipe);
-        savedRecipe.ifPresent(recipe -> sidebarRecipeNamesList.getSelectionModel().select(recipe));
+        savedRecipe.ifPresent(recipe -> {
+            ignoreSideBarSelectionEvent = true;
+            sidebarRecipeNamesList.getSelectionModel().select(recipe);
+            ignoreSideBarSelectionEvent = false;
+            openRecipe(recipe);
+        });
     }
 
     /**
@@ -1052,7 +1161,11 @@ public class RecipesWindowCtrl {
         if (hit == null) {
             return;
         }
+        ignoreSideBarSelectionEvent = true;
         dataManipulator.deleteRecipe(hit);
+        ignoreSideBarSelectionEvent = false;
+        if(getSelectedRecipe() == null) return;
+        openRecipe(getSelectedRecipe());
     }
 
     @FXML
