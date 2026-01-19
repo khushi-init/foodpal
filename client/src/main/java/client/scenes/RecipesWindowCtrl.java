@@ -111,6 +111,10 @@ public class RecipesWindowCtrl {
     double recipeScale = 1.0;
     double scaleLimit = 1000.0;
 
+    int hundredtwenty = 120;
+    int five = 5;
+    int ten = 10;
+
     private boolean newInstructionAdded = false;
 
     // This is the Shopping List data that is used in the session.
@@ -1339,10 +1343,10 @@ public class RecipesWindowCtrl {
         Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
 
         // Set styling so the hover area fills the menu width
-        engLabel.setMinWidth(120);
-        nlLabel.setMinWidth(120);
-        engLabel.setPadding(new Insets(5, 10, 5, 10));
-        nlLabel.setPadding(new Insets(5, 10, 5, 10));
+        engLabel.setMinWidth(hundredtwenty);
+        nlLabel.setMinWidth(hundredtwenty);
+        engLabel.setPadding(new Insets(five, ten, five, ten));
+        nlLabel.setPadding(new Insets(five, ten, five, ten));
 
         // 2. Initialize the CustomMenuItems with these labels
         englishItem = new CustomMenuItem(engLabel);
