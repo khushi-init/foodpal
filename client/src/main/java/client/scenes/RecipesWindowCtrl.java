@@ -390,7 +390,7 @@ public class RecipesWindowCtrl {
             recipeDeletionSubscription.unsubscribe();
             recipeDeletionSubscription = null;
         }
-        
+
     }
 
     /**
