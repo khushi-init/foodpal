@@ -654,8 +654,11 @@ public class RecipesWindowCtrl {
         recipeNameField.setText(currentRecipe.getName());
 
         String lang = currentRecipe.getLanguage();
+        if(lang == null){
+            lang = "uk";
+        }
 
-        updateLanguageMenu(currentRecipe.getLanguage());
+        updateLanguageMenu(lang);
         // Activate recipe specific buttons
         updateRecipeSelectionState(true);
 
@@ -669,12 +672,12 @@ public class RecipesWindowCtrl {
 
     /**
      * Handles the updating of a recipe's language
-     * @param currentRecipe the recipe to update
      * @param language the language to set it to
      */
-    private void updateRecipeLanguage(Recipe currentRecipe, String language) {
+    private void updateRecipeLanguage(String language) {
         currentRecipe.setLanguage(language);
         updateLanguageMenu(language);
+        System.out.println("Changed language of recipe "+ currentRecipe.getName()+ " to: " + currentRecipe.getLanguage());
         updateRefresh();
     }
 
@@ -683,7 +686,6 @@ public class RecipesWindowCtrl {
      * @param language the language to change the icon to.
      */
     private void updateLanguageMenu(String language) {
-        System.out.println("Changed language of recipe "+ currentRecipe.getName()+ "to: " + currentRecipe.getLanguage());
         languageMenu.setGraphic(icon("/client/images/flag" + language.toUpperCase() +".png"));
     }
 
@@ -830,30 +832,6 @@ public class RecipesWindowCtrl {
         openRecipe(currentRecipe);
         refreshNutritionTooltip(currentRecipe);
     }
-
-
-//    /**
-//     * Handling input window for ingredient editing
-//     * @param initName the initial name value to be displayed
-//     * @param initQty  the initial quantity value to be displayed
-//     * @param handler  the consumer that handles to call back to the value's usage
-//     */
-//    public void handleIngredientInput(String initName, double initQty, BiConsumer<String, Double> handler) {
-//        showIngredientPopUp(initName, String.valueOf(initQty)).ifPresent(pair -> {
-//            String name = pair.getKey();
-//            String quantityText = pair.getValue();
-//            double quantity;
-//            try {
-//                quantity = Double.parseDouble(quantityText);
-//            } catch (NumberFormatException err) {
-//                if (errorCtrl != null) {
-//                    errorCtrl.showGenericError("Quantity must be a number.");
-//                }
-//                return;
-//            }
-//            handler.accept(name, quantity);
-//        });
-//    }
 
     /**
      * Loads the instructions within a list to the recipeView UI element
@@ -1527,9 +1505,9 @@ public class RecipesWindowCtrl {
         MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.jpg"));
         MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.jpg"));
 
-        visualEng.setOnAction(e -> updateRecipeLanguage(currentRecipe, "uk"));
-        visualNl.setOnAction(e -> updateRecipeLanguage(currentRecipe, "nl"));
-        visualSk.setOnAction(e -> updateRecipeLanguage(currentRecipe, "sk"));
+        visualEng.setOnAction(e -> updateRecipeLanguage("uk"));
+        visualNl.setOnAction(e -> updateRecipeLanguage("nl"));
+        visualSk.setOnAction(e -> updateRecipeLanguage("sk"));
 
         languageMenu.getItems().setAll(visualEng, visualNl, visualSk, visualGr, visualPt);
         languageMenu.setGraphic(icon("/client/images/flagUS.png")); //initial language = english
