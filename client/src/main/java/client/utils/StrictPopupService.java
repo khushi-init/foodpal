@@ -41,6 +41,11 @@ public class StrictPopupService <C>{
             lockStage = new Stage();
             lockStage.initModality(Modality.APPLICATION_MODAL);
             lockStage.setScene(new Scene(root));
+            lockStage.setOnCloseRequest(event -> {
+                event.consume();
+
+                System.out.println("Exiting this window is not allowed!");
+            });
             lockStage.show();
         });
     }
