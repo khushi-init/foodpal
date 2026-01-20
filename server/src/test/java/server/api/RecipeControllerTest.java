@@ -29,9 +29,12 @@ public class RecipeControllerTest {
     private RecipeService mockRecipeService;
 
     private Recipe testRecipe;
-    private Long id = 1L;
-    private Long id2 = 2L;
-    private Long fakeId = 99L;
+
+    private final Long id = 1L;
+    private final Long id2 = 2L;
+    private final Long fakeId = 99L;
+
+    private final int negativeServingsAmount = -2;
 
     @InjectMocks
     private RecipeController sut;
@@ -169,7 +172,7 @@ public class RecipeControllerTest {
     @Test
     public void createRecipeNegativeServingsTest() {
         // ARRANGE: Create a recipe with an invalid amount of servings
-        Recipe badRecipe = new Recipe("",  -2, null, null);
+        Recipe badRecipe = new Recipe("",  negativeServingsAmount, null, null);
 
         // ACT
         ResponseEntity<Recipe> response = sut.createRecipe(badRecipe);
@@ -240,7 +243,7 @@ public class RecipeControllerTest {
     @Test
     public void changeRecipeInvalidServingsTest() {
         // Arrange
-        Recipe updated = new Recipe(null, -2, new ArrayList<>(), new ArrayList<>());
+        Recipe updated = new Recipe(null, negativeServingsAmount, new ArrayList<>(), new ArrayList<>());
         updated.setId(id);
 
         // Act
@@ -253,14 +256,16 @@ public class RecipeControllerTest {
     @Test
     public void changeRecipeInvalidIngredientTest() {
         // Arrange
+        int nutritionalValue = 10;
         Ingredient ingredient = new Ingredient(
                 "",
-                new NutritionalValue(10, 10, 10)
+                new NutritionalValue(nutritionalValue, nutritionalValue, nutritionalValue)
         );
+        double ingredientQuantity = 10.0;
         RecipeIngredient recipeIngredient = new RecipeIngredient(
                 null,
                 ingredient,
-                10.0,
+                ingredientQuantity,
                 new RecipeIngredientUnit(UnitType.FORMAL, "g", "g")
         );
 
