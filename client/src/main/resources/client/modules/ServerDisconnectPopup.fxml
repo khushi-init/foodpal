@@ -34,6 +34,6 @@
             </ProgressIndicator>
          </children>
       </VBox>
-        <Button fx:id="abortButton" mnemonicParsing="false" style="-fx-background-color: #e2090c; -fx-text-fill: white; -fx-font-weight: bold;" text="ABORT APPLICATION" GridPane.rowIndex="2" />
+        <Button fx:id="abortButton" onAction="#killApplication" mnemonicParsing="false" style="-fx-background-color: #e2090c; -fx-text-fill: white; -fx-font-weight: bold;" text="ABORT APPLICATION" GridPane.rowIndex="2" />
     </children>
 </GridPane>

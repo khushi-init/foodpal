@@ -49,7 +49,11 @@ public class RecipesWindowCtrl {
 
     private final WebSocketManager socker;
 
-    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor();
+    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
     private Long previousRecipeSubscription = -1L;
 
     @FXML
