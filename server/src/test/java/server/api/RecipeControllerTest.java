@@ -16,6 +16,8 @@ import server.service.RecipeService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.http.HttpStatus.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -135,9 +137,39 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void createRecipeBadRequestTest() {
-        // ARRANGE: Create a recipe that fails validation (empty name)
+    public void createRecipeEmptyNameTest() {
+        // ARRANGE: Create a recipe where the name is empty
         Recipe badRecipe = new Recipe("",  null, null);
+
+        // ACT
+        ResponseEntity<Recipe> response = sut.createRecipe(badRecipe);
+
+        // ASSERT: Check HTTP status (400 Bad Request)
+        assertEquals(BAD_REQUEST, response.getStatusCode());
+
+        // ASSERT: Verify the save method was never called due to validation failure
+        verify(mockRecipeService, never()).createRecipe(badRecipe);
+    }
+
+    @Test
+    public void createRecipeNullNameTest() {
+        // ARRANGE: Create a recipe where name field is null
+        Recipe badRecipe = new Recipe(null,  null, null);
+
+        // ACT
+        ResponseEntity<Recipe> response = sut.createRecipe(badRecipe);
+
+        // ASSERT: Check HTTP status (400 Bad Request)
+        assertEquals(BAD_REQUEST, response.getStatusCode());
+
+        // ASSERT: Verify the save method was never called due to validation failure
+        verify(mockRecipeService, never()).createRecipe(badRecipe);
+    }
+
+    @Test
+    public void createRecipeNegativeServingsTest() {
+        // ARRANGE: Create a recipe with an invalid amount of servings
+        Recipe badRecipe = new Recipe("",  -2, null, null);
 
         // ACT
         ResponseEntity<Recipe> response = sut.createRecipe(badRecipe);
@@ -161,6 +193,88 @@ public class RecipeControllerTest {
 
         assertEquals(OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
+    }
+
+    @Test
+    public void changeRecipeInvalidIDTest() {
+        Recipe updated = new Recipe("Updated Recipe Name", new ArrayList<>(), new ArrayList<>());
+        updated.setId(id);
+
+        // Recipe with this id does not exist
+        when(mockRecipeService.updateRecipe(eq(fakeId), any(Recipe.class)))
+                .thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<Recipe> response = sut.changeRecipe(fakeId, updated);
+
+        assertEquals(NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    public void changeRecipeNullNameTest() {
+        // Arrange
+        Recipe updated = new Recipe(null, new ArrayList<>(), new ArrayList<>());
+        updated.setId(id);
+
+        // Act
+        ResponseEntity<Recipe> response = sut.changeRecipe(id, updated);
+
+        assertEquals(BAD_REQUEST, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    public void changeRecipeEmptyNameTest() {
+        // Arrange
+        Recipe updated = new Recipe("", new ArrayList<>(), new ArrayList<>());
+        updated.setId(id);
+
+        // Act
+        ResponseEntity<Recipe> response = sut.changeRecipe(id, updated);
+
+        assertEquals(BAD_REQUEST, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    public void changeRecipeInvalidServingsTest() {
+        // Arrange
+        Recipe updated = new Recipe(null, -2, new ArrayList<>(), new ArrayList<>());
+        updated.setId(id);
+
+        // Act
+        ResponseEntity<Recipe> response = sut.changeRecipe(id, updated);
+
+        assertEquals(BAD_REQUEST, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    public void changeRecipeInvalidIngredientTest() {
+        // Arrange
+        Ingredient ingredient = new Ingredient(
+                "",
+                new NutritionalValue(10, 10, 10)
+        );
+        RecipeIngredient recipeIngredient = new RecipeIngredient(
+                null,
+                ingredient,
+                10.0,
+                new RecipeIngredientUnit(UnitType.FORMAL, "g", "g")
+        );
+
+        List<RecipeIngredient> recipeIngredients = List.of(recipeIngredient);
+
+        Recipe updated = new Recipe("Updated", recipeIngredients, new ArrayList<>());
+        updated.setId(id);
+
+        // Act
+        ResponseEntity<Recipe> response = sut.changeRecipe(id, updated);
+
+        // Assert
+        assertEquals(BAD_REQUEST, response.getStatusCode());
+        assertNull(response.getBody());
     }
 
     @Test
