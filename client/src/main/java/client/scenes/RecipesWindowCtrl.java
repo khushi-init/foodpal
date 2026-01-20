@@ -29,10 +29,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -117,6 +114,10 @@ public class RecipesWindowCtrl {
     double recipeScale = 1.0;
     double scaleLimit = 1000.0;
 
+    int hundredtwenty = 120;
+    int five = 5;
+    int ten = 10;
+
     private boolean newInstructionAdded = false;
 
     private boolean ignoreSideBarSelectionEvent = false;
@@ -138,6 +139,11 @@ public class RecipesWindowCtrl {
 
     private final TranslationManager tm;
 
+    private Locale activeLocale = Locale.ENGLISH;
+    private String activeFlagPath = "/client/images/flagUK.png";
+
+    private CustomMenuItem englishItem;
+    private CustomMenuItem dutchItem;
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param socker WebSocketManager instance
@@ -1417,28 +1423,47 @@ public class RecipesWindowCtrl {
     @FXML
     private MenuButton addIngredientMenu;
 
-    private MenuItem englishItem;
-    private MenuItem dutchItem;
-
     private Locale currentLocale = Locale.ENGLISH;
 
     private final int sizeFlag = 16;
 
 
     private void setUpLanguageDropdown() {
-        englishItem = new MenuItem("", icon("/client/images/flagUK.png"));
-        dutchItem   = new MenuItem("", icon("/client/images/flagNL.png"));
+        // 1. Create Labels (Nodes) that can detect hover
+        Label engLabel = new Label("English", icon("/client/images/flagUK.png"));
+        Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
 
+        // Set styling so the hover area fills the menu width
+        engLabel.setMinWidth(hundredtwenty);
+        nlLabel.setMinWidth(hundredtwenty);
+        engLabel.setPadding(new Insets(five, ten, five, ten));
+        nlLabel.setPadding(new Insets(five, ten, five, ten));
+
+        // 2. Initialize the CustomMenuItems with these labels
+        englishItem = new CustomMenuItem(engLabel);
+        dutchItem = new CustomMenuItem(nlLabel);
+
+        // 3. Attach Hover Listeners directly to the Labels
+        engLabel.setOnMouseEntered(e -> tm.setLanguage(Locale.ENGLISH));
+        nlLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("nl")));
+
+        // 4. Revert to the "Official" language when the menu is closed
+        addIngredientMenu.setOnHidden(e -> tm.setLanguage(activeLocale));
+
+        // 5. Standard Click Logic (Actions)
         englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUK.png"));
         dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
 
         addIngredientMenu.getItems().setAll(englishItem, dutchItem);
 
-        // default
+        // Default starting state
         setLanguage(Locale.ENGLISH, "/client/images/flagUK.png");
     }
 
     private void setLanguage(Locale locale, String flagPath) {
+        this.activeLocale = locale;
+        this.activeFlagPath = flagPath;
+
         tm.setLanguage(locale);
 
         // Update the dropdown button look based on language
@@ -1474,8 +1499,14 @@ public class RecipesWindowCtrl {
         totalServingsField.setPromptText(tm.tr("prompt.servings"));
         totalServingsLabel.setText(tm.tr("label.totalServings", getCurrentServings()));
 
-        englishItem.setText(tm.tr("menu.language.english"));
-        dutchItem.setText(tm.tr("menu.language.dutch"));
+        // Update the labels inside the custom items
+        ((Label) englishItem.getContent()).setText(tm.tr("menu.language.english"));
+        ((Label) dutchItem.getContent()).setText(tm.tr("menu.language.dutch"));
+
+        // Update the main dropdown button text based on the PREVIEW language
+        String currentKey = tm.getCurrentLocale().equals(Locale.ENGLISH) ?
+                "menu.language.english" : "menu.language.dutch";
+        addIngredientMenu.setText(tm.tr(currentKey));
     }
 
     private void updateTotalServingsLabelText() {
