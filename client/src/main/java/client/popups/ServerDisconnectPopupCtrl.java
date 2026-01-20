@@ -1,5 +1,7 @@
 package client.popups;
 
+import client.data.TranslationManager;
+import com.google.inject.Inject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -16,6 +18,19 @@ public class ServerDisconnectPopupCtrl {
 
     @FXML
     private Button abortButton;
+
+    private TranslationManager tm;
+
+    @Inject
+    public ServerDisconnectPopupCtrl(TranslationManager tm) {
+        this.tm = tm;
+    }
+
+    public void initialize() {
+        titleLabel.setText(tm.tr("warning.server.disconnect.title"));
+        reconnectionAttemptLabel.setText(tm.tr("warning.server.disconnect.subLabel"));
+        abortButton.setText(tm.tr("warning.server.abortButton"));
+    }
 
     /**
      * Functionality of the "Abort" button. Kills the application
