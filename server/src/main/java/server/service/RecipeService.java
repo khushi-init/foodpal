@@ -8,6 +8,7 @@ import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -114,9 +115,10 @@ public class RecipeService {
 
             for (RecipeIngredient ri : incoming.getIngredients()) {
                 String name = getIngredientName(ri);
+                Long ingId = getIngredientId(ri);
 
                 // Logic: Reuse existing ingredient or create new
-                Ingredient ing = ingredientRepository.findByName(name)
+                Ingredient ing = ingredientRepository.findById(ingId)
                         .orElseGet(() -> new Ingredient(name, defaultNutritionalValue));
 
                 // Logic: Prevent duplicate ingredients in the same recipe
@@ -188,6 +190,13 @@ public class RecipeService {
         return (name == null || name.trim().isEmpty()) ? null : name;
     }
 
+    Long getIngredientId(RecipeIngredient recipeIngredient){
+        if (recipeIngredient == null || recipeIngredient.getIngredient() == null) {
+            return null;
+        }
+        return recipeIngredient.getIngredient().getId();
+    }
+
     /**
      * Deletes a recipe from the database if it exists.
      * @param id The ID of the recipe to delete.
@@ -242,7 +251,8 @@ public class RecipeService {
     @Transactional
     public void updateRecipesWithChangedIngredient(Ingredient ingredient){
         for(Recipe recipe: recipeRepository.findAll()){
-            if(recipe.getIngredients().stream().anyMatch(x -> ingredient.getId() == x.getIngredient().getId())){
+            ArrayList<RecipeIngredient> ings = new ArrayList<>(recipe.getIngredients());
+            if(ings.stream().anyMatch(x -> ingredient.getId() == x.getIngredient().getId())){
                 eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
             }
         }
@@ -251,15 +261,29 @@ public class RecipeService {
     /**
      * Sends an update over the websocket for all recipes that contain the deleted ingredient
      * @param ingredientId The deleted ingredient
+     * @return List of all recipe ID's containing this ingredient
      */
     @Transactional
-    public void updateRecipesWithDeletedIngredient(Long ingredientId){
-        for(Recipe recipe: recipeRepository.findAll()){
-            boolean removed = recipe.getIngredients()
-                    .removeIf(x -> x.getIngredient().getId().equals(ingredientId));
-            if (removed) {
-                recipeRepository.save(recipe);
-            }
+    public List<Long> getRecipesWithIngredientID(Long ingredientId){
+        // for(Recipe recipe: recipeRepository.findAll()){
+        //     if(recipe.getIngredients().stream().anyMatch(x -> x.getIngredient().getId().equals(ingredientId))){
+        //         eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
+        //     }
+        // }
+        return recipeRepository.findAll().stream().filter(x -> 
+            x.getIngredients().stream().anyMatch(
+                y -> y.getIngredient().getId().equals(ingredientId)
+            )
+        )
+        .map(x -> x.getId()).toList();
+    }
+
+    @Transactional
+    public void sendRecipeUpdateForIds(List<Long> ids){
+        for(Long id: ids){
+            Optional<Recipe> r = recipeRepository.findById(id);
+            if(r.isEmpty()) continue;
+            eventPublisher.publishEvent(new RecipeUpdate(id, r.get()));
         }
     }
 }

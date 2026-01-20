@@ -2,18 +2,21 @@ package client.scenes;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.springframework.messaging.simp.stomp.StompSession;
 
 import client.IngredientListCell;
 import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
 import client.data.TranslationManager;
+import client.data.WebSocketManager;
 import client.utils.ServerUtils;
-import commons.InformalUnit;
-import commons.Ingredient;
-import commons.NutritionalValue;
-import commons.RecipeIngredient;
+import commons.*;
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -40,6 +43,14 @@ public class IngredientsWindowCtrl {
     private final PrimaryCtrl primaryCtrl;
     private final ErrorCtrl errorCtrl;
     private final MyFXML fxml;
+    private final WebSocketManager socker;
+
+    private volatile StompSession.Subscription nameSubscription;
+    private volatile StompSession.Subscription ingredientSubscription;
+    private volatile StompSession.Subscription ingredientAdditionSubscription;
+    private volatile StompSession.Subscription ingredientDeletionSubscription;
+
+    private volatile ExecutorService subscriptionExecutor;
 
     // NutriScore points
     private final double nutriScoreA = 1;
@@ -120,6 +131,9 @@ public class IngredientsWindowCtrl {
 
     private final TranslationManager tm;
 
+    private Ingredient currentIngredient;
+    private boolean ignoreIngredientSelectionEvent = false;
+
     /**
      * Injectable constructor is REQUIRED for Guice to provide dependencies.
      * @param p PrimaryCtrl instance for scene switching.
@@ -128,10 +142,11 @@ public class IngredientsWindowCtrl {
      * @param dataManipulator - The injected data Manipulator
      * @param server - Injected serverUtils instance
      * @param fxml - Injected MyFXML instance
-     *             @param tm the translation manager used to localize UI text
+     * @param tm the translation manager used to localize UI text
+     * @param socker The websocket handler
      */
     @Inject
-    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml, TranslationManager tm) {
+    public IngredientsWindowCtrl(PrimaryCtrl p, ErrorCtrl c, LocalStorage storage, DataManipulator dataManipulator, ServerUtils server, MyFXML fxml, TranslationManager tm, WebSocketManager socker) {
         this.primaryCtrl = p;
         this.errorCtrl = c;
         this.storage = storage;
@@ -139,6 +154,8 @@ public class IngredientsWindowCtrl {
         this.server = server;
         this.fxml = fxml;
         this.tm = tm;
+        this.subscriptionExecutor = Executors.newSingleThreadExecutor();
+        this.socker = socker;
     }
 
     /**
@@ -152,13 +169,13 @@ public class IngredientsWindowCtrl {
         });
 
         // logic to sort ingredients by name
-        FXCollections.sort(storage.getIngredients(), (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
+        sortSideBar();
 
         sidebarIngredientNamesList.setItems(storage.getIngredients());
         sidebarIngredientNamesList.setCellFactory(icl -> new IngredientListCell());
         sidebarIngredientNamesList.getSelectionModel().selectedItemProperty()
-                .addListener((observable, oldValue,
-                              newValue) -> {
+                .addListener((observable, oldValue, newValue) -> {
+                    if(ignoreIngredientSelectionEvent) return;
                     if(newValue != null){
                         openIngredient(newValue);
                     }
@@ -173,11 +190,103 @@ public class IngredientsWindowCtrl {
         });
     }
 
+    public void startup(){
+        System.out.println("Starting ingredients subscription.");
+        initializeIngredientAdditionSubscription();
+        initializeIngredientDeletionSubscription();
+        initializeNameSubscription();
+    }
+
+    public void shutdown(){
+        if(ingredientSubscription != null){
+            ingredientSubscription.unsubscribe();
+            ingredientSubscription = null;
+        }
+    }
+
+    public void initializeNameSubscription(){
+        subscriptionExecutor.submit(() -> {
+            nameSubscription = socker.subscribe("/updates/ingredient-name", IngredientNameUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    System.out.println("RECEIVED NAME UPDATE: " + update.name());
+                    dataManipulator.changeIngredientNameLocal(update.id(), update.name());
+                    // sidebarIngredientNamesList.refresh();
+                    sortSideBar();
+                });
+            });
+        });
+    }
+
+    public void initializeIngredientSubscription(Long id){
+        subscriptionExecutor.submit(() -> {
+            System.out.println("SUBSCRIBING TO OTHER RECIPE");
+            ingredientSubscription = socker.subscribe("/updates/ingredient/" + Long.toString(id), IngredientUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    ignoreIngredientSelectionEvent = true;
+                    dataManipulator.updateIngredientLocal(update.ingredient());
+                    Ingredient previousIngredient = update.ingredient();
+                    System.out.println("PROCESSING UPDATE");
+                    sortSideBar();
+                    if(currentIngredient != null){
+
+                        if(currentIngredient.getId().equals(update.id())) currentIngredient = update.ingredient();
+                        showIngredientDetails(currentIngredient, false);
+                        sidebarIngredientNamesList.getSelectionModel().select(previousIngredient);
+                        openIngredient(previousIngredient);
+                    }
+                    ignoreIngredientSelectionEvent = false;
+                    System.out.println("UPDATED INGREDIENT VIEW");
+                });
+            });
+        });
+    }
+
+    public void initializeIngredientAdditionSubscription(){
+        subscriptionExecutor.submit(() -> {
+            ingredientAdditionSubscription = socker.subscribe("/updates/ingredient-addition", IngredientAddition.class, update -> {
+                Platform.runLater(() -> {
+                    ignoreIngredientSelectionEvent = true;
+                    dataManipulator.updateIngredientLocal(update.ingredient());
+                    // sidebarIngredientNamesList.getSelectionModel().select(currentIngredient);
+                    sortSideBar();
+                    ignoreIngredientSelectionEvent = false;
+                });
+            });
+        });
+    }
+
+    public void initializeIngredientDeletionSubscription(){
+        subscriptionExecutor.submit(() -> {
+            ingredientDeletionSubscription = socker.subscribe("/updates/ingredient-deletion", IngredientDeletion.class, update -> {
+                Platform.runLater(() -> {
+                    ignoreIngredientSelectionEvent = true;
+                    dataManipulator.deleteIngredientLocal(update.id());
+                    // sidebarIngredientNamesList.getSelectionModel().select(currentIngredient);
+                    sortSideBar();
+                    if(currentIngredient != null && currentIngredient.getId().equals(update.id())){
+                        clearDetails();
+                        errorCtrl.showGenericError("Someone deleted the ingredient you were viewing ):");
+                    }
+                    ignoreIngredientSelectionEvent = false;
+                });
+            });
+        });
+    }
+
+
     /**
      * sets correct values in labels when an ingredient is selected from sidebar
      * @param ingredient the ingredient selected
+     * @param update Boolean representing if the ingredient should be refreshed
      */
-    public void showIngredientDetails(Ingredient ingredient) {
+    public void showIngredientDetails(Ingredient ingredient, boolean update) {
+        ignoreIngredientSelectionEvent = true;
+        this.currentIngredient = ingredient;
+        if(update){
+            this.currentIngredient = dataManipulator.refreshIngredient(ingredient.getId());
+            ingredient = this.currentIngredient;
+        }
+        ignoreIngredientSelectionEvent = false;
         ingredientDetailsView.setVisible(true);
         ingredientDetailsView.setManaged(true);
 
@@ -200,6 +309,12 @@ public class IngredientsWindowCtrl {
         }
 
         showNutriScore(ingredient);
+
+        initializeIngredientSubscription(ingredient.getId());
+    }
+
+    public void showIngredientDetails(Ingredient ingredient){
+        showIngredientDetails(ingredient, false);
     }
 
     /**
@@ -210,6 +325,7 @@ public class IngredientsWindowCtrl {
         ingredientDetailsView.setManaged(false);
         // Remove any ImageView when clearing
         nutriScoreBox.getChildren().clear();
+        currentIngredient = null;
     }
 
     @FXML
@@ -422,4 +538,7 @@ public class IngredientsWindowCtrl {
 
 
     // We need an update method to re-sort the ingredients list on updates
+    public void sortSideBar(){
+        FXCollections.sort(storage.getIngredients(), (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
+    }
 }

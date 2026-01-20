@@ -4,6 +4,8 @@ import commons.Ingredient;
 import commons.NutritionalValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
+
 import server.database.IngredientRepository;
 import server.database.RecipeIngredientRepository;
 
@@ -19,6 +21,7 @@ public class IngredientServiceTest {
     private IngredientRepository mockIngredientRepo;
     private RecipeIngredientRepository mockRecipeIngredientRepo;
     private RecipeService mockRecipeService;
+    private ApplicationEventPublisher eventPublisher;
 
     private final Long id = 1L;
 
@@ -27,7 +30,9 @@ public class IngredientServiceTest {
         mockIngredientRepo = mock(IngredientRepository.class);
         mockRecipeIngredientRepo = mock(RecipeIngredientRepository.class);
         mockRecipeService = mock(RecipeService.class);
-        sut = new IngredientService(mockIngredientRepo, mockRecipeIngredientRepo, mockRecipeService);
+        eventPublisher = mock(ApplicationEventPublisher.class);
+        
+        sut = new IngredientService(mockIngredientRepo, mockRecipeIngredientRepo, mockRecipeService, eventPublisher);
     }
 
     @Test
