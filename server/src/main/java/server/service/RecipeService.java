@@ -3,7 +3,11 @@ package server.service;
 import commons.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+// import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
@@ -263,26 +267,25 @@ public class RecipeService {
      * @param ingredientId The deleted ingredient
      * @return List of all recipe ID's containing this ingredient
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Long> getRecipesWithIngredientID(Long ingredientId){
-        // for(Recipe recipe: recipeRepository.findAll()){
-        //     if(recipe.getIngredients().stream().anyMatch(x -> x.getIngredient().getId().equals(ingredientId))){
-        //         eventPublisher.publishEvent(new RecipeUpdate(recipe.getId(), recipe));
-        //     }
-        // }
-        return recipeRepository.findAll().stream().filter(x -> 
+        ArrayList<Recipe> recipes = new ArrayList<>(recipeRepository.findAll());
+        return recipes.stream().filter(x -> 
             x.getIngredients().stream().anyMatch(
                 y -> y.getIngredient().getId().equals(ingredientId)
             )
         )
-        .map(x -> x.getId()).toList();
+        .map(x -> x.getId()).map(x -> Long.valueOf(x.longValue())).toList();
     }
 
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    // @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendRecipeUpdateForIds(List<Long> ids){
         for(Long id: ids){
             Optional<Recipe> r = recipeRepository.findById(id);
             if(r.isEmpty()) continue;
+            System.out.println("RECIPE WITH DELETED INGREDIENT: " + id);
+            System.out.println("AMOUNT OF INGS: " + r.get().getIngredients().size());
             eventPublisher.publishEvent(new RecipeUpdate(id, r.get()));
         }
     }

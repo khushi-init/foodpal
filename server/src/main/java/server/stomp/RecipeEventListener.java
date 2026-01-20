@@ -1,21 +1,27 @@
 package server.stomp;
 
 import commons.*;
+import server.database.RecipeRepository;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 public class RecipeEventListener {
     private final SimpMessagingTemplate messaging;
+    private final RecipeRepository recipeRepository;
 
     /**
      * The Recipe event listener sends updates via socket when informed by the RecipeService
      * @param messaging - The messaging template for socket communication
      */
-    public RecipeEventListener(SimpMessagingTemplate messaging) {
+    public RecipeEventListener(SimpMessagingTemplate messaging, RecipeRepository recipeRepository) {
         this.messaging = messaging;
+        this.recipeRepository = recipeRepository;
     }
 
     /**
@@ -34,9 +40,13 @@ public class RecipeEventListener {
      * @param update The updated recipe
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void publishRecipeChange(RecipeUpdate update){
         System.out.println("Sending updated recipe with id " + update.id());
-        messaging.convertAndSend("/updates/recipe/" + Long.toString(update.recipe().getId()), update);
+        recipeRepository.flush();
+        RecipeUpdate update2 = new RecipeUpdate(update.id(), recipeRepository.findById(update.id()).get());
+        System.out.println(update2.recipe().getIngredients().size());
+        messaging.convertAndSend("/updates/recipe/" + Long.toString(update2.recipe().getId()), update2);
     }
 
     /**

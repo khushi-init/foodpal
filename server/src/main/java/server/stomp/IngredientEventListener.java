@@ -1,21 +1,28 @@
 package server.stomp;
 
 import commons.*;
+import server.service.IngredientService;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 public class IngredientEventListener {
     private final SimpMessagingTemplate messaging;
+    private final IngredientService ingredientService;
 
     /**
      * The Recipe event listener sends updates via socket when informed by the RecipeService
      * @param messaging - The messaging template for socket communication
+     * @param 
      */
-    public IngredientEventListener(SimpMessagingTemplate messaging) {
+    public IngredientEventListener(SimpMessagingTemplate messaging, IngredientService ingredientService) {
         this.messaging = messaging;
+        this.ingredientService = ingredientService;
     }
 
     /**
@@ -26,6 +33,7 @@ public class IngredientEventListener {
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishIngredientNameChange(IngredientNameUpdate update) {
+        System.out.println("Sending changed ingredient name: " + update.name());
         messaging.convertAndSend("/updates/ingredient-name", update);
     }
 
@@ -54,7 +62,9 @@ public class IngredientEventListener {
      * @param update RecipeDeletion containing the ID of the deleted recipe
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void publishIngredientDeletion(IngredientDeletion update){
+        ingredientService.deleteIngredient(update.id());
         System.out.println("Sending deleted ingredient with id " + update.id());
         messaging.convertAndSend("/updates/ingredient-deletion", update);
     }

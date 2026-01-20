@@ -427,6 +427,7 @@ public class RecipesWindowCtrl {
             recipeSubscription = socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
                 Platform.runLater(() -> {
                     System.out.println("Recipe " + update.id() + " changed.");
+                    System.out.println("AMOUNT OF INGS IN RECIPE: " + update.recipe().getIngredients().size());
                     dataManipulator.updateRecipe(update.recipe());
                     if(currentRecipe.getId().equals(update.id())) currentRecipe = update.recipe();
                     openRecipe(currentRecipe);
@@ -759,6 +760,7 @@ public class RecipesWindowCtrl {
                     .ifPresent(this::openQuantityDialog);
         });
         addButton.setOnShowing(a -> {
+            dataManipulator.refreshIngredients();
             addButton.getItems().clear();
             storage.getIngredients().forEach(ingredient -> {
                 MenuItem menu = new MenuItem(ingredient.getName());

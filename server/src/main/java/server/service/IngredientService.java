@@ -75,32 +75,53 @@ public class IngredientService {
         return saved;
     }
 
-    /**
-     * Validates and updates an existing ingredient.
-     * @param ingredient The ingredient data to update
-     * @return The updated ingredient, or null if the ID does not exist
-     * @throws IllegalArgumentException if the name is invalid
-     */
+    // /**
+    //  * Validates and updates an existing ingredient.
+    //  * @param ingredient The ingredient data to update
+    //  * @return The updated ingredient, or null if the ID does not exist
+    //  * @throws IllegalArgumentException if the name is invalid
+    //  */
+    // @Transactional
+    // public Optional<Ingredient> updateIngredient(Ingredient ingredient) {
+    //     Optional<Ingredient> oldIng = ingredientRepository.findById(ingredient.getId());
+    //     boolean nameUpdated = false;
+    //     if(oldIng.isPresent()){
+    //         nameUpdated = !ingredient.getName().equals(oldIng.get().getName());
+    //     }
+    //     //drop oldIng, it is tied to the repository and would result in a concurrency exception
+    //     oldIng = null;
+    //     Optional<Ingredient> updated = Optional.of(ingredient)
+    //             .filter(i -> ingredientRepository.existsById(i.getId()))
+    //             .filter(this::validateIngredientName)
+    //             .map(ingredientRepository::save);
+    //     if(updated.isPresent()){
+    //         eventPublisher.publishEvent(new IngredientUpdate(ingredient.getId(), updated.get()));
+    //         if(nameUpdated){
+    //             eventPublisher.publishEvent(new IngredientNameUpdate(ingredient.getId(), updated.get().getName()));
+    //         }
+    //         recipeService.updateRecipesWithChangedIngredient(ingredient);
+    //     }
+    //     return updated;
+    // }
+
     @Transactional
-    public Optional<Ingredient> updateIngredient(Ingredient ingredient) {
-        Optional<Ingredient> oldIng = ingredientRepository.findById(ingredient.getId());
-        boolean nameUpdated = false;
-        if(oldIng.isPresent()){
-            nameUpdated = !ingredient.getName().equals(oldIng.get().getName());
-        }
-        oldIng = null;
-        Optional<Ingredient> updated = Optional.of(ingredient)
-                .filter(i -> ingredientRepository.existsById(i.getId()))
-                .filter(this::validateIngredientName)
-                .map(ingredientRepository::save);
-        if(updated.isPresent()){
-            eventPublisher.publishEvent(new IngredientUpdate(ingredient.getId(), updated.get()));
-            if(nameUpdated){
-                eventPublisher.publishEvent(new IngredientNameUpdate(ingredient.getId(), updated.get().getName()));
+    public Optional<Ingredient> updateIngredient(Ingredient ingredient){
+        return ingredientRepository.findById(ingredient.getId()).map(existing -> {
+            if(!validateIngredientName(ingredient));
+            boolean nameChange = false;
+            if(existing.getName() != null && !existing.getName().equals(ingredient.getName())){
+                existing.setName(ingredient.getName());
+                nameChange = true;
             }
-            recipeService.updateRecipesWithChangedIngredient(ingredient);
-        }
-        return updated;
+            existing.setNutritionalValue(ingredient.getNutritionalValue());
+            Ingredient saved = ingredientRepository.save(existing);
+            if(nameChange){
+                eventPublisher.publishEvent(new IngredientNameUpdate(ingredient.getId(), saved.getName()));
+            }
+            eventPublisher.publishEvent(new IngredientUpdate(ingredient.getId(), saved));
+            recipeService.updateRecipesWithChangedIngredient(saved);
+            return saved;
+        });
     }
 
     /**
@@ -119,6 +140,7 @@ public class IngredientService {
 
         // Now the constraint is satisfied, delete the parent ingredient
         ingredientRepository.deleteById(id);
+
         eventPublisher.publishEvent(new IngredientDeletion(id));
         recipeService.sendRecipeUpdateForIds(recipeIds);
 

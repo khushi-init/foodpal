@@ -177,20 +177,32 @@ public class IngredientsWindowCtrl {
                 .addListener((observable, oldValue, newValue) -> {
                     if(ignoreIngredientSelectionEvent) return;
                     if(newValue != null){
-                        openIngredient(newValue);
+                        showIngredientDetails(newValue, true);
+                        if(ingredientSubscription != null){
+                            ingredientSubscription.unsubscribe();
+                        }
+                        initializeIngredientSubscription(newValue.getId());
+                    } else {
+                        clearDetails();
+                        if(ingredientSubscription != null){
+                            ingredientSubscription.unsubscribe();
+                            ingredientSubscription = null;
+                        }
                     }
                 });
 
-        sidebarIngredientNamesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                showIngredientDetails(newValue);
-            } else {
-                clearDetails();
-            }
-        });
+        // sidebarIngredientNamesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        //     if (newValue != null) {
+        //         showIngredientDetails(newValue);
+        //     } else {
+        //         clearDetails();
+        //     }
+        // });
     }
 
     public void startup(){
+        dataManipulator.refreshIngredients();
+        sortSideBar();
         System.out.println("Starting ingredients subscription.");
         initializeIngredientAdditionSubscription();
         initializeIngredientDeletionSubscription();
@@ -198,9 +210,22 @@ public class IngredientsWindowCtrl {
     }
 
     public void shutdown(){
+
         if(ingredientSubscription != null){
             ingredientSubscription.unsubscribe();
             ingredientSubscription = null;
+        }
+        if(nameSubscription != null){
+            nameSubscription.unsubscribe();
+            nameSubscription = null;
+        }
+        if(ingredientAdditionSubscription != null){
+            ingredientAdditionSubscription.unsubscribe();
+            ingredientAdditionSubscription = null;
+        }
+        if(ingredientDeletionSubscription != null){
+            ingredientDeletionSubscription.unsubscribe();
+            ingredientDeletionSubscription = null;
         }
     }
 
@@ -218,6 +243,7 @@ public class IngredientsWindowCtrl {
     }
 
     public void initializeIngredientSubscription(Long id){
+        if(ingredientSubscription != null) ingredientSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
             System.out.println("SUBSCRIBING TO OTHER RECIPE");
             ingredientSubscription = socker.subscribe("/updates/ingredient/" + Long.toString(id), IngredientUpdate.class, update -> {
@@ -242,6 +268,7 @@ public class IngredientsWindowCtrl {
     }
 
     public void initializeIngredientAdditionSubscription(){
+        if(ingredientAdditionSubscription != null) ingredientAdditionSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
             ingredientAdditionSubscription = socker.subscribe("/updates/ingredient-addition", IngredientAddition.class, update -> {
                 Platform.runLater(() -> {
@@ -256,6 +283,7 @@ public class IngredientsWindowCtrl {
     }
 
     public void initializeIngredientDeletionSubscription(){
+        if(ingredientDeletionSubscription != null) ingredientDeletionSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
             ingredientDeletionSubscription = socker.subscribe("/updates/ingredient-deletion", IngredientDeletion.class, update -> {
                 Platform.runLater(() -> {
@@ -310,7 +338,7 @@ public class IngredientsWindowCtrl {
 
         showNutriScore(ingredient);
 
-        initializeIngredientSubscription(ingredient.getId());
+        // initializeIngredientSubscription(ingredient.getId());
     }
 
     public void showIngredientDetails(Ingredient ingredient){
