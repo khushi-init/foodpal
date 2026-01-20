@@ -642,6 +642,9 @@ public class RecipesWindowCtrl {
 
         recipeNameField.setText(currentRecipe.getName());
 
+        String lang = currentRecipe.getLanguage();
+
+        updateLanguageMenu(currentRecipe.getLanguage());
         // Activate recipe specific buttons
         updateRecipeSelectionState(true);
 
@@ -651,6 +654,26 @@ public class RecipesWindowCtrl {
 
         updateScale(recipeScale);
 
+    }
+
+    /**
+     * Handles the updating of a recipe's language
+     * @param currentRecipe the recipe to update
+     * @param language the language to set it to
+     */
+    private void updateRecipeLanguage(Recipe currentRecipe, String language) {
+        currentRecipe.setLanguage(language);
+        updateLanguageMenu(language);
+        updateRefresh();
+    }
+
+    /**
+     * Change the language menu icon to the specified language icon path
+     * @param language the language to change the icon to.
+     */
+    private void updateLanguageMenu(String language) {
+        System.out.println("Changed language of recipe "+ currentRecipe.getName()+ "to: " + currentRecipe.getLanguage());
+        languageMenu.setGraphic(icon("/client/images/flag" + language.toUpperCase() +".png"));
     }
 
     /**
@@ -1474,13 +1497,14 @@ public class RecipesWindowCtrl {
         // Default starting state
         setLanguage(Locale.ENGLISH, "/client/images/flagUK.png");
 
+        // Setup/Logic for the Recipe language selection
         MenuItem visualEng = new MenuItem("", icon("/client/images/flagUK.png"));
         MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
         MenuItem visualSk = new MenuItem("", icon("/client/images/flagSK.png"));
 
-        visualEng.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagUK.png")));
-        visualNl.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagNL.png")));
-        visualSk.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagSK.png")));
+        visualEng.setOnAction(e -> updateRecipeLanguage(currentRecipe, "uk"));
+        visualNl.setOnAction(e -> updateRecipeLanguage(currentRecipe, "nl"));
+        visualSk.setOnAction(e -> updateRecipeLanguage(currentRecipe, "sk"));
 
         languageMenu.getItems().setAll(visualEng, visualNl, visualSk);
         languageMenu.setGraphic(icon("/client/images/flagUK.png")); //initial language = english
