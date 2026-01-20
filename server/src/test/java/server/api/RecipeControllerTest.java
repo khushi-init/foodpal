@@ -35,6 +35,8 @@ public class RecipeControllerTest {
     private final Long fakeId = 99L;
 
     private final int negativeServingsAmount = -2;
+    private final int nutritionalValue = 10;
+    private final double ingredientQuantity = 10.0;
 
     @InjectMocks
     private RecipeController sut;
@@ -256,12 +258,10 @@ public class RecipeControllerTest {
     @Test
     public void changeRecipeInvalidIngredientTest() {
         // Arrange
-        int nutritionalValue = 10;
         Ingredient ingredient = new Ingredient(
                 "",
                 new NutritionalValue(nutritionalValue, nutritionalValue, nutritionalValue)
         );
-        double ingredientQuantity = 10.0;
         RecipeIngredient recipeIngredient = new RecipeIngredient(
                 null,
                 ingredient,
