@@ -23,6 +23,9 @@ public class Recipe {
     @Column
     private Integer totalServings = 0;
 
+    @Column
+    private String language = "uk";
+
     // One Recipe has MANY RecipeIngredients (the join entity)
     @OneToMany(
             mappedBy = "recipe",
@@ -119,6 +122,14 @@ public class Recipe {
         this.preparationSteps = preparationSteps;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return EqualsBuilder.reflectionEquals(this, obj);
@@ -208,6 +219,11 @@ public class Recipe {
         };
     }
 
+    /**
+     * Calculates the kcal per 100g for the supplied recipe considering its nutritional value
+     * @param recipe The recipe from which the nutritional value will be taken
+     * @return The kcal/100g of that tecipe
+     */
     public double calculateRecipeKcalPer100g(Recipe recipe) {
         double totalWeightInGrams = 0;
         double totalCalories = 0;
