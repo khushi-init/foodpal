@@ -28,7 +28,7 @@ public class RecipeTest {
         ingredient2 = new Ingredient("Butter", defaultNutritionalValue);
 
         recipeIngredient1 = new RecipeIngredient(recipe, ingredient1, amount1, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM));
-        recipeIngredient2 = new RecipeIngredient(recipe, ingredient2, amount2, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM));
+        recipeIngredient2 = new RecipeIngredient(recipe, ingredient2, amount2, new RecipeIngredientUnit());
 
         ingredientList = new ArrayList<>(List.of(recipeIngredient1, recipeIngredient2));
         preparationSteps = new ArrayList<>(List.of(
@@ -48,15 +48,15 @@ public class RecipeTest {
                 ## Ingredients
                 | Name | Amount |
                 |------|--------|
-                | Sugar | 50.0 |
-                | Butter | 25.0 |
+                | Sugar | 50.0 g |
+                | Butter | N/A |
                 
                 ## Preparation Steps
                 * Mix the sugar and butter together.
                 * Use the spell 'Pepernoteratus'.
                 * Put it in the oven for 10 minutes.
                 
-                *This recipe has been served 1 time(s)*
+                *This recipe gives you a total of 1 serving(s)*
                 """;
 
         String result = recipe.toMarkdown();

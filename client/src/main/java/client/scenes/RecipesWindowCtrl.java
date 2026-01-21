@@ -29,10 +29,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -40,7 +37,6 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.springframework.messaging.simp.stomp.StompSession;
 
 
 public class RecipesWindowCtrl {
@@ -53,12 +49,15 @@ public class RecipesWindowCtrl {
 
     private final WebSocketManager socker;
 
-    private volatile StompSession.Subscription titleSubscription;
-    private volatile StompSession.Subscription recipeSubscription;
-    private volatile StompSession.Subscription recipeAdditionSubscription;
-    private volatile StompSession.Subscription recipeDeletionSubscription;
+    // Make sure to change to *flagPT.jpg* after we made him mad
+    private final String francisco = "flatPT.jpg";
 
-    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor();
+    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
+    private Long previousRecipeSubscription = -1L;
 
     @FXML
     private ListView<Recipe> sidebarRecipeNamesList;
@@ -105,6 +104,9 @@ public class RecipesWindowCtrl {
     @FXML
     private Label advancedSearchButton;
 
+    @FXML
+    private MenuButton languageMenu;
+
     // Favorite Injections
     @FXML
     private ImageView favoriteImage;
@@ -121,6 +123,10 @@ public class RecipesWindowCtrl {
     // global recipe scaling factor
     double recipeScale = 1.0;
     double scaleLimit = 1000.0;
+
+    int hundredtwenty = 120;
+    int five = 5;
+    int ten = 10;
 
     private boolean newInstructionAdded = false;
 
@@ -143,6 +149,14 @@ public class RecipesWindowCtrl {
 
     private final TranslationManager tm;
 
+    private Locale activeLocale = Locale.ENGLISH;
+    private String activeFlagPath = "/client/images/flagUS.png";
+
+    private CustomMenuItem englishItem;
+    private CustomMenuItem dutchItem;
+    private CustomMenuItem slovakItem;
+    private CustomMenuItem greekItem;
+    private CustomMenuItem portugueseItem;
     /**
      * Injectable constructor for RecipesWindowCtrl
      * @param socker WebSocketManager instance
@@ -359,10 +373,8 @@ public class RecipesWindowCtrl {
      * THIS MUST ALWAYS BE RUN WHEN RECIPEWINDOW COMES INTO VIEW
      */
     public void startup() {
-        if (titleSubscription != null) {
-            return;
-        }
         initializeTitleSubscription();
+        if (previousRecipeSubscription != -1) initializeRecipeSubscription(previousRecipeSubscription, true);
         initializeRecipeAdditionSubscription();
         initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
@@ -373,24 +385,12 @@ public class RecipesWindowCtrl {
      * It ensures the app isn't subscribed into any unnecessary updates
      */
     public void shutdown() {
-        if (titleSubscription != null) {
-            titleSubscription.unsubscribe();
-            titleSubscription = null;
-            System.out.println("Unsubscribed from title updates.");
-        }
-        if(recipeSubscription != null){
-            recipeSubscription.unsubscribe();
-            recipeSubscription = null;
-        }
-        if(recipeAdditionSubscription != null){
-            recipeAdditionSubscription.unsubscribe();
-            recipeAdditionSubscription = null;
-        }
-        if(recipeDeletionSubscription != null){
-            recipeDeletionSubscription.unsubscribe();
-            recipeDeletionSubscription = null;
-        }
-        
+        // Unsubscribe from all websockets
+        socker.unsubscribe("/updates/title");
+        socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
+        socker.unsubscribe("/updates/recipe-addition");
+        socker.unsubscribe("/updates/recipe-deletion");
+
     }
 
     /**
@@ -399,7 +399,7 @@ public class RecipesWindowCtrl {
      */
     public void initializeTitleSubscription(){
         subscriptionExecutor.submit(() -> {
-            titleSubscription = socker.subscribe("/updates/title", TitleUpdate.class, update -> {
+            socker.subscribe("/updates/title", TitleUpdate.class, update -> {
                 Platform.runLater(() -> {
                     System.out.println("Title of recipe " + update.id() + " Changed!");
                     dataManipulator.changeNameLocal(update.id(), update.newTitle());
@@ -408,11 +408,6 @@ public class RecipesWindowCtrl {
                     if(currentRecipe == null) return;
                 });
             });
-            if (titleSubscription == null ) {
-                Platform.runLater(() -> {
-                    errorCtrl.showGenericError(tm.tr("error.couldNotSubscribeTitle"));
-                });
-            }
         });
     }
 
@@ -420,11 +415,14 @@ public class RecipesWindowCtrl {
      * Subscribes to any update in the recipe with the specified ID, except for changes in the Ingredients.
      * Note that changes in RecipeIngredient ARE propagated through this subscription
      * @param id Id of the recipe we want to subscribe to
+     * @param forceResubscribe Forces resubscription to the websocket even if its to the same recipe
      */
-    public void initializeRecipeSubscription(Long id){
-        if(recipeSubscription != null) recipeSubscription.unsubscribe();
+    public void initializeRecipeSubscription(Long id, boolean forceResubscribe){
+        if (previousRecipeSubscription.equals(id) && !forceResubscribe) return;
+        // Unsubscribe from previous recipe
+        if (previousRecipeSubscription != -1) socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
         subscriptionExecutor.submit(() -> {
-            recipeSubscription = socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
+            socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
                 Platform.runLater(() -> {
                     System.out.println("Recipe " + update.id() + " changed.");
                     dataManipulator.updateRecipe(update.recipe());
@@ -433,15 +431,15 @@ public class RecipesWindowCtrl {
                 });
             });
         });
+        previousRecipeSubscription = id;
     }
 
     /**
      * Subscribes to all new recipes, and locally stores the new recipes using the DataManipulator
      */
-    public void initializeRecipeAdditionSubscription(){
-        if(recipeAdditionSubscription != null) recipeAdditionSubscription.unsubscribe();
+    public void initializeRecipeAdditionSubscription() {
         subscriptionExecutor.submit(() -> {
-            recipeAdditionSubscription = socker.subscribe("/updates/recipe-addition", RecipeAddition.class, update -> {
+            socker.subscribe("/updates/recipe-addition", RecipeAddition.class, update -> {
                 Platform.runLater(() -> {
                     ignoreSideBarSelectionEvent = true;
                     dataManipulator.updateRecipe(update.recipe());
@@ -456,9 +454,8 @@ public class RecipesWindowCtrl {
      * Subscribes to all deleted recipes, and locally deletes the recipe with the specified id using the DataManipulator
      */
     public void initializeRecipeDeletionSubscription(){
-        if(recipeDeletionSubscription != null) recipeDeletionSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
-            recipeDeletionSubscription = socker.subscribe("/updates/recipe-deletion", RecipeDeletion.class, update -> {
+            socker.subscribe("/updates/recipe-deletion", RecipeDeletion.class, update -> {
                 Platform.runLater(() -> {
                     ignoreSideBarSelectionEvent = true;
                     if(currentRecipe != null && update.id().equals(currentRecipe.getId())){
@@ -601,6 +598,10 @@ public class RecipesWindowCtrl {
         recipeNameField.setDisable(!active);
         recipeNameField.setVisible(active);
 
+        languageMenu.setDisable(!active);
+        languageMenu.setVisible(active);
+        languageMenu.setManaged(active);
+
         if (!active) {
             Label noRecipeSelectedLabel = new Label(tm.tr("label.noRecipeSelected"));
             noRecipeSelectedLabel.setStyle(
@@ -646,7 +647,7 @@ public class RecipesWindowCtrl {
                 favoriteImage.setImage(unFavorite);
             }
         }
-        initializeRecipeSubscription(currentRecipe.getId());
+        initializeRecipeSubscription(currentRecipe.getId(), false);
 
         recipeNameField.setText(currentRecipe.getName());
 
@@ -1440,33 +1441,90 @@ public class RecipesWindowCtrl {
     @FXML
     private MenuButton addIngredientMenu;
 
-    private MenuItem englishItem;
-    private MenuItem dutchItem;
-
     private Locale currentLocale = Locale.ENGLISH;
 
     private final int sizeFlag = 16;
+    private final int sizeFlag2 = 20;
 
 
     private void setUpLanguageDropdown() {
-        englishItem = new MenuItem("", icon("/client/images/flagUK.png"));
-        dutchItem   = new MenuItem("", icon("/client/images/flagNL.png"));
+        // 1. Create Labels (Nodes) that can detect hover
+        Label engLabel = new Label("English", icon("/client/images/flagUS.png"));
+        Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
+        Label skLabel = new Label("Slovencina", icon("/client/images/flagSK.png"));
+        Label grLabel = new Label("Ελληνικά", icon("/client/images/flagGR.jpg"));
+        Label ptLabel = new Label("Português", icon("/client/images/" + francisco));
 
-        englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUK.png"));
+        // Set styling so the hover area fills the menu width
+        engLabel.setMinWidth(hundredtwenty);
+        nlLabel.setMinWidth(hundredtwenty);
+        engLabel.setPadding(new Insets(five, ten, five, ten));
+        nlLabel.setPadding(new Insets(five, ten, five, ten));
+        skLabel.setPadding(new Insets(five, ten, five, ten));
+        grLabel.setPadding(new Insets(five, ten, five, ten));
+        ptLabel.setPadding(new Insets(five, ten, five, ten));
+
+
+        // 2. Initialize the CustomMenuItems with these labels
+        englishItem = new CustomMenuItem(engLabel);
+        dutchItem = new CustomMenuItem(nlLabel);
+        slovakItem = new CustomMenuItem(skLabel);
+        greekItem = new CustomMenuItem(grLabel);
+        portugueseItem = new CustomMenuItem(ptLabel);
+
+        // 3. Attach Hover Listeners directly to the Labels
+        engLabel.setOnMouseEntered(e -> tm.setLanguage(Locale.ENGLISH));
+        nlLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("nl")));
+        skLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("sk")));
+        grLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("gr")));
+        ptLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("pt")));
+
+        // 4. Revert to the "Official" language when the menu is closed
+        addIngredientMenu.setOnHidden(e -> tm.setLanguage(activeLocale));
+
+        // 5. Standard Click Logic (Actions)
+        englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUS.png"));
         dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
+        slovakItem.setOnAction(e -> setLanguage(new Locale("sk"), "/client/images/flagSK.png"));
+        greekItem.setOnAction(e -> setLanguage(new Locale("gr"), "/client/images/flagGR.jpg"));
+        portugueseItem.setOnAction(e -> setLanguage(new Locale("pt"), "/client/images/" + francisco));
 
-        addIngredientMenu.getItems().setAll(englishItem, dutchItem);
+        addIngredientMenu.getItems().setAll(englishItem, dutchItem, slovakItem, greekItem, portugueseItem);
 
-        // default
-        setLanguage(Locale.ENGLISH, "/client/images/flagUK.png");
+        // Default starting state
+        setLanguage(Locale.ENGLISH, "/client/images/flagUS.png");
+
+        MenuItem visualEng = new MenuItem("", icon("/client/images/flagUS.png"));
+        MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
+        MenuItem visualSk = new MenuItem("", icon("/client/images/flagSK.png"));
+        MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.jpg"));
+        MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.jpg"));
+
+        visualEng.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagUS.png")));
+        visualNl.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagNL.png")));
+        visualSk.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagSK.png")));
+        visualGr.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagGR.jpg")));
+        visualPt.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/" + francisco)));
+
+        languageMenu.getItems().setAll(visualEng, visualNl, visualSk, visualGr, visualPt);
+        languageMenu.setGraphic(icon("/client/images/flagUS.png")); //initial language = english
+        languageMenu.setText("");
+
     }
 
     private void setLanguage(Locale locale, String flagPath) {
+        this.activeLocale = locale;
+        this.activeFlagPath = flagPath;
+
         tm.setLanguage(locale);
 
         // Update the dropdown button look based on language
         addIngredientMenu.setGraphic(icon(flagPath));
-        addIngredientMenu.setText(tm.tr(locale.equals(Locale.ENGLISH) ? "menu.language.english" : "menu.language.dutch"));
+        addIngredientMenu.setText(
+                tm.tr("menu.language." + locale.getLanguage())
+        );
+
+        languageMenu.setText(""); //we can add the language name if we want??
     }
 
     private void refreshDynamicViews() {
@@ -1484,9 +1542,8 @@ public class RecipesWindowCtrl {
 
     private ImageView icon(String path) {
         ImageView iv = new ImageView(new Image(getClass().getResourceAsStream(path)));
-        iv.setFitWidth(sizeFlag);
+        iv.setFitWidth(sizeFlag2);
         iv.setFitHeight(sizeFlag);
-        iv.setPreserveRatio(true);
         return iv;
     }
 
@@ -1497,8 +1554,19 @@ public class RecipesWindowCtrl {
         totalServingsField.setPromptText(tm.tr("prompt.servings"));
         totalServingsLabel.setText(tm.tr("label.totalServings", getCurrentServings()));
 
-        englishItem.setText(tm.tr("menu.language.english"));
-        dutchItem.setText(tm.tr("menu.language.dutch"));
+        // Update the labels inside the custom items
+        ((Label) englishItem.getContent()).setText(tm.tr("menu.language.en"));
+        ((Label) dutchItem.getContent()).setText(tm.tr("menu.language.nl"));
+        ((Label) slovakItem.getContent()).setText(tm.tr("menu.language.sk"));
+        ((Label) greekItem.getContent()).setText(tm.tr("menu.language.gr"));
+        ((Label) portugueseItem.getContent()).setText(tm.tr("menu.language.pt"));
+
+        // Update the main dropdown button text based on the PREVIEW language
+        englishItem.setText(tm.tr("menu.language.en"));
+        dutchItem.setText(tm.tr("menu.language.nl"));
+        slovakItem.setText(tm.tr("menu.language.sk"));
+        greekItem.setText(tm.tr("menu.language.gr"));
+        portugueseItem.setText(tm.tr("menu.language.pt"));
     }
 
     private void updateTotalServingsLabelText() {
