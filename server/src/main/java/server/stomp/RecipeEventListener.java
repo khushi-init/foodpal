@@ -68,4 +68,10 @@ public class RecipeEventListener {
         System.out.println("Sending deleted recipe with id " + update.id());
         messaging.convertAndSend("/updates/recipe-deletion", update);
     }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void publishIngredientLinkedRecipesUpdate(IngredientLinkedRecipesUpdate update){
+        System.out.println("Sending linked recipes change for ingredient "+ update.ingredientId());
+        messaging.convertAndSend("/updates/ingredient-linked-recipes/"+update.ingredientId(), update);
+    }
 }

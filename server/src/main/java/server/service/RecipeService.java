@@ -9,17 +9,21 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import server.database.IngredientRepository;
+import server.database.RecipeIngredientRepository;
 import server.database.RecipeRepository;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
     private final ApplicationEventPublisher eventPublisher;
     private NutritionalValue defaultNutritionalValue = new NutritionalValue(0, 0, 0);
 
@@ -29,10 +33,11 @@ public class RecipeService {
      * @param ingredientRepository the ingredient repository to meddle with
      * @param eventPublisher The event publisher for sending updates to sockets
      */
-    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ApplicationEventPublisher eventPublisher) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ApplicationEventPublisher eventPublisher, RecipeIngredientRepository recipeIngredientRepository) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.eventPublisher = eventPublisher;
+        this.recipeIngredientRepository = recipeIngredientRepository;
     }
 
     /**
@@ -112,6 +117,19 @@ public class RecipeService {
                 existing.setName(incoming.getName());
                 nameChange = true;
             }
+
+            //get the symmetric difference between the ingredients of the recipes
+            //all ingredients that are in either recipe but not in both should get an update
+            //to show the accurate recipe count in the ingredients window
+            Set<Long> symDiff = new HashSet<>(incoming.getIngredients().stream().map(x -> x.getIngredient().getId()).toList());
+            for(RecipeIngredient ing: existing.getIngredients()){
+                if(!symDiff.add(ing.getIngredient().getId())){
+                    symDiff.remove(ing.getIngredient().getId());
+                }
+            }
+            ArrayList<Long> changedIngredients = new ArrayList<>(symDiff);
+            symDiff = null;
+
             existing.setPreparationSteps(incoming.getPreparationSteps());
 
             // Delete ingredients that are in existing but not in incoming
@@ -147,6 +165,8 @@ public class RecipeService {
                 eventPublisher.publishEvent(new TitleUpdate(id, incoming.getName()));
             }
 
+            sendUpdateForChangedRecipeLinks(changedIngredients);
+
             existing.setTotalServings(incoming.getTotalServings());
 
             eventPublisher.publishEvent(new RecipeUpdate(id, incoming));
@@ -175,9 +195,20 @@ public class RecipeService {
                 return false;
             }
 
-            return incoming.getIngredients().stream()
+            boolean deleted = incoming.getIngredients().stream()
                     .noneMatch(incomingRi ->
                             existingName.equals(getIngredientName(incomingRi)));
+
+            if(deleted){
+                eventPublisher.publishEvent(
+                    new IngredientLinkedRecipesUpdate(
+                        existingRi.getIngredient().getId(),
+                        recipeIngredientRepository.getRecipeUsageNumber(existingRi.getIngredient().getId().longValue())
+                    )
+                );
+            }
+
+            return deleted;
         });
     }
 
@@ -211,7 +242,6 @@ public class RecipeService {
         if (recipeRepository.existsById(id)) {
             recipeRepository.deleteById(id);
             eventPublisher.publishEvent(new RecipeDeletion(id));
-            System.out.println("DELETED RECIPE " + id);
             return true;
         }
         return false;
@@ -241,8 +271,9 @@ public class RecipeService {
 
         if (removed) {
             recipeRepository.save(recipe);
+            eventPublisher.publishEvent(new IngredientLinkedRecipesUpdate(ingredientId, recipeIngredientRepository.getRecipeUsageNumber(ingredientId)));
         }
-
+        
         eventPublisher.publishEvent(new RecipeUpdate(recipeId, recipe));
 
         return removed;
@@ -279,14 +310,20 @@ public class RecipeService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    // @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendRecipeUpdateForIds(List<Long> ids){
         for(Long id: ids){
             Optional<Recipe> r = recipeRepository.findById(id);
             if(r.isEmpty()) continue;
-            System.out.println("RECIPE WITH DELETED INGREDIENT: " + id);
-            System.out.println("AMOUNT OF INGS: " + r.get().getIngredients().size());
             eventPublisher.publishEvent(new RecipeUpdate(id, r.get()));
+        }
+    }
+
+    @Transactional
+    public void sendUpdateForChangedRecipeLinks(List<Long> ids){
+        for(Long id: ids){
+            eventPublisher.publishEvent(
+                new IngredientLinkedRecipesUpdate(id, recipeIngredientRepository.getRecipeUsageNumber(id))
+            );
         }
     }
 }

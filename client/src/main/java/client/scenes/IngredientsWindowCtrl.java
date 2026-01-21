@@ -49,6 +49,7 @@ public class IngredientsWindowCtrl {
     private volatile StompSession.Subscription ingredientSubscription;
     private volatile StompSession.Subscription ingredientAdditionSubscription;
     private volatile StompSession.Subscription ingredientDeletionSubscription;
+    private volatile StompSession.Subscription ingredientLinkedRecipeSubscription;
 
     private volatile ExecutorService subscriptionExecutor;
 
@@ -182,6 +183,7 @@ public class IngredientsWindowCtrl {
                             ingredientSubscription.unsubscribe();
                         }
                         initializeIngredientSubscription(newValue.getId());
+                        initializeIngredentLinkedRecipeSubscription(newValue.getId());
                     } else {
                         clearDetails();
                         if(ingredientSubscription != null){
@@ -233,7 +235,6 @@ public class IngredientsWindowCtrl {
         subscriptionExecutor.submit(() -> {
             nameSubscription = socker.subscribe("/updates/ingredient-name", IngredientNameUpdate.class, update -> {
                 Platform.runLater(() -> {
-                    System.out.println("RECEIVED NAME UPDATE: " + update.name());
                     dataManipulator.changeIngredientNameLocal(update.id(), update.name());
                     // sidebarIngredientNamesList.refresh();
                     sortSideBar();
@@ -245,13 +246,11 @@ public class IngredientsWindowCtrl {
     public void initializeIngredientSubscription(Long id){
         if(ingredientSubscription != null) ingredientSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
-            System.out.println("SUBSCRIBING TO OTHER RECIPE");
             ingredientSubscription = socker.subscribe("/updates/ingredient/" + Long.toString(id), IngredientUpdate.class, update -> {
                 Platform.runLater(() -> {
                     ignoreIngredientSelectionEvent = true;
                     dataManipulator.updateIngredientLocal(update.ingredient());
                     Ingredient previousIngredient = update.ingredient();
-                    System.out.println("PROCESSING UPDATE");
                     sortSideBar();
                     if(currentIngredient != null){
 
@@ -261,7 +260,6 @@ public class IngredientsWindowCtrl {
                         openIngredient(previousIngredient);
                     }
                     ignoreIngredientSelectionEvent = false;
-                    System.out.println("UPDATED INGREDIENT VIEW");
                 });
             });
         });
@@ -274,7 +272,6 @@ public class IngredientsWindowCtrl {
                 Platform.runLater(() -> {
                     ignoreIngredientSelectionEvent = true;
                     dataManipulator.updateIngredientLocal(update.ingredient());
-                    // sidebarIngredientNamesList.getSelectionModel().select(currentIngredient);
                     sortSideBar();
                     ignoreIngredientSelectionEvent = false;
                 });
@@ -289,13 +286,24 @@ public class IngredientsWindowCtrl {
                 Platform.runLater(() -> {
                     ignoreIngredientSelectionEvent = true;
                     dataManipulator.deleteIngredientLocal(update.id());
-                    // sidebarIngredientNamesList.getSelectionModel().select(currentIngredient);
                     sortSideBar();
                     if(currentIngredient != null && currentIngredient.getId().equals(update.id())){
                         clearDetails();
                         errorCtrl.showGenericError("Someone deleted the ingredient you were viewing ):");
                     }
                     ignoreIngredientSelectionEvent = false;
+                });
+            });
+        });
+    }
+
+    public void initializeIngredentLinkedRecipeSubscription(Long id){
+        if(ingredientLinkedRecipeSubscription != null) ingredientLinkedRecipeSubscription.unsubscribe();
+        subscriptionExecutor.submit(() -> {
+            ingredientLinkedRecipeSubscription = socker.subscribe("/updates/ingredient-linked-recipes/"+id, IngredientLinkedRecipesUpdate.class, update -> {
+                Platform.runLater(() -> {
+                    if(currentIngredient == null || !currentIngredient.getId().equals(update.ingredientId())) return;
+                    recipesUsedInLabel.setText(String.format(("%d "+ tm.tr("recipe(s)")), update.amountOfRecipes()));
                 });
             });
         });
