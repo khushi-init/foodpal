@@ -1,6 +1,8 @@
 package client.data;
 
+import client.popups.ServerDisconnectPopupCtrl;
 import client.scenes.ErrorCtrl;
+import client.utils.StrictPopupService;
 import com.google.inject.Inject;
 import javafx.application.Platform;
 import org.jspecify.annotations.NonNull;
@@ -26,12 +28,15 @@ public class WebSocketManager {
     private StompSession session;
     private final String url = "ws://localhost:8080/autoupdates-websocket";
 
+    private final StrictPopupService<ServerDisconnectPopupCtrl> serverDisconnectPopup;
+
     private final Map<String, Subsubscription<?>> activeSubscriptions = new ConcurrentHashMap<>();
 
     @Inject
-    private WebSocketManager(ErrorCtrl errors){
+    private WebSocketManager(ErrorCtrl errors, StrictPopupService<ServerDisconnectPopupCtrl> serverDisconnectPopup){
         connect();
         this.errorCtrl = errors;
+        this.serverDisconnectPopup = serverDisconnectPopup;
     }
 
     // /!\ WARNING /!\ THE DOCUMENTATION USED TO WRITE THE FOLLOWING CODE WAS VERY LIMITED. I KINDA KNOW WHAT THIS DOES.
@@ -107,6 +112,7 @@ public class WebSocketManager {
                 activeSubscriptions.forEach((topic, details) -> {
                     details.stompSubscription().set(performSubscription(topic, details));
                 });
+                serverDisconnectPopup.hideStrictPopup();
             }
 
             @Override
@@ -119,6 +125,9 @@ public class WebSocketManager {
             public void handleTransportError(StompSession sesh, Throwable e) {
                 // TODO We need to limit the amount of reconnections and resubscribe
                 System.out.println("Connection lost. Retrying in 5 seconds...");
+                if (!serverDisconnectPopup.isShowing()) {
+                    serverDisconnectPopup.showStrictPopup(ServerDisconnectPopupCtrl.class, "client", "modules", "ServerDisconnectPopup.fxml");
+                }
                 // Schedule a reconnect
                 Executors.newSingleThreadScheduledExecutor()
                         .schedule(() -> connect(), subscriptionTime/2, TimeUnit.SECONDS);

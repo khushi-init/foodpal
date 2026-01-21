@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="320.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.popups.ServerDisconnectPopupCtrl">
+    <columnConstraints>
+        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+    </rowConstraints>
+    <children>
+        <Label fx:id="titleLabel" alignment="CENTER" text="LOST CONNECTION TO SERVER" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS">
+            <font>
+                <Font size="20.0" />
+            </font>
+        </Label>
+      <VBox alignment="CENTER" prefWidth="320.0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+         <children>
+            <Label fx:id="reconnectionAttemptLabel" contentDisplay="CENTER" text="Attempting Reconnect" textAlignment="CENTER">
+               <VBox.margin>
+                  <Insets bottom="18.0" />
+               </VBox.margin>
+            </Label>
+              <ProgressIndicator focusTraversable="false">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </ProgressIndicator>
+         </children>
+      </VBox>
+        <Button fx:id="abortButton" onAction="#killApplication" mnemonicParsing="false" style="-fx-background-color: #e2090c; -fx-text-fill: white; -fx-font-weight: bold;" text="ABORT APPLICATION" GridPane.rowIndex="2" />
+    </children>
+</GridPane>

@@ -144,29 +144,50 @@ public class Recipe {
         // Header 1 with the name of the recipe
         output.append("# ").append(name).append("\n\n");
         // List of ingredients in a table
-        output.append("## Ingredients\n");
-        output.append("| Name | Amount |\n");
-        output.append("|------|--------|\n");
+        output.append("## Ingredients\n")
+                .append("| Name | Amount |\n")
+                .append("|------|--------|\n");
 
         // Add all ingredients to the table.
         for (RecipeIngredient i : ingredients) {
             output.append("| ")
                     .append(i.getIngredient().getName())
-                    .append(" | ")
-                    .append(i.getQuantity())
+                    .append(" | ");
+
+            String amountText;
+
+            try {
+                if (i.getUnit() == null) {
+                    amountText = String.valueOf(i.getQuantity());
+                } else {
+                    Unit unit = i.getUnit().toUnit();
+                    if (unit == null) {
+                        amountText = "N/A";
+                    } else {
+                        amountText = i.getQuantity() + " "
+                                + unit.getDisplayName();
+                    }
+                }
+            } catch (Exception e) {
+                amountText = "N/A";
+            }
+
+            output.append(amountText)
                     .append(" |\n");
         }
 
         // List of all preparation steps.
         output.append("\n## Preparation Steps\n");
         for (String step : preparationSteps) {
-            output.append("* ").append(step).append("\n");
+            output.append("* ")
+                    .append(step)
+                    .append("\n");
         }
 
         output.append("\n")
-                .append("*This recipe has been served ")
+                .append("*This recipe gives you a total of ")
                 .append(totalServings)
-                .append(" time(s)*\n");
+                .append(" serving(s)*\n");
 
         return output.toString();
     }
