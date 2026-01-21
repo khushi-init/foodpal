@@ -28,7 +28,7 @@
                         prefWidth="45" prefHeight="45"
                         minWidth="45" minHeight="45"
                         style="-fx-background-color: transparent;
-               -fx-border-color: tranparent;
+               -fx-border-color: transparent;
                -fx-text-fill: white;
                -fx-font-size: 36;
                -fx-font-weight: 900;
