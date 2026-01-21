@@ -32,7 +32,6 @@
                 <Label prefHeight="38.0" prefWidth="202.0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="FoodPal" />
 
                 <Region HBox.hgrow="ALWAYS" />
-                <MenuButton fx:id="addIngredientMenu" text="Add Ingredient" />
 
                 <Button fx:id="shoppingListButton" onAction="#onShoppingList" style="-fx-cursor: hand; -fx-background-color: transparent;">
                     <graphic>
@@ -52,6 +51,11 @@
                         </ImageView>
                     </graphic>
                 </Button>
+
+                <MenuButton fx:id="addIngredientMenu"
+                            mnemonicParsing="false"
+                            style="-fx-background-color: transparent;">
+                </MenuButton>
             </children>
         </HBox>
     </top>

@@ -124,6 +124,9 @@ public class RecipesWindowCtrl {
     double recipeScale = 1.0;
     double scaleLimit = 1000.0;
 
+    int flagHeight = 36;
+    int flagWidth = 40;
+
     int hundredtwenty = 120;
     int five = 5;
     int ten = 10;
@@ -1517,13 +1520,19 @@ public class RecipesWindowCtrl {
 
         tm.setLanguage(locale);
 
-        // Update the dropdown button look based on language
+        // Update the dropdown button look
         addIngredientMenu.setGraphic(icon(flagPath));
-        addIngredientMenu.setText(
-                tm.tr("menu.language." + locale.getLanguage())
-        );
 
-        languageMenu.setText(""); //we can add the language name if we want??
+        // 1. Clear the text so ONLY the flag shows
+        addIngredientMenu.setText("");
+
+        // 2. Remove the grey background and the arrow/caret
+        addIngredientMenu.setStyle(
+                "-fx-background-color: transparent; " + // Removes grey box
+                        "-fx-padding: 0; " +                    // Removes inner space
+                        "-fx-mark-color: transparent; " +       // Hides the tiny dropdown arrow
+                        "-fx-cursor: hand;"                     // Makes it feel like a button
+        );
     }
 
     private void refreshDynamicViews() {
@@ -1541,8 +1550,11 @@ public class RecipesWindowCtrl {
 
     private ImageView icon(String path) {
         ImageView iv = new ImageView(new Image(getClass().getResourceAsStream(path)));
-        iv.setFitWidth(sizeFlag2);
-        iv.setFitHeight(sizeFlag);
+        iv.setSmooth(true);
+        iv.setCache(true);
+        iv.setFitWidth(flagWidth);
+        iv.setFitHeight(flagHeight);
+        iv.setPreserveRatio(true);
         return iv;
     }
 
