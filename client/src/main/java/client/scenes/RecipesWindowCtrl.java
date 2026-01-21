@@ -52,7 +52,11 @@ public class RecipesWindowCtrl {
     // Make sure to change to *flagPT.jpg* after we made him mad
     private final String francisco = "flatPT.jpg";
 
-    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor();
+    private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
     private Long previousRecipeSubscription = -1L;
 
     @FXML
