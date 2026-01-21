@@ -199,7 +199,7 @@ public class RecipeService {
                     .noneMatch(incomingRi ->
                             existingName.equals(getIngredientName(incomingRi)));
 
-            if(deleted){
+            if(deleted && existingRi != null && existingRi.getIngredient() != null && existingRi.getIngredient().getId() != null){
                 eventPublisher.publishEvent(
                     new IngredientLinkedRecipesUpdate(
                         existingRi.getIngredient().getId(),
