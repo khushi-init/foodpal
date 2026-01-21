@@ -106,6 +106,8 @@ public class IngredientService {
 
     @Transactional
     public Optional<Ingredient> updateIngredient(Ingredient ingredient){
+        System.out.println("Trying ingredient update " + ingredient.getId());
+        System.out.println(ingredientRepository.findById(ingredient.getId()).isPresent());
         return ingredientRepository.findById(ingredient.getId()).map(existing -> {
             if(!validateIngredientName(ingredient));
             boolean nameChange = false;

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 public class IngredientServiceTest {
@@ -107,11 +109,12 @@ public class IngredientServiceTest {
         existing.setId(id);
 
         when(mockIngredientRepo.existsById(id)).thenReturn(true);
+        when(mockIngredientRepo.findById(id)).thenReturn(Optional.of(existing));
         when(mockIngredientRepo.save(existing)).thenReturn(existing);
 
         // ACT
         Optional<Ingredient> result = sut.updateIngredient(existing);
-
+        
         // ASSERT
         assertTrue(result.isPresent());
         assertEquals("Sugar", result.get().getName());
