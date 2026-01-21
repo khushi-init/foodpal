@@ -79,6 +79,8 @@ public class RecipeService {
         recipe.setName(incoming.getName());
         recipe.setPreparationSteps(incoming.getPreparationSteps());
 
+        recipe.setLanguage(incoming.getLanguage());
+
         List<RecipeIngredient> ingredients = new java.util.ArrayList<>();
 
         if (incoming.getIngredients() != null) {
@@ -131,6 +133,8 @@ public class RecipeService {
             symDiff = null;
 
             existing.setPreparationSteps(incoming.getPreparationSteps());
+
+            existing.setLanguage(incoming.getLanguage());
 
             // Delete ingredients that are in existing but not in incoming
             removeDeletedIngredients(existing, incoming);
