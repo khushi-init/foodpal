@@ -406,7 +406,7 @@ public class IngredientsWindowCtrl {
         return "• " + ri.getIngredient().getName() + " " + quantity + " " + unitName;
     }
     private void applyTexts() {
-        backButton.setText(tm.tr("button.back"));
+        //backButton.setText(tm.tr("button.back"));
         name.setText(tm.tr("ingredient.name"));
         nutriInfo.setText(tm.tr("ingredient.nutrition.info"));
         per100.setText(tm.tr("ingredient.per.100g"));
