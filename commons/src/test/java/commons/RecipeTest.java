@@ -56,7 +56,7 @@ public class RecipeTest {
                 * Use the spell 'Pepernoteratus'.
                 * Put it in the oven for 10 minutes.
                 
-                *This recipe has been served 1 time(s)*
+                *This recipe gives you a total of 1 serving(s)*
                 """;
 
         String result = recipe.toMarkdown();

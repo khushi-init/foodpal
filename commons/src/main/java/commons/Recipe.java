@@ -153,8 +153,20 @@ public class Recipe {
             output.append("| ")
                     .append(i.getIngredient().getName())
                     .append(" | ")
-                    .append(i.getQuantity())
-                    .append(" |\n");
+                    .append(i.getQuantity());
+
+            RecipeIngredientUnit unitWrapper = i.getUnit();
+            if (unitWrapper != null) {
+                Unit unit = unitWrapper.toUnit();
+                if (unit != null) {
+                    output.append(" ")
+                            .append(unit.getDisplayName());
+                } else {
+                    output.append("-");
+                }
+            }
+            output.append(" |");
+            output.append(" |\n");
         }
 
         // List of all preparation steps.
@@ -164,9 +176,9 @@ public class Recipe {
         }
 
         output.append("\n")
-                .append("*This recipe has been served ")
+                .append("*This recipe gives you a total of ")
                 .append(totalServings)
-                .append(" time(s)*\n");
+                .append(" serving(s)*\n");
 
         return output.toString();
     }
