@@ -144,35 +144,44 @@ public class Recipe {
         // Header 1 with the name of the recipe
         output.append("# ").append(name).append("\n\n");
         // List of ingredients in a table
-        output.append("## Ingredients\n");
-        output.append("| Name | Amount |\n");
-        output.append("|------|--------|\n");
+        output.append("## Ingredients\n")
+                .append("| Name | Amount |\n")
+                .append("|------|--------|\n");
 
         // Add all ingredients to the table.
         for (RecipeIngredient i : ingredients) {
             output.append("| ")
                     .append(i.getIngredient().getName())
-                    .append(" | ")
-                    .append(i.getQuantity());
+                    .append(" | ");
 
-            RecipeIngredientUnit unitWrapper = i.getUnit();
-            if (unitWrapper != null) {
-                Unit unit = unitWrapper.toUnit();
-                if (unit != null) {
-                    output.append(" ")
-                            .append(unit.getDisplayName());
+            String amountText;
+
+            try {
+                if (i.getUnit() == null) {
+                    amountText = String.valueOf(i.getQuantity());
                 } else {
-                    output.append("-");
+                    Unit unit = i.getUnit().toUnit();
+                    if (unit == null) {
+                        amountText = "N/A";
+                    } else {
+                        amountText = i.getQuantity() + " "
+                                + unit.getDisplayName();
+                    }
                 }
+            } catch (Exception e) {
+                amountText = "N/A";
             }
-            output.append(" |");
-            output.append(" |\n");
+
+            output.append(amountText)
+                    .append(" |\n");
         }
 
         // List of all preparation steps.
         output.append("\n## Preparation Steps\n");
         for (String step : preparationSteps) {
-            output.append("* ").append(step).append("\n");
+            output.append("* ")
+                    .append(step)
+                    .append("\n");
         }
 
         output.append("\n")
