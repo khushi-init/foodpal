@@ -26,6 +26,10 @@ public class ServerDisconnectPopupCtrl {
         this.tm = tm;
     }
 
+    /**
+     * Initializes the popup with translated text.
+     */
+    @FXML
     public void initialize() {
         titleLabel.setText(tm.tr("warning.server.disconnect.title"));
         reconnectionAttemptLabel.setText(tm.tr("warning.server.disconnect.subLabel"));
