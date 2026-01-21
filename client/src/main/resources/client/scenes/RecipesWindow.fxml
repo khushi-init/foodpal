@@ -227,7 +227,11 @@
 
              <Label fx:id="totalKcalLabel" style="-fx-font-weight: bold;" text="0 total kcal" />
 
+             <Pane prefWidth="5.0" />
+
              <Label text="|" textFill="#bdbdbd" />
+
+             <Pane prefWidth="5.0" />
 
              <Label fx:id="kcalPer100gLabel" text="0 kcal/100g" />
          </children>
