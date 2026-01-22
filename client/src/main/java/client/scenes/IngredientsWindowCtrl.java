@@ -44,7 +44,8 @@ public class IngredientsWindowCtrl {
     private final MyFXML fxml;
     private final WebSocketManager socker;
 
-    private Long previousIngredientSubscription = 1L;
+    private Long previousIngredientSubscription = -1L;
+    private Long previousLinkedRecipesSubscription = -1L;
 
     private volatile ExecutorService subscriptionExecutor;
 
@@ -179,7 +180,7 @@ public class IngredientsWindowCtrl {
                     if(newValue != null){
                         showIngredientDetails(newValue, true);
                         initializeIngredientSubscription(newValue.getId(), false);
-                        initializeIngredentLinkedRecipeSubscription(newValue.getId());
+                        initializeIngredientLinkedRecipeSubscription(newValue.getId(), false);
                     } else {
                         clearDetails();
                     }
@@ -196,7 +197,10 @@ public class IngredientsWindowCtrl {
         System.out.println("Starting ingredients subscription.");
         initializeIngredientAdditionSubscription();
         initializeIngredientDeletionSubscription();
-        if(previousIngredientSubscription != -1) initializeIngredientSubscription(previousIngredientSubscription, true);
+        if(previousIngredientSubscription != -1){
+            initializeIngredientSubscription(previousIngredientSubscription, true);
+            initializeIngredientLinkedRecipeSubscription(previousLinkedRecipesSubscription, true);
+        }
         initializeNameSubscription();
     }
 
@@ -208,7 +212,7 @@ public class IngredientsWindowCtrl {
         socker.unsubscribe("/updates/ingredient-addition");
         socker.unsubscribe("/updates/ingredient-name");
         socker.unsubscribe("/updates/ingredient/" + previousIngredientSubscription);
-        socker.unsubscribe("/updates/ingredient-linked-recipes/" + previousIngredientSubscription);
+        socker.unsubscribe("/updates/ingredient-linked-recipes/" + previousLinkedRecipesSubscription);
         socker.unsubscribe("/updates/ingredient-deletion");
     }
 
@@ -233,7 +237,9 @@ public class IngredientsWindowCtrl {
      */
     public void initializeIngredientSubscription(Long id, boolean forceResubscribe){
         if(previousIngredientSubscription.equals(id) && !forceResubscribe) return;
-        if(previousIngredientSubscription != -1) socker.unsubscribe("/updates/ingredient/" + previousIngredientSubscription);
+        if(previousIngredientSubscription != -1){
+            socker.unsubscribe("/updates/ingredient/" + previousIngredientSubscription);
+        }
         subscriptionExecutor.submit(() -> {
             socker.subscribe("/updates/ingredient/" + Long.toString(id), IngredientUpdate.class, update -> {
                 Platform.runLater(() -> {
@@ -252,6 +258,7 @@ public class IngredientsWindowCtrl {
                 });
             });
         });
+        previousIngredientSubscription = id;
     }
 
     /**
@@ -293,8 +300,13 @@ public class IngredientsWindowCtrl {
     /**
      * Subscribes to changes in the recipe count of the ingredient with the specified ID
      * @param id ID of the ingredient
+     * @param forceResubscribe Forces resubscription even when it's to the same ingredient
      */
-    public void initializeIngredentLinkedRecipeSubscription(Long id){
+    public void initializeIngredientLinkedRecipeSubscription(Long id, boolean forceResubscribe){
+        if(previousLinkedRecipesSubscription.equals(id) && !forceResubscribe) return;
+        if(previousLinkedRecipesSubscription != -1){
+            socker.unsubscribe("/updates/ingredient-linked-recipes/" + previousLinkedRecipesSubscription);
+        }
         subscriptionExecutor.submit(() -> {
             socker.subscribe("/updates/ingredient-linked-recipes/"+id, IngredientLinkedRecipesUpdate.class, update -> {
                 Platform.runLater(() -> {
@@ -303,6 +315,7 @@ public class IngredientsWindowCtrl {
                 });
             });
         });
+        previousLinkedRecipesSubscription = id;
     }
 
 
