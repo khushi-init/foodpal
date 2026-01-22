@@ -1054,6 +1054,7 @@ public class RecipesWindowCtrl {
         List<String> stepsCopy = new ArrayList<>(original.getPreparationSteps());
 
         Recipe clone = new Recipe(newName, totalServings, null, stepsCopy);
+        clone.setLanguage(original.getLanguage());
 
         List<RecipeIngredient> ingredientsCopy = new ArrayList<>();
         for (RecipeIngredient ri : original.getIngredients()) {
@@ -1511,9 +1512,18 @@ public class RecipesWindowCtrl {
             languageMenu.setGraphic(icon("/client/images/flagNL.png"));
             dataManipulator.editRecipeLanguage(currentRecipe, "nl");
         });
-        visualSk.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagSK.png")));
-        visualGr.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagGR.png")));
-        visualPt.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagPT.png")));
+        visualSk.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagSK.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "sk");
+        });
+        visualGr.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagGR.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "gr");
+        });
+        visualPt.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagPT.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "pt");
+        });
 
         languageMenu.getItems().setAll(visualUS, visualNl, visualSk, visualGr, visualPt);
         languageMenu.setGraphic(icon("/client/images/flagEN.png")); //initial language = english
