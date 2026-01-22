@@ -155,7 +155,7 @@ public class RecipesWindowCtrl {
 
     private final PrimaryCtrl primaryCtrl;
 
-    private final RecipeIngredientUnit defaultUnit = RecipeIngredientUnit.fromUnit(FormalUnit.GRAM);
+    private final RecipeIngredientUnit defaultUnit = RecipeIngredientUnit.fromUnit(FormalUnit.G);
 
     private final TranslationManager tm;
 
@@ -1265,21 +1265,21 @@ public class RecipesWindowCtrl {
 
     /**
      * Displays a modal dialog for editing an ingredient and returns the entered values
-     *
      * @param initialQuantity ingredient quantity
      * @return Optional containing the name and quantity if confirmed, otherwise Optional is empty
      */
     private Optional<IngredientPopUpCtrl> showIngredientPopUp(Ingredient initialIngredient, Double initialQuantity,
                                                               RecipeIngredientUnit unit) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/modules/IngredientPopUp.fxml"));
-            Parent root = loader.load();
-            IngredientPopUpCtrl ctrl = loader.getController();
 
-            Stage popUpStage = new Stage();
-            popUpStage.initModality(Modality.APPLICATION_MODAL);
-            popUpStage.setTitle(tm.tr("title.EditInstruction"));
-            popUpStage.setScene(new Scene(root));
+            Pair<IngredientPopUpCtrl, Parent> addIngPair = fxml.load(IngredientPopUpCtrl.class, "client", "modules", "IngredientPopUp.fxml");
+            Parent root = addIngPair.getValue();
+            IngredientPopUpCtrl ctrl =addIngPair.getKey();
+
+
+        Stage popUpStage = new Stage();
+        popUpStage.initModality(Modality.APPLICATION_MODAL);
+        popUpStage.setTitle(tm.tr("title.editIngredient"));
+        popUpStage.setScene(new Scene(root));
 
             ctrl.setStage(popUpStage);
 
@@ -1289,7 +1289,7 @@ public class RecipesWindowCtrl {
             // 2. Update this call to pass the Ingredient object instead of just a String name
             ctrl.setInitialValues(initialIngredient, initialQuantity, unit);
 
-            popUpStage.showAndWait();
+        popUpStage.showAndWait();
 
             if (ctrl.isOkClicked()) {
                 updateNutritionSummary();
@@ -1297,13 +1297,6 @@ public class RecipesWindowCtrl {
                 return Optional.of(ctrl);
             }
 
-        } catch (IOException e) {
-            if (errorCtrl != null) {
-                errorCtrl.showGenericError(e);
-            } else {
-                e.printStackTrace();
-            }
-        }
         return Optional.empty();
     }
 

@@ -27,7 +27,7 @@ public class RecipeTest {
         ingredient1 = new Ingredient("Sugar", defaultNutritionalValue);
         ingredient2 = new Ingredient("Butter", defaultNutritionalValue);
 
-        recipeIngredient1 = new RecipeIngredient(recipe, ingredient1, amount1, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM));
+        recipeIngredient1 = new RecipeIngredient(recipe, ingredient1, amount1, RecipeIngredientUnit.fromUnit(FormalUnit.G));
         recipeIngredient2 = new RecipeIngredient(recipe, ingredient2, amount2, new RecipeIngredientUnit());
 
         ingredientList = new ArrayList<>(List.of(recipeIngredient1, recipeIngredient2));

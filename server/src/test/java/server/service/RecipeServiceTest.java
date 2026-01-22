@@ -267,16 +267,16 @@ public class RecipeServiceTest {
         Recipe existing = new Recipe();
         existing.setIngredients(new ArrayList<>());
 
-        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
+        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.G)));
         existing.getIngredients().get(0).setId(new RecipeIngredientKey());
         existing.getIngredients().get(0).getIngredient().setId(1L);
 
-        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Pepper", null), 2.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
+        existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Pepper", null), 2.0, RecipeIngredientUnit.fromUnit(FormalUnit.G)));
         existing.getIngredients().get(1).setId(new RecipeIngredientKey());
         existing.getIngredients().get(0).getIngredient().setId(2L);
 
         Recipe incoming = new Recipe("Updated", new ArrayList<>(), new ArrayList<>());
-        incoming.getIngredients().add(new RecipeIngredient(incoming, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
+        incoming.getIngredients().add(new RecipeIngredient(incoming, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.G)));
         existing.getIngredients().get(1).setId(new RecipeIngredientKey());
         existing.getIngredients().get(0).getIngredient().setId(0L);
 
@@ -297,7 +297,7 @@ public class RecipeServiceTest {
     @Test
     public void testGetIngredientName() {
         RecipeIngredient ri =
-                new RecipeIngredient(null, new Ingredient("   ", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM));
+                new RecipeIngredient(null, new Ingredient("   ", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.G));
         String result = sut.getIngredientName(ri);
         assertNull(result);
     }

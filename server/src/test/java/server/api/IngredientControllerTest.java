@@ -43,10 +43,10 @@ public class IngredientControllerTest {
         testIngredient.setId(id);
 
 
-        testRI1 = new RecipeIngredient(testRecipe1, testIngredient, fakeQuantity, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM));
+        testRI1 = new RecipeIngredient(testRecipe1, testIngredient, fakeQuantity, RecipeIngredientUnit.fromUnit(FormalUnit.G));
         testRecipe1 = new Recipe("Ice soup", List.of(testRI1), List.of());
 
-        testRI2 = new RecipeIngredient(testRecipe2, testIngredient, fakeQuantity, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM));
+        testRI2 = new RecipeIngredient(testRecipe2, testIngredient, fakeQuantity, RecipeIngredientUnit.fromUnit(FormalUnit.G));
         testRecipe2 = new Recipe("Ice soup", List.of(testRI2), List.of());
 
         testRecipe1.setId(fakeRecipeId1);
