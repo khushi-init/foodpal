@@ -697,19 +697,22 @@ public class RecipesWindowCtrl {
                 refreshNutritionTooltip(currentRecipe);
             });
             ingCtrl.setEditIngredient(() -> {
-                showIngredientPopUp(ri.getIngredient().getName(), ri.getQuantity(), ri.getUnit())
-                                .ifPresent(result -> {
-                                    try {
-                                        ri.setQuantity(Double.parseDouble(result.getKey()));
-                                        Unit selectedUnit = result.getValue();
-                                        ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
-                                        refreshNutritionTooltip(currentRecipe);
-                                        openRecipe(currentRecipe);
-                                        server.updateRecipe(currentRecipe);
-                                    } catch (NumberFormatException err) {
-                                        errorCtrl.showGenericError(tm.tr("error.quantityMustBeNumber"));
-                                    }
-                                });
+                showIngredientPopUp(ri.getIngredient(), ri.getQuantity(), ri.getUnit())
+                        .ifPresent(result -> {
+                            try {
+                                // Now these methods match the ones in IngredientPopUpCtrl!
+                                ri.setIngredient(result.getSelectedIngredient());
+                                ri.setQuantity(Double.parseDouble(result.getQuantity()));
+
+                                Unit selectedUnit = result.getSelectedUnit();
+                                ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
+
+                                openRecipe(currentRecipe);
+                                server.updateRecipe(currentRecipe);
+                            } catch (NumberFormatException err) {
+                                errorCtrl.showGenericError(tm.tr("error.quantityMustBeNumber"));
+                            }
+                        });
             });
         }
         //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
@@ -1242,12 +1245,11 @@ public class RecipesWindowCtrl {
     /**
      * Displays a modal dialog for editing an ingredient and returns the entered values
      *
-     * @param initialName ingredient name
      * @param initialQuantity ingredient quantity
      * @return Optional containing the name and quantity if confirmed, otherwise Optional is empty
      */
-    private Optional<Pair<String, Unit>> showIngredientPopUp(String initialName, Double initialQuantity,
-                                                             RecipeIngredientUnit unit) {
+    private Optional<IngredientPopUpCtrl> showIngredientPopUp(Ingredient initialIngredient, Double initialQuantity,
+                                                              RecipeIngredientUnit unit) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/modules/IngredientPopUp.fxml"));
             Parent root = loader.load();
@@ -1259,14 +1261,19 @@ public class RecipesWindowCtrl {
             popUpStage.setScene(new Scene(root));
 
             ctrl.setStage(popUpStage);
-            ctrl.setInitialValues(initialName, initialQuantity, unit);
+
+            // 1. Pass the full list of ingredients to the dropdown
+            ctrl.setIngredients(storage.getIngredients(), initialIngredient);
+
+            // 2. Update this call to pass the Ingredient object instead of just a String name
+            ctrl.setInitialValues(initialIngredient, initialQuantity, unit);
 
             popUpStage.showAndWait();
 
             if (ctrl.isOkClicked()) {
                 refreshNutritionTooltip(currentRecipe);
-                // Pair holds the Quantity String (Key) and the Unit Enum/Object (Value)
-                return Optional.of(new Pair<>(ctrl.getQuantity(), ctrl.getSelectedUnit()));
+                // 3. Return the entire controller instead of a Pair
+                return Optional.of(ctrl);
             }
 
         } catch (IOException e) {
