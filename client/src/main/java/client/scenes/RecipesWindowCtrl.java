@@ -412,8 +412,7 @@ public class RecipesWindowCtrl {
     }
 
     /**
-     * Subscribes to any update in the recipe with the specified ID, except for changes in the Ingredients.
-     * Note that changes in RecipeIngredient ARE propagated through this subscription
+     * Subscribes to any update in the recipe with the specified ID, including (Recipe)Ingredient
      * @param id Id of the recipe we want to subscribe to
      * @param forceResubscribe Forces resubscription to the websocket even if its to the same recipe
      */

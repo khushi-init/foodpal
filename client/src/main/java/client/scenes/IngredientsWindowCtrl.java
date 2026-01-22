@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.springframework.messaging.simp.stomp.StompSession;
 
 import client.IngredientListCell;
 import client.MyFXML;
@@ -45,11 +44,7 @@ public class IngredientsWindowCtrl {
     private final MyFXML fxml;
     private final WebSocketManager socker;
 
-    private volatile StompSession.Subscription nameSubscription;
-    private volatile StompSession.Subscription ingredientSubscription;
-    private volatile StompSession.Subscription ingredientAdditionSubscription;
-    private volatile StompSession.Subscription ingredientDeletionSubscription;
-    private volatile StompSession.Subscription ingredientLinkedRecipeSubscription;
+    private Long previousIngredientSubscription = 1L;
 
     private volatile ExecutorService subscriptionExecutor;
 
@@ -155,7 +150,11 @@ public class IngredientsWindowCtrl {
         this.server = server;
         this.fxml = fxml;
         this.tm = tm;
-        this.subscriptionExecutor = Executors.newSingleThreadExecutor();
+        this.subscriptionExecutor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        });
         this.socker = socker;
     }
 
@@ -179,74 +178,64 @@ public class IngredientsWindowCtrl {
                     if(ignoreIngredientSelectionEvent) return;
                     if(newValue != null){
                         showIngredientDetails(newValue, true);
-                        if(ingredientSubscription != null){
-                            ingredientSubscription.unsubscribe();
-                        }
-                        initializeIngredientSubscription(newValue.getId());
+                        initializeIngredientSubscription(newValue.getId(), false);
                         initializeIngredentLinkedRecipeSubscription(newValue.getId());
                     } else {
                         clearDetails();
-                        if(ingredientSubscription != null){
-                            ingredientSubscription.unsubscribe();
-                            ingredientSubscription = null;
-                        }
                     }
                 });
-
-        // sidebarIngredientNamesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-        //     if (newValue != null) {
-        //         showIngredientDetails(newValue);
-        //     } else {
-        //         clearDetails();
-        //     }
-        // });
     }
 
+    /**
+     * MUST ALWAYS BE CALLED WHEN INGREDIENTSWINDOW COMES INTO VIEW
+     * Refreshes ingredients and subsribes to websockets
+     */
     public void startup(){
         dataManipulator.refreshIngredients();
         sortSideBar();
         System.out.println("Starting ingredients subscription.");
         initializeIngredientAdditionSubscription();
         initializeIngredientDeletionSubscription();
+        if(previousIngredientSubscription != -1) initializeIngredientSubscription(previousIngredientSubscription, true);
         initializeNameSubscription();
     }
 
+    /**
+     * Should always be called when IngredientsWindow goes out of view
+     * Unsubsribes from websockets
+     */
     public void shutdown(){
-
-        if(ingredientSubscription != null){
-            ingredientSubscription.unsubscribe();
-            ingredientSubscription = null;
-        }
-        if(nameSubscription != null){
-            nameSubscription.unsubscribe();
-            nameSubscription = null;
-        }
-        if(ingredientAdditionSubscription != null){
-            ingredientAdditionSubscription.unsubscribe();
-            ingredientAdditionSubscription = null;
-        }
-        if(ingredientDeletionSubscription != null){
-            ingredientDeletionSubscription.unsubscribe();
-            ingredientDeletionSubscription = null;
-        }
+        socker.unsubscribe("/updates/ingredient-addition");
+        socker.unsubscribe("/updates/ingredient-name");
+        socker.unsubscribe("/updates/ingredient/" + previousIngredientSubscription);
+        socker.unsubscribe("/updates/ingredient-linked-recipes/" + previousIngredientSubscription);
+        socker.unsubscribe("/updates/ingredient-deletion");
     }
 
+    /**
+     * Subscribes to updates on the name of any ingredient
+     */
     public void initializeNameSubscription(){
         subscriptionExecutor.submit(() -> {
-            nameSubscription = socker.subscribe("/updates/ingredient-name", IngredientNameUpdate.class, update -> {
+            socker.subscribe("/updates/ingredient-name", IngredientNameUpdate.class, update -> {
                 Platform.runLater(() -> {
                     dataManipulator.changeIngredientNameLocal(update.id(), update.name());
-                    // sidebarIngredientNamesList.refresh();
                     sortSideBar();
                 });
             });
         });
     }
 
-    public void initializeIngredientSubscription(Long id){
-        if(ingredientSubscription != null) ingredientSubscription.unsubscribe();
+    /**
+     * Subscribes to any update in the ingredient with the specified ID, except for the recipe count
+     * @param id Id of the ingredient we want to subscribe to
+     * @param forceResubscribe Forces resubscription to the websocket even if its to the same ingredient
+     */
+    public void initializeIngredientSubscription(Long id, boolean forceResubscribe){
+        if(previousIngredientSubscription.equals(id) && !forceResubscribe) return;
+        if(previousIngredientSubscription != -1) socker.unsubscribe("/updates/ingredient/" + previousIngredientSubscription);
         subscriptionExecutor.submit(() -> {
-            ingredientSubscription = socker.subscribe("/updates/ingredient/" + Long.toString(id), IngredientUpdate.class, update -> {
+            socker.subscribe("/updates/ingredient/" + Long.toString(id), IngredientUpdate.class, update -> {
                 Platform.runLater(() -> {
                     ignoreIngredientSelectionEvent = true;
                     dataManipulator.updateIngredientLocal(update.ingredient());
@@ -265,10 +254,12 @@ public class IngredientsWindowCtrl {
         });
     }
 
+    /**
+     * Subscribes to the addition of ingredients
+     */
     public void initializeIngredientAdditionSubscription(){
-        if(ingredientAdditionSubscription != null) ingredientAdditionSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
-            ingredientAdditionSubscription = socker.subscribe("/updates/ingredient-addition", IngredientAddition.class, update -> {
+            socker.subscribe("/updates/ingredient-addition", IngredientAddition.class, update -> {
                 Platform.runLater(() -> {
                     ignoreIngredientSelectionEvent = true;
                     dataManipulator.updateIngredientLocal(update.ingredient());
@@ -279,10 +270,12 @@ public class IngredientsWindowCtrl {
         });
     }
 
+    /**
+     * Subscribes to the deletion of ingredients
+     */
     public void initializeIngredientDeletionSubscription(){
-        if(ingredientDeletionSubscription != null) ingredientDeletionSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
-            ingredientDeletionSubscription = socker.subscribe("/updates/ingredient-deletion", IngredientDeletion.class, update -> {
+            socker.subscribe("/updates/ingredient-deletion", IngredientDeletion.class, update -> {
                 Platform.runLater(() -> {
                     ignoreIngredientSelectionEvent = true;
                     dataManipulator.deleteIngredientLocal(update.id());
@@ -297,10 +290,13 @@ public class IngredientsWindowCtrl {
         });
     }
 
+    /**
+     * Subscribes to changes in the recipe count of the ingredient with the specified ID
+     * @param id ID of the ingredient
+     */
     public void initializeIngredentLinkedRecipeSubscription(Long id){
-        if(ingredientLinkedRecipeSubscription != null) ingredientLinkedRecipeSubscription.unsubscribe();
         subscriptionExecutor.submit(() -> {
-            ingredientLinkedRecipeSubscription = socker.subscribe("/updates/ingredient-linked-recipes/"+id, IngredientLinkedRecipesUpdate.class, update -> {
+            socker.subscribe("/updates/ingredient-linked-recipes/"+id, IngredientLinkedRecipesUpdate.class, update -> {
                 Platform.runLater(() -> {
                     if(currentIngredient == null || !currentIngredient.getId().equals(update.ingredientId())) return;
                     recipesUsedInLabel.setText(String.format(("%d "+ tm.tr("recipe(s)")), update.amountOfRecipes()));
@@ -346,9 +342,12 @@ public class IngredientsWindowCtrl {
 
         showNutriScore(ingredient);
 
-        // initializeIngredientSubscription(ingredient.getId());
     }
 
+    /**
+     * Shows ingredient details without refreshing the ingredient
+     * @param ingredient Ingredient to show
+     */
     public void showIngredientDetails(Ingredient ingredient){
         showIngredientDetails(ingredient, false);
     }
@@ -573,7 +572,9 @@ public class IngredientsWindowCtrl {
     }
 
 
-    // We need an update method to re-sort the ingredients list on updates
+    /**
+     * Sorts the side bar in alphabetical order
+     */
     public void sortSideBar(){
         FXCollections.sort(storage.getIngredients(), (i1, i2) -> i1.getName().compareToIgnoreCase(i2.getName()));
     }

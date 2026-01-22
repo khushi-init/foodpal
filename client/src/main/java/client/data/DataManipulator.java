@@ -116,7 +116,6 @@ public class DataManipulator {
         for (int i = 0; i < storage.getIngredients().size(); i++) {
             if (Objects.equals(storage.getIngredients().get(i).getId(), id)) {
                 storage.getIngredients().get(i).setName(newName);
-                System.out.println("NEW NAME SET");
                 updateIngredientLocal(storage.getIngredients().get(i));
                 break;
             }
@@ -166,7 +165,7 @@ public class DataManipulator {
      * @param id
      */
     public void deleteRecipeLocal(Long id){
-        System.out.println(storage.getRecipes().removeIf(x -> x.getId().equals(id)));
+        storage.getRecipes().removeIf(x -> x.getId().equals(id));
     }
 
     /**

@@ -16,9 +16,9 @@ public class IngredientEventListener {
     private final IngredientService ingredientService;
 
     /**
-     * The Recipe event listener sends updates via socket when informed by the RecipeService
+     * The Ingredient event listener sends updates via socket when informed by the RecipeService
      * @param messaging - The messaging template for socket communication
-     * @param 
+     * @param ingredientService - The ingredientService instance of the server
      */
     public IngredientEventListener(SimpMessagingTemplate messaging, IngredientService ingredientService) {
         this.messaging = messaging;
@@ -26,10 +26,8 @@ public class IngredientEventListener {
     }
 
     /**
-     * If a recipe name update event is published and the database transaction succeeds, the update is forwarded to the socket.
-     * Note: Using TitleUpdate for both event publishing and socket communication is not perfect, but should be fine withing the
-     * scope of the project
-     * @param update - The title-update object
+     * Sends an updated ingredient name to all clients subsribed to name changes
+     * @param update IngredientNameUpdate containing the id and new name of the ingredient
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishIngredientNameChange(IngredientNameUpdate update) {
@@ -38,8 +36,8 @@ public class IngredientEventListener {
     }
 
     /**
-     * Sends an updated recipe to all clients subscribed to that specific recipe.
-     * @param update The updated recipe
+     * Sends an updated ingredient to all clients subscribed to that specific ingredient.
+     * @param update The updated ingredient
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishIngredientChange(IngredientUpdate update){
@@ -48,8 +46,8 @@ public class IngredientEventListener {
     }
 
     /**
-     * Sends a new recipe to all clients subscribed to recipe additions
-     * @param update RecipeAddition containing the new recipe
+     * Sends a new ingredient to all clients subscribed to ingredient additions
+     * @param update IngredientAddition containing the new ingredient
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishIngredientAddition(IngredientAddition update){
@@ -58,8 +56,10 @@ public class IngredientEventListener {
     }
 
     /**
-     * Sends the id of a deleted recipe to all clients subscribed to recipe deletions
-     * @param update RecipeDeletion containing the ID of the deleted recipe
+     * Sends the id of a deleted ingredient to all clients subscribed to ingredient deletions
+     * For mysterious reasons, the ingredient doesn't actually get deleted after first calling deleteIngredient on IngredientService
+     * So we call it again in a new transaction to be sure that the ingredient is deleted.
+     * @param update IngredientDeletion containing the ID of the deleted ingredient
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -67,5 +67,15 @@ public class IngredientEventListener {
         ingredientService.deleteIngredient(update.id());
         System.out.println("Sending deleted ingredient with id " + update.id());
         messaging.convertAndSend("/updates/ingredient-deletion", update);
+    }
+
+    /**
+     * Sends the id and new recipe count of an ingredient to all clients subscribed to a change in recipe count
+     * @param update IngredientLinkedRecipesUpdate containing the ID and new recipe count of the ingredient
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void publishIngredientLinkedRecipesUpdate(IngredientLinkedRecipesUpdate update){
+        System.out.println("Sending linked recipes change for ingredient "+ update.ingredientId());
+        messaging.convertAndSend("/updates/ingredient-linked-recipes/"+update.ingredientId(), update);
     }
 }

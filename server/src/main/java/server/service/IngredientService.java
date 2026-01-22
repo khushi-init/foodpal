@@ -75,41 +75,18 @@ public class IngredientService {
         return saved;
     }
 
-    // /**
-    //  * Validates and updates an existing ingredient.
-    //  * @param ingredient The ingredient data to update
-    //  * @return The updated ingredient, or null if the ID does not exist
-    //  * @throws IllegalArgumentException if the name is invalid
-    //  */
-    // @Transactional
-    // public Optional<Ingredient> updateIngredient(Ingredient ingredient) {
-    //     Optional<Ingredient> oldIng = ingredientRepository.findById(ingredient.getId());
-    //     boolean nameUpdated = false;
-    //     if(oldIng.isPresent()){
-    //         nameUpdated = !ingredient.getName().equals(oldIng.get().getName());
-    //     }
-    //     //drop oldIng, it is tied to the repository and would result in a concurrency exception
-    //     oldIng = null;
-    //     Optional<Ingredient> updated = Optional.of(ingredient)
-    //             .filter(i -> ingredientRepository.existsById(i.getId()))
-    //             .filter(this::validateIngredientName)
-    //             .map(ingredientRepository::save);
-    //     if(updated.isPresent()){
-    //         eventPublisher.publishEvent(new IngredientUpdate(ingredient.getId(), updated.get()));
-    //         if(nameUpdated){
-    //             eventPublisher.publishEvent(new IngredientNameUpdate(ingredient.getId(), updated.get().getName()));
-    //         }
-    //         recipeService.updateRecipesWithChangedIngredient(ingredient);
-    //     }
-    //     return updated;
-    // }
-
+    /**
+     * Validates and updates an existing ingredient.
+     * @param ingredient The ingredient data to update
+     * @return The updated ingredient, or null if the ID does not exist
+     * @throws IllegalArgumentException if the name is invalid
+     */
     @Transactional
     public Optional<Ingredient> updateIngredient(Ingredient ingredient){
         System.out.println("Trying ingredient update " + ingredient.getId());
         System.out.println(ingredientRepository.findById(ingredient.getId()).isPresent());
         return ingredientRepository.findById(ingredient.getId()).map(existing -> {
-            if(!validateIngredientName(ingredient));
+            if(!validateIngredientName(ingredient)) return null;
             boolean nameChange = false;
             if(existing.getName() != null && !existing.getName().equals(ingredient.getName())){
                 existing.setName(ingredient.getName());
