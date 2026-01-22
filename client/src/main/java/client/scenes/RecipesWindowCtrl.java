@@ -504,15 +504,18 @@ public class RecipesWindowCtrl {
                     return;
                 }
                 try{
-                    ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                            favFilter(
-                                    searchService.query(
-                                            searchField.getText(), storage.getRecipes()
-                                    ),
-                                    storage.getFavoriteIDs())
-                    );
-                    sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
-                    searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                    if(!searchField.getText().isEmpty()){ // Check if the user's query is not just whitespace or empty
+                        ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
+                                favFilter(
+                                        searchService.query(
+                                                searchField.getText(), storage.getRecipes()
+                                        ),
+                                        storage.getFavoriteIDs())
+                        );
+                        sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
+                        searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                    } else errorCtrl.showGenericError("Search Query must not be empty!");
+
                 } catch (Exception e){
                     errorCtrl.showGenericError(e);
                 }
@@ -545,21 +548,6 @@ public class RecipesWindowCtrl {
      */
     public void updateToFav() {
         cancelSearch();
-        // Load only favorites or nah
-        if (favoriteCheck.isSelected()) {
-            searchService.setFavToggle(true);
-            List<Recipe> favRecipes = new ArrayList<>();
-            for (Recipe r : storage.getRecipes()) {
-                if (storage.getFavoriteIDs().contains(r.getId())) {
-                    favRecipes.add(r);
-                }
-            }
-            sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
-            sidebarRecipeNamesList.getSelectionModel().select(0);
-        } else {
-            searchService.setFavToggle(false);
-            sidebarRecipeNamesList.setItems(storage.getRecipes());
-        }
     }
 
     /**
@@ -803,21 +791,35 @@ public class RecipesWindowCtrl {
      * @return a string describing the recipeIngredient and its attributes
      */
     public String formatIngredientText(RecipeIngredient ri) {
-        String unitName = "";
+        String unitName = getUnitDisplayName(ri);
         boolean isInformal = false;
-        if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
-            unitName = ri.getUnit().toUnit().getDisplayName();
-            isInformal = ri.getUnit().toUnit() instanceof InformalUnit;
 
+        if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
+            isInformal = ri.getUnit().toUnit() instanceof InformalUnit;
         }
-        double quantity;
-        if(isInformal || recipeScale == 1.0) {
-            quantity = ri.getQuantity();
-        }
-        else {
+
+        double quantity = ri.getQuantity();
+
+        // Only apply scaling and normalization if NOT informal and scale is NOT 1.0
+        if (!isInformal && recipeScale != 1.0) {
             quantity = ri.getQuantity() * recipeScale;
+
+            if (ri.getUnit() != null) {
+                // Call the method exactly as you named it: getNormalizedDisplay(double)
+                org.apache.commons.lang3.tuple.Pair<Double, String> normalizedPair =
+                        ri.getUnit().getNormalizedDisplay(quantity);
+
+                quantity = normalizedPair.getLeft();
+                unitName = normalizedPair.getRight();
+            }
         }
-        return "• " + ri.getIngredient().getName() + " " + quantity + " " + unitName;
+
+        // Clean up the number formatting (e.g., 1.0 -> 1)
+        String formattedQuantity = (quantity % 1 == 0)
+                ? String.format("%.0f", quantity)
+                : String.format("%.2f", quantity);
+
+        return "• " + ri.getIngredient().getName() + " " + formattedQuantity + " " + unitName;
     }
     /**
      * Updates the current recipe and refreshes it to reflect changes made
@@ -1206,6 +1208,8 @@ public class RecipesWindowCtrl {
             if (!recipeStillExists) return;
             setSelectedRecipe(selectedRecipe);
 
+            dataManipulator.loadFavs();
+
         } catch (Exception e) {
             errorCtrl.showGenericError(e);
         }
@@ -1350,7 +1354,25 @@ public class RecipesWindowCtrl {
             if(searchField.isFocused()){
                 searchField.getParent().requestFocus();
             }
-            sidebarRecipeNamesList.setItems(storage.getRecipes()); //display all recipes again
+            if(favoriteCheck.isSelected()){
+                // Load only favorites or nah
+                if (favoriteCheck.isSelected()) {
+                    searchService.setFavToggle(true);
+                    List<Recipe> favRecipes = new ArrayList<>();
+                    for (Recipe r : storage.getRecipes()) {
+                        if (storage.getFavoriteIDs().contains(r.getId())) {
+                            favRecipes.add(r);
+                        }
+                    }
+                    sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
+                    sidebarRecipeNamesList.getSelectionModel().select(0);
+                } else {
+                    searchService.setFavToggle(false);
+                    sidebarRecipeNamesList.setItems(storage.getRecipes());
+                }
+            } else {
+                sidebarRecipeNamesList.setItems(storage.getRecipes()); //display all recipes again
+            }
         } catch (Exception e){
             errorCtrl.showGenericError(e);
         }

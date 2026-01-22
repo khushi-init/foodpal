@@ -430,8 +430,7 @@ public class IngredientsWindowCtrl {
     public Optional<Ingredient> handlePlusButtonPress() {
         Optional<Ingredient> parsed = ingredientDataPrompt(tm.tr("create.ingredient"), tm.tr("ingredient.create"), "", "", "", "");
         if (parsed.isEmpty()) return Optional.empty();
-        dataManipulator.addIngredient(parsed.get());
-        return parsed;
+        return dataManipulator.addIngredient(parsed.get());
     }
 
     /**

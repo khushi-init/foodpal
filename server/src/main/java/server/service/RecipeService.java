@@ -32,6 +32,7 @@ public class RecipeService {
      * @param recipeRepository The Recipe repository to meddle with
      * @param ingredientRepository the ingredient repository to meddle with
      * @param eventPublisher The event publisher for sending updates to sockets
+     * @param recipeIngredientRepository The RecipeIngredient repository of the server
      */
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ApplicationEventPublisher eventPublisher, RecipeIngredientRepository recipeIngredientRepository) {
         this.recipeRepository = recipeRepository;
@@ -313,6 +314,10 @@ public class RecipeService {
         .map(x -> x.getId()).map(x -> Long.valueOf(x.longValue())).toList();
     }
 
+    /**
+     * Sends a recipe update event for the recipes with the specifiet IDs
+     * @param ids List of recipe IDs
+     */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendRecipeUpdateForIds(List<Long> ids){
         for(Long id: ids){
@@ -322,6 +327,10 @@ public class RecipeService {
         }
     }
 
+    /**
+     * Sends a websocket update for the ingredients with the specified IDs
+     * @param ids IDs of the ingredients to receive a LinkedRecipesUpdate
+     */
     @Transactional
     public void sendUpdateForChangedRecipeLinks(List<Long> ids){
         for(Long id: ids){
