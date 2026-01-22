@@ -504,15 +504,18 @@ public class RecipesWindowCtrl {
                     return;
                 }
                 try{
-                    ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
-                            favFilter(
-                                    searchService.query(
-                                            searchField.getText(), storage.getRecipes()
-                                    ),
-                                    storage.getFavoriteIDs())
-                    );
-                    sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
-                    searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                    if(!searchField.getText().isEmpty()){ // Check if the user's query is not just whitespace or empty
+                        ObservableList<Recipe> searchResults = FXCollections.observableArrayList(
+                                favFilter(
+                                        searchService.query(
+                                                searchField.getText(), storage.getRecipes()
+                                        ),
+                                        storage.getFavoriteIDs())
+                        );
+                        sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
+                        searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
+                    } else errorCtrl.showGenericError("Search Query must not be empty!");
+
                 } catch (Exception e){
                     errorCtrl.showGenericError(e);
                 }
@@ -545,21 +548,6 @@ public class RecipesWindowCtrl {
      */
     public void updateToFav() {
         cancelSearch();
-        // Load only favorites or nah
-        if (favoriteCheck.isSelected()) {
-            searchService.setFavToggle(true);
-            List<Recipe> favRecipes = new ArrayList<>();
-            for (Recipe r : storage.getRecipes()) {
-                if (storage.getFavoriteIDs().contains(r.getId())) {
-                    favRecipes.add(r);
-                }
-            }
-            sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
-            sidebarRecipeNamesList.getSelectionModel().select(0);
-        } else {
-            searchService.setFavToggle(false);
-            sidebarRecipeNamesList.setItems(storage.getRecipes());
-        }
     }
 
     /**
@@ -1204,6 +1192,8 @@ public class RecipesWindowCtrl {
             if (!recipeStillExists) return;
             setSelectedRecipe(selectedRecipe);
 
+            dataManipulator.loadFavs();
+
         } catch (Exception e) {
             errorCtrl.showGenericError(e);
         }
@@ -1348,7 +1338,25 @@ public class RecipesWindowCtrl {
             if(searchField.isFocused()){
                 searchField.getParent().requestFocus();
             }
-            sidebarRecipeNamesList.setItems(storage.getRecipes()); //display all recipes again
+            if(favoriteCheck.isSelected()){
+                // Load only favorites or nah
+                if (favoriteCheck.isSelected()) {
+                    searchService.setFavToggle(true);
+                    List<Recipe> favRecipes = new ArrayList<>();
+                    for (Recipe r : storage.getRecipes()) {
+                        if (storage.getFavoriteIDs().contains(r.getId())) {
+                            favRecipes.add(r);
+                        }
+                    }
+                    sidebarRecipeNamesList.setItems(FXCollections.observableList(favRecipes));
+                    sidebarRecipeNamesList.getSelectionModel().select(0);
+                } else {
+                    searchService.setFavToggle(false);
+                    sidebarRecipeNamesList.setItems(storage.getRecipes());
+                }
+            } else {
+                sidebarRecipeNamesList.setItems(storage.getRecipes()); //display all recipes again
+            }
         } catch (Exception e){
             errorCtrl.showGenericError(e);
         }
