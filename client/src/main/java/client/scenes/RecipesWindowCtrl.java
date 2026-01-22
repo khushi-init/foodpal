@@ -273,7 +273,7 @@ public class RecipesWindowCtrl {
         });
         // Focused Property Listener, saves when the TextField loses focus
         scaleTextField.focusedProperty().addListener((obs,
-                                                          oldFocused, newFocused) -> {
+                                                      oldFocused, newFocused) -> {
             if (oldFocused && !newFocused) {
                 try {
                     updateScale(Double.parseDouble(scaleTextField.getText()));
@@ -328,7 +328,7 @@ public class RecipesWindowCtrl {
         });
         // Focused Property Listener, saves when the TextField loses focus
         totalServingsField.focusedProperty().addListener((obs,
-                                                       oldFocused, newFocused) -> {
+                                                          oldFocused, newFocused) -> {
             if (oldFocused && !newFocused) {
                 addRecipeServings();
             }
@@ -698,18 +698,18 @@ public class RecipesWindowCtrl {
             });
             ingCtrl.setEditIngredient(() -> {
                 showIngredientPopUp(ri.getIngredient().getName(), ri.getQuantity(), ri.getUnit())
-                                .ifPresent(result -> {
-                                    try {
-                                        ri.setQuantity(Double.parseDouble(result.getKey()));
-                                        Unit selectedUnit = result.getValue();
-                                        ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
-                                        refreshNutritionTooltip(currentRecipe);
-                                        openRecipe(currentRecipe);
-                                        server.updateRecipe(currentRecipe);
-                                    } catch (NumberFormatException err) {
-                                        errorCtrl.showGenericError(tm.tr("error.quantityMustBeNumber"));
-                                    }
-                                });
+                        .ifPresent(result -> {
+                            try {
+                                ri.setQuantity(Double.parseDouble(result.getKey()));
+                                Unit selectedUnit = result.getValue();
+                                ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
+                                refreshNutritionTooltip(currentRecipe);
+                                openRecipe(currentRecipe);
+                                server.updateRecipe(currentRecipe);
+                            } catch (NumberFormatException err) {
+                                errorCtrl.showGenericError(tm.tr("error.quantityMustBeNumber"));
+                            }
+                        });
             });
         }
         //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
@@ -966,12 +966,12 @@ public class RecipesWindowCtrl {
                 String movedItem = recipeIngredients.remove(initIndex);
                 recipeIngredients.add(currentIndex,movedItem);
                 new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(() ->
-                                updateRefresh());
-                    }
-                },
+                                         @Override
+                                         public void run() {
+                                             Platform.runLater(() ->
+                                                     updateRefresh());
+                                         }
+                                     },
                         processingDelay
                 );
 
@@ -1392,7 +1392,7 @@ public class RecipesWindowCtrl {
         ctrl.setShoppingList(shoppingList);
         ctrl.setSourceRecipeName(getSelectedRecipe().getName());
         ctrl.setOpenShoppingList(this::showShoppingList);
-        ctrl.loadFromRecipe(getSelectedRecipe().getIngredients());
+        ctrl.loadFromRecipe(getIngredientQuantityToScale());
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);
@@ -1403,6 +1403,32 @@ public class RecipesWindowCtrl {
         popUpStage.showAndWait();
     }
 
+    private List<RecipeIngredient> getIngredientQuantityToScale() {
+        if (currentRecipe == null) {
+            return List.of();
+        }
+
+        List<RecipeIngredient> scaledIngredients = new ArrayList<>();
+
+        for (RecipeIngredient ri : currentRecipe.getIngredients()) {
+            double quantity = ri.getQuantity();
+
+            if (ri.getUnit() != null && ri.getUnit().toUnit() != null
+                    && (ri.getUnit().toUnit() instanceof FormalUnit)) {
+                quantity = quantity * recipeScale;
+            }
+
+            scaledIngredients.add(
+                    new RecipeIngredient(
+                            currentRecipe,
+                            ri.getIngredient(),
+                            quantity,
+                            ri.getUnit()
+                    )
+            );
+        }
+        return scaledIngredients;
+    }
 
     @FXML
     private void onAdvancedSearch(){
