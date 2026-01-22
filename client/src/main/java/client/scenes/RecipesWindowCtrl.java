@@ -381,6 +381,7 @@ public class RecipesWindowCtrl {
         initializeRecipeAdditionSubscription();
         initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
+        openRecipe(currentRecipe, true);
     }
 
     /**
@@ -614,6 +615,7 @@ public class RecipesWindowCtrl {
      * @param updateRecipe True iff the recipe should be updated from the server
      */
     public void openRecipe(Recipe recipe, boolean updateRecipe) {
+        if (recipe == null) return;
         this.currentRecipe = recipe;
         ignoreSideBarSelectionEvent = true;
         if(updateRecipe){
