@@ -775,21 +775,35 @@ public class RecipesWindowCtrl {
      * @return a string describing the recipeIngredient and its attributes
      */
     public String formatIngredientText(RecipeIngredient ri) {
-        String unitName = "";
+        String unitName = getUnitDisplayName(ri);
         boolean isInformal = false;
-        if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
-            unitName = ri.getUnit().toUnit().getDisplayName();
-            isInformal = ri.getUnit().toUnit() instanceof InformalUnit;
 
+        if (ri.getUnit() != null && ri.getUnit().toUnit() != null) {
+            isInformal = ri.getUnit().toUnit() instanceof InformalUnit;
         }
-        double quantity;
-        if(isInformal || recipeScale == 1.0) {
-            quantity = ri.getQuantity();
-        }
-        else {
+
+        double quantity = ri.getQuantity();
+
+        // Only apply scaling and normalization if NOT informal and scale is NOT 1.0
+        if (!isInformal && recipeScale != 1.0) {
             quantity = ri.getQuantity() * recipeScale;
+
+            if (ri.getUnit() != null) {
+                // Call the method exactly as you named it: getNormalizedDisplay(double)
+                org.apache.commons.lang3.tuple.Pair<Double, String> normalizedPair =
+                        ri.getUnit().getNormalizedDisplay(quantity);
+
+                quantity = normalizedPair.getLeft();
+                unitName = normalizedPair.getRight();
+            }
         }
-        return "• " + ri.getIngredient().getName() + " " + quantity + " " + unitName;
+
+        // Clean up the number formatting (e.g., 1.0 -> 1)
+        String formattedQuantity = (quantity % 1 == 0)
+                ? String.format("%.0f", quantity)
+                : String.format("%.2f", quantity);
+
+        return "• " + ri.getIngredient().getName() + " " + formattedQuantity + " " + unitName;
     }
     /**
      * Updates the current recipe and refreshes it to reflect changes made
