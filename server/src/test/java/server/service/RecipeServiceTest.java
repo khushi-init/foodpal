@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import server.database.IngredientRepository;
+import server.database.RecipeIngredientRepository;
 import server.database.RecipeRepository;
 
 import java.util.ArrayList;
@@ -24,6 +25,9 @@ public class RecipeServiceTest {
 
     @Mock
     private IngredientRepository mockIngredientRepo;
+
+    @Mock
+    private RecipeIngredientRepository mockRecipeIngredientRepository;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -146,10 +150,17 @@ public class RecipeServiceTest {
         existing.setIngredients(new ArrayList<>());
 
         existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
+        existing.getIngredients().get(0).setId(new RecipeIngredientKey());
+        existing.getIngredients().get(0).getIngredient().setId(1L);
+
         existing.getIngredients().add(new RecipeIngredient(existing, new Ingredient("Pepper", null), 2.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
+        existing.getIngredients().get(1).setId(new RecipeIngredientKey());
+        existing.getIngredients().get(0).getIngredient().setId(2L);
 
         Recipe incoming = new Recipe("Updated", new ArrayList<>(), new ArrayList<>());
         incoming.getIngredients().add(new RecipeIngredient(incoming, new Ingredient("Salt", null), 1.0, RecipeIngredientUnit.fromUnit(FormalUnit.GRAM)));
+        existing.getIngredients().get(1).setId(new RecipeIngredientKey());
+        existing.getIngredients().get(0).getIngredient().setId(0L);
 
         when(mockRecipeRepo.findById(id)).thenReturn(Optional.of(existing));
         when(mockRecipeRepo.save(any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));

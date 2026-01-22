@@ -112,6 +112,13 @@ public class ServerUtils {
             .get(new GenericType<Recipe>(){});
     }
 
+    public Ingredient getIngredient(Long id){
+        return ClientBuilder.newClient(new ClientConfig())
+            .target(server).path("/api/ingredients/" + Long.toString(id))
+            .request(APPLICATION_JSON)
+            .get(new GenericType<Ingredient>(){});
+    }
+
 
     /**
      * Sends a POST request to the server to create a new recipe
