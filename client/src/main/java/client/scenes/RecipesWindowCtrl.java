@@ -49,6 +49,9 @@ public class RecipesWindowCtrl {
 
     private final WebSocketManager socker;
 
+    private final List<Pair<RecipeInstructionUICtrl, Node>> instructionCache = new ArrayList<>();
+    private final List<Pair<RecipeIngredientUICtrl, Node>> ingredientCache = new ArrayList<>();
+
     // Make sure to change to *flagPT.jpg* after we made him mad
     private final String francisco = "flatPT.jpg";
 
@@ -422,7 +425,7 @@ public class RecipesWindowCtrl {
     public void initializeRecipeSubscription(Long id, boolean forceResubscribe){
         if (previousRecipeSubscription.equals(id) && !forceResubscribe) return;
         // Unsubscribe from previous recipe
-        if (previousRecipeSubscription != -1) socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
+        if (previousRecipeSubscription != -1) subscriptionExecutor.submit(() -> socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription));
         subscriptionExecutor.submit(() -> {
             socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
                 Platform.runLater(() -> {
@@ -675,7 +678,16 @@ public class RecipesWindowCtrl {
 
         for (int i = 0; i < recipeIngredients.size(); ++i) {
             RecipeIngredient ri = recipeIngredients.get(i);
-            Pair<RecipeIngredientUICtrl, Node> ing = fxml.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
+            Pair<RecipeIngredientUICtrl, Node> ing;
+
+            // CACHE CHECK: Reuse existing node if possible
+            if (i < ingredientCache.size()) {
+                ing = ingredientCache.get(i);
+            } else {
+                ing = fxml.loadNode(RecipeIngredientUICtrl.class, "client", "modules", "RecipeIngredient.fxml");
+                ingredientCache.add(ing);
+            }
+
             RecipeIngredientUICtrl ingCtrl = ing.getKey();
             Node ingNode = ing.getValue();
 
@@ -851,13 +863,24 @@ public class RecipesWindowCtrl {
 
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
-            Pair<RecipeInstructionUICtrl, Node> ing = fxml.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
-            RecipeInstructionUICtrl instCtrl = ing.getKey();
-            Node ingNode = ing.getValue();
+            Pair<RecipeInstructionUICtrl, Node> inst;
+
+            // CACHE CHECK: Reuse existing node if possible
+            if (i < instructionCache.size()) {
+                inst = instructionCache.get(i);
+            } else {
+                inst = fxml.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
+                instructionCache.add(inst);
+            }
+
+            RecipeInstructionUICtrl instCtrl = inst.getKey();
+            Node ingNode = inst.getValue();
+
+            ingNode.setStyle("");
             int currentIndex = i;
 
             // Drag and drop trigger
-            detectDrag(ingNode, currentIndex, recipeInstructions);
+            // detectDrag(ingNode, currentIndex, recipeInstructions);
             // Delete logic
             instCtrl.setDeleteCheck(() -> {
                 // This code runs when .run() is called on click in deleteCheck runnable
@@ -914,72 +937,62 @@ public class RecipesWindowCtrl {
      * Drag and drop function, seperated as a helper. LoadSteps is already gigantic
      * @param n The node, or in this case RecipeInstruction node to move and compare to
      * @param currentIndex The current index of the this node/instruction
-     * @param recipeIngredients The list of recipeInredients, to be altered when dragging
+     * @param recipeInstructions The list of recipeInstructions, to be altered when dragging
      */
-    public void detectDrag(Node n, int currentIndex, List<String> recipeIngredients) {
-        // Things to do when instructions is dragged
-        // Basically just detect it as dragged, and copy the index to the 'clipboard'
-        // A clipboard is a required dataformat for the drag board...... These names man
+    public void detectDrag(Node n, int currentIndex, List<String> recipeInstructions) {
+        // 1. Start the drag process
         n.setOnDragDetected(event -> {
             Dragboard db = n.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent index = new ClipboardContent();
             index.putString(String.valueOf(currentIndex));
             db.setContent(index);
             event.consume();
-            System.out.println("Drag detected! Moving instruction at index " + currentIndex);
         });
-        // Check for any other node (Button, label, whatever) if its eligible
+
+        // 2. Allow the drop to happen
         n.setOnDragOver(dragEvent -> {
-            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+            if (dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
                 dragEvent.acceptTransferModes(TransferMode.MOVE);
             }
             dragEvent.consume();
         });
 
-        // Change border of target to green line for emphasis
-        // This depends on if we move up or down
+        // 3. Visual feedback (Top/Bottom border based on direction)
         n.setOnDragEntered(dragEvent -> {
-            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
+            if (dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
                 int initIndex = Integer.parseInt(dragEvent.getDragboard().getString());
-                String border = "-fx-border-style: solid outside; -fx-border-color: GREENYELLOW;";
-                if(initIndex < currentIndex) {
-                    // up right down left (0 0 3 0) = draw only top
-                    n.setStyle(border + "-fx-border-width: 0 0 3 0;");
-                } else if(initIndex > currentIndex) {
-                    n.setStyle(border + "-fx-border-width: 3 0 0 0;");
+                String border = "-fx-border-style: solid; -fx-border-color: GREENYELLOW; ";
+                if (initIndex < currentIndex) {
+                    n.setStyle(border + "-fx-border-width: 0 0 3 0;"); // Coming from above, highlight bottom
+                } else {
+                    n.setStyle(border + "-fx-border-width: 3 0 0 0;"); // Coming from below, highlight top
                 }
             }
         });
 
-        // Reset style when leaving target
-        n.setOnDragExited(dragEvent -> {
-            if(dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
-                n.setStyle("");
-            }
-        });
-        // When dropped on another instruction, remove original, and set on new target index
+        n.setOnDragExited(dragEvent -> n.setStyle(""));
+
+        // 4. THE FIX: Handle the drop without creating new Timer threads
         n.setOnDragDropped(dragEvent -> {
-            boolean succes = false;
             Dragboard db = dragEvent.getDragboard();
-            int initIndex = Integer.parseInt(db.getString());
-            if(initIndex != currentIndex) {
-                String movedItem = recipeIngredients.remove(initIndex);
-                recipeIngredients.add(currentIndex,movedItem);
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(() ->
-                                updateRefresh());
-                    }
-                },
-                        processingDelay
-                );
+            boolean success = false;
 
-                succes = true;
+            if (db.hasString()) {
+                int initIndex = Integer.parseInt(db.getString());
+                if (initIndex != currentIndex) {
+                    // Reorder the list locally
+                    String movedItem = recipeInstructions.remove(initIndex);
+                    recipeInstructions.add(currentIndex, movedItem);
+
+                    // Immediately update the server and UI on the JavaFX thread
+                    // No more "new Timer()" here!
+                    updateRefresh();
+                    success = true;
+                }
             }
-            dragEvent.setDropCompleted(succes);
-            dragEvent.consume();
 
+            dragEvent.setDropCompleted(success);
+            dragEvent.consume();
         });
     }
     /**
