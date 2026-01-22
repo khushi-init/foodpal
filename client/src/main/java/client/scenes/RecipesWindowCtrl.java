@@ -1497,15 +1497,17 @@ public class RecipesWindowCtrl {
         // Default starting state
         setLanguage(Locale.ENGLISH, "/client/images/flagUS.png");
 
-        MenuItem visualEng = new MenuItem("", icon("/client/images/flagUK.png"));
+        MenuItem visualUS = new MenuItem("", icon("/client/images/flagUS.png"));
         MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
         MenuItem visualSk = new MenuItem("", icon("/client/images/flagSK.png"));
         MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.png"));
         MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.png"));
 
-        visualEng.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagUK.png")));
+        visualUS.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagUK.png")));
         visualNl.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagNL.png")));
         visualSk.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagSK.png")));
+        visualGr.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagGR.png")));
+        visualPt.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagPT.png")));
 
         languageMenu.getItems().setAll(visualUS, visualNl, visualSk, visualGr, visualPt);
         languageMenu.setGraphic(icon("/client/images/flagUS.png")); //initial language = english
