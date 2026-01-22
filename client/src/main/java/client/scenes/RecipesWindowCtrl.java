@@ -153,7 +153,7 @@ public class RecipesWindowCtrl {
     private final TranslationManager tm;
 
     private Locale activeLocale = Locale.ENGLISH;
-    private String activeFlagPath = "/client/images/flagUS.png";
+    private String activeFlagPath = "/client/images/flagEN.png";
 
     private CustomMenuItem englishItem;
     private CustomMenuItem dutchItem;
@@ -655,7 +655,7 @@ public class RecipesWindowCtrl {
 
         String lang = currentRecipe.getLanguage();
         if(lang == null){
-            lang = "us";
+            lang = "en";
         }
 
         updateLanguageMenu(lang);
@@ -1452,7 +1452,7 @@ public class RecipesWindowCtrl {
 
     private void setUpLanguageDropdown() {
         // 1. Create Labels (Nodes) that can detect hover
-        Label engLabel = new Label("English", icon("/client/images/flagUS.png"));
+        Label engLabel = new Label("English", icon("/client/images/flagEN.png"));
         Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
         Label skLabel = new Label("Slovencina", icon("/client/images/flagSK.png"));
         Label grLabel = new Label("Ελληνικά", icon("/client/images/flagGR.png"));
@@ -1486,7 +1486,7 @@ public class RecipesWindowCtrl {
         addIngredientMenu.setOnHidden(e -> tm.setLanguage(activeLocale));
 
         // 5. Standard Click Logic (Actions)
-        englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUS.png"));
+        englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagEN.png"));
         dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
         slovakItem.setOnAction(e -> setLanguage(new Locale("sk"), "/client/images/flagSK.png"));
         greekItem.setOnAction(e -> setLanguage(new Locale("gr"), "/client/images/flagGR.png"));
@@ -1495,22 +1495,28 @@ public class RecipesWindowCtrl {
         addIngredientMenu.getItems().setAll(englishItem, dutchItem, slovakItem, greekItem, portugueseItem);
 
         // Default starting state
-        setLanguage(Locale.ENGLISH, "/client/images/flagUS.png");
+        setLanguage(Locale.ENGLISH, "/client/images/flagEN.png");
 
-        MenuItem visualUS = new MenuItem("", icon("/client/images/flagUS.png"));
+        MenuItem visualUS = new MenuItem("", icon("/client/images/flagEN.png"));
         MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
         MenuItem visualSk = new MenuItem("", icon("/client/images/flagSK.png"));
         MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.png"));
         MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.png"));
 
-        visualUS.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagUK.png")));
-        visualNl.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagNL.png")));
+        visualUS.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagEN.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "en");
+        });
+        visualNl.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagNL.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "nl");
+        });
         visualSk.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagSK.png")));
         visualGr.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagGR.png")));
         visualPt.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagPT.png")));
 
         languageMenu.getItems().setAll(visualUS, visualNl, visualSk, visualGr, visualPt);
-        languageMenu.setGraphic(icon("/client/images/flagUS.png")); //initial language = english
+        languageMenu.setGraphic(icon("/client/images/flagEN.png")); //initial language = english
         languageMenu.setText("");
 
     }

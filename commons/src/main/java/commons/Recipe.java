@@ -24,7 +24,7 @@ public class Recipe {
     private Integer totalServings = 0;
 
     @Column
-    private String language = "uk";
+    private String language = "en";
 
     // One Recipe has MANY RecipeIngredients (the join entity)
     @OneToMany(
