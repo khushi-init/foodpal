@@ -880,7 +880,7 @@ public class RecipesWindowCtrl {
             int currentIndex = i;
 
             // Drag and drop trigger
-            // detectDrag(ingNode, currentIndex, recipeInstructions);
+            detectDrag(ingNode, currentIndex, recipeInstructions);
             // Delete logic
             instCtrl.setDeleteCheck(() -> {
                 // This code runs when .run() is called on click in deleteCheck runnable
@@ -999,6 +999,11 @@ public class RecipesWindowCtrl {
      * Clears recipe view, making it look the same as when the app launches
      */
     public void clearRecipeView() {
+        for (Node n : recipeView.getChildren()) {
+            n.setOnDragDetected(null);
+            n.setOnDragOver(null);
+            n.setOnDragDropped(null);
+        }
         recipeView.getChildren().clear();
         recipeNameField.setText("");
         refreshNutritionTooltip(null);
