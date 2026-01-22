@@ -66,7 +66,8 @@ public class ToBeAddedCtrl {
     public void loadFromRecipe(List<RecipeIngredient> ingredients) {
         toBeAddedList.clear();
         for (RecipeIngredient recipeIngredient : ingredients) {
-            String text = recipeIngredient.getIngredient().getName() + " (" + recipeIngredient.getQuantity() + ")";
+            String text = recipeIngredient.getIngredient().getName() + " (" + recipeIngredient.getQuantity() +
+                    " " + recipeIngredient.getUnit().toUnit().getDisplayName() + ")";
             toBeAddedList.add(new ShoppingListIngredient(text));
         }
 
