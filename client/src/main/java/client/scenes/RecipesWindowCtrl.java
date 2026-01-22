@@ -966,14 +966,12 @@ public class RecipesWindowCtrl {
                 String movedItem = recipeIngredients.remove(initIndex);
                 recipeIngredients.add(currentIndex,movedItem);
                 new Timer().schedule(new TimerTask() {
-                                         @Override
-                                         public void run() {
-                                             Platform.runLater(() ->
-                                                     updateRefresh());
-                                         }
-                                     },
-                        processingDelay
-                );
+                    @Override
+                    public void run() {
+                        Platform.runLater(() ->
+                                updateRefresh());
+                    }
+                }, processingDelay);
 
                 succes = true;
             }
