@@ -753,8 +753,8 @@ public class RecipesWindowCtrl {
         double scaledTotal = totalKcal * recipeScale;
 
         // 3. Update the labels
-        totalKcalLabel.setText(String.format("%.0f total kcal", scaledTotal));
-        kcalPer100gLabel.setText(String.format("%.0f kcal/100g", density));
+        totalKcalLabel.setText(String.format(tm.tr("label.totalKcal"), scaledTotal));
+        kcalPer100gLabel.setText(String.format(tm.tr("label.kcalDensity"), density));
     }
 
 
@@ -1673,6 +1673,7 @@ public class RecipesWindowCtrl {
         slovakItem.setText(tm.tr("menu.language.sk"));
         greekItem.setText(tm.tr("menu.language.gr"));
         portugueseItem.setText(tm.tr("menu.language.pt"));
+        scaleLabel.setText(tm.tr("scale"));
     }
 
     private void updateTotalServingsLabelText() {
