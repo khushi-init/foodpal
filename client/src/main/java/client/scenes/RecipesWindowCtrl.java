@@ -49,8 +49,8 @@ public class RecipesWindowCtrl {
 
     private final WebSocketManager socker;
 
-    // Make sure to change to *flagPT.jpg* after we made him mad
-    private final String francisco = "flatPT.jpg";
+    // Make sure to change to *flagPT.png* after we made him mad
+    private final String francisco = "flatPT.png";
 
     private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r);
@@ -655,7 +655,7 @@ public class RecipesWindowCtrl {
 
         String lang = currentRecipe.getLanguage();
         if(lang == null){
-            lang = "uk";
+            lang = "us";
         }
 
         updateLanguageMenu(lang);
@@ -1455,7 +1455,7 @@ public class RecipesWindowCtrl {
         Label engLabel = new Label("English", icon("/client/images/flagUS.png"));
         Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
         Label skLabel = new Label("Slovencina", icon("/client/images/flagSK.png"));
-        Label grLabel = new Label("Ελληνικά", icon("/client/images/flagGR.jpg"));
+        Label grLabel = new Label("Ελληνικά", icon("/client/images/flagGR.png"));
         Label ptLabel = new Label("Português", icon("/client/images/" + francisco));
 
         // Set styling so the hover area fills the menu width
@@ -1489,7 +1489,7 @@ public class RecipesWindowCtrl {
         englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUS.png"));
         dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
         slovakItem.setOnAction(e -> setLanguage(new Locale("sk"), "/client/images/flagSK.png"));
-        greekItem.setOnAction(e -> setLanguage(new Locale("gr"), "/client/images/flagGR.jpg"));
+        greekItem.setOnAction(e -> setLanguage(new Locale("gr"), "/client/images/flagGR.png"));
         portugueseItem.setOnAction(e -> setLanguage(new Locale("pt"), "/client/images/" + francisco));
 
         addIngredientMenu.getItems().setAll(englishItem, dutchItem, slovakItem, greekItem, portugueseItem);
@@ -1497,19 +1497,20 @@ public class RecipesWindowCtrl {
         // Default starting state
         setLanguage(Locale.ENGLISH, "/client/images/flagUS.png");
 
-        MenuItem visualEng = new MenuItem("", icon("/client/images/flagUS.png"));
         // Setup/Logic for the Recipe language selection
-        MenuItem visualEng = new MenuItem("", icon("/client/images/flagUK.png"));
+        MenuItem visualUS = new MenuItem("", icon("/client/images/flagUS.png"));
         MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
         MenuItem visualSk = new MenuItem("", icon("/client/images/flagSK.png"));
-        MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.jpg"));
-        MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.jpg"));
+        MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.png"));
+        MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.png"));
 
-        visualEng.setOnAction(e -> updateRecipeLanguage("uk"));
         visualNl.setOnAction(e -> updateRecipeLanguage("nl"));
         visualSk.setOnAction(e -> updateRecipeLanguage("sk"));
+        visualUS.setOnAction(e -> updateRecipeLanguage("us"));
+        visualPt.setOnAction(e -> updateRecipeLanguage("pt"));
+        visualGr.setOnAction(e -> updateRecipeLanguage("gr"));
 
-        languageMenu.getItems().setAll(visualEng, visualNl, visualSk, visualGr, visualPt);
+        languageMenu.getItems().setAll(visualUS, visualNl, visualSk, visualGr, visualPt);
         languageMenu.setGraphic(icon("/client/images/flagUS.png")); //initial language = english
         languageMenu.setText("");
 
