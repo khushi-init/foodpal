@@ -987,6 +987,7 @@ public class RecipesWindowCtrl {
         recipeView.getChildren().clear();
         recipeNameField.setText("");
         updateNutritionSummary();
+        updateRecipeSelectionState(false);
     }
 
     /**
