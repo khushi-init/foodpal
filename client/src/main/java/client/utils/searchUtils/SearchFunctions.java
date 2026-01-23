@@ -91,7 +91,11 @@ public enum SearchFunctions {
     HASNAME ("hasname", true, 1, new Class<?>[]{String.class},
             (recipe, arguments) -> {
                 return !NOTNAME.evaluate.apply(recipe, arguments);
-            });
+            }),
+    HASLANG ("haslang", true, 1 , new Class<?>[]{String.class}, (recipe, arguments) -> {
+
+        return recipe.getLanguage().equalsIgnoreCase((String) arguments.getFirst());
+    });
 
     public final String name;
     public final boolean isAtomic;
