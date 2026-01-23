@@ -78,12 +78,6 @@ public class IngredientsWindowCtrl {
     private Button backButton;
 
     @FXML
-    private Label ingScaleLabel;
-
-    @FXML
-    private TextField ingScaleTextField;
-
-    @FXML
     private Label nameLabel;
     @FXML
     private Label proteinLabel;
