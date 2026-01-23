@@ -86,8 +86,33 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
-* **Bonus Feature(s):** 
-
+	- When a recipe is opened, a togglable star appears which lets the user (un)star a recipe.
+	- Underneath the recipes list there is a favorites toggle to only show favorites.
+	- Favorite recipes have a star next to their name in the recipes list.
+	- The list of favorites is stored locally.
+	- A search bar allowing simple space-separated queries. For example: "pizza cheese" shows the recipes containing both pizza AND cheese in its title, or any of its ingredients, or any of its preparation steps. A recipe called pizza with an ingredient which has cheese in its name would satisfy this query.
+	- The results of a query are always displayed in the standard list of recipes.
+	- Pressing escape cancels the current search and resets the search input box.
+	- When the favorites filter is enabled while searching, only results that satisfy the query AND are marked as favorite are shown.
+  - Favorites are stored as references in the local config file, so renaming a recipe does not influence the starred state of the recipe
+  - A warning is sent when someone else deleted your favorite recipe.
+* **Bonus Feature:** 
+  - We should get excellent for this epic because of the following feature:
+  - Clicking the spiky wheel next to the search field opens an advanced query generator. This allows for using more specific filters.
+	- Filters are either atomic or combined. Atomic filters check a recipe for a certain property (like HASING, checks if a recipe has an ingredient that contains the String passed into HASING), while combined filters allow for combining filters (they can be nested).
+	- Combined filters are AND, OR
+	- Atomic filters are HASING, HASNAME, HASSTEP, HAS (equivalent to OR(HASING, HASNAME, HASSTEP)), NOT (equivalent to the negation of HAS), NOTING, NOTNAME, NOTSTEP, MINING (minimal amount of an ingredient), MAXING, MINSTEPS (minimum amount of steps), MAXSTEPS, HASLANG.
+	- All filters are case insensitive.
+  - A short explanation on how to use this feature can be found when clicking the question mark in the search window.
+	- Results of the query are displayed in the same way as normal search.
+	- In the UI, for every argument the expected type is specified.
+	- Examples:
+		- Recipe 1 called Pizza, containing 20 g cheese and 100 g dough, having 0 preparation steps
+		- Recipe 2 called Cake, containing 100 g sugar, having 3 preparation steps.
+		- OR(AND(MINING(cheese, 20), MAXSTEPS(0)), HASING(sugar)) would yield both recipes
+		- OR(AND(MINING(cheese, 20), MINSTEPS(1)), HASING(sugar)) would yield recipe 2
+		- AND(HASNAME(a), MAXSTEPS(5)) would yield both recipes, because they both have 'a' in their names
+		- AND(HASNAME(pizza), MINSTEPS(1)) would yield no recipes
 ---
 
 ## 5. Shopping List
