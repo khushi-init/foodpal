@@ -23,7 +23,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -76,12 +75,6 @@ public class IngredientsWindowCtrl {
 
     @FXML
     private Button backButton;
-
-    @FXML
-    private Label ingScaleLabel;
-
-    @FXML
-    private TextField ingScaleTextField;
 
     @FXML
     private Label nameLabel;
@@ -168,7 +161,6 @@ public class IngredientsWindowCtrl {
         tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
             applyTexts();
         });
-
         // logic to sort ingredients by name
         sortSideBar();
 
@@ -291,7 +283,7 @@ public class IngredientsWindowCtrl {
                     sortSideBar();
                     if(currentIngredient != null && currentIngredient.getId().equals(update.id())){
                         clearDetails();
-                        errorCtrl.showGenericError("Someone deleted the ingredient you were viewing ):");
+                        errorCtrl.showGenericError("ingredient.deleted.viewing");
                     }
                     ignoreIngredientSelectionEvent = false;
                 });
@@ -580,6 +572,7 @@ public class IngredientsWindowCtrl {
         kcalInf.setText(tm.tr("ingredient.kcal"));
         usedIn.setText(tm.tr("ingredient.used.in.recipes"));
         nameLabel.setText(tm.tr("ingredient.name.Label"));
+
 
 
     }

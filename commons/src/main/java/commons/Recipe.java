@@ -206,14 +206,14 @@ public class Recipe {
     public double convertToGrams(double quantity, Unit unit) {
         return switch (unit) {
             // Weight
-            case GRAM -> quantity;
-            case MILLIGRAM -> quantity / thousand;
-            case KILOGRAM -> quantity * thousand;
+            case G -> quantity;
+            case MG -> quantity / thousand;
+            case KG -> quantity * thousand;
 
             // Volume (Assuming 1ml = 1g)
-            case MILLILITER -> quantity;
-            case LITER -> quantity * thousand;
-            case TABLESPOON -> quantity * fifteen; // 1 tbsp is roughly 15g/15ml
+            case ML -> quantity;
+            case L -> quantity * thousand;
+
 
             default -> 0.0;
         };

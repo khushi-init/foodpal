@@ -93,9 +93,9 @@
                             <Insets bottom="2.0" left="5.0" right="5.0" top="8.0" />
                         </padding>
                     </ScrollPane>
-               <HBox alignment="CENTER" prefHeight="28.0" prefWidth="146.0">
-                  <children>
-                     <CheckBox fx:id="favoriteCheck" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="22.0" prefWidth="75.0" text="Favorites">
+               <HBox alignment="CENTER" prefHeight="28.0" prefWidth="70.0">
+                  <children >
+                     <CheckBox fx:id="favoriteCheck" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="22.0" text="Favorites">
                         <opaqueInsets>
                            <Insets />
                         </opaqueInsets>
@@ -145,7 +145,7 @@
                                 </TextField>
 
                                 <Region HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="totalServingsField" prefHeight="26.0" prefWidth="98.0" promptText="Set servings">
+                        <TextField fx:id="totalServingsField" prefHeight="26.0" prefWidth="150.0" promptText="Set servings">
                            <HBox.margin>
                               <Insets top="5.0" />
                            </HBox.margin>
@@ -226,7 +226,7 @@
          <children>
             <Label fx:id="totalServingsLabel" alignment="CENTER" text="Total servings: 0" />
             <Pane prefHeight="21.0" prefWidth="16.0" />
-            <Label fx:id="scaleLabel" text="Scale: " />
+            <Label fx:id="scaleLabel" />
             <TextField fx:id="scaleTextField" prefHeight="21.0" prefWidth="26.0" promptText="1.0">
                <font>
                   <Font size="10.0" />
