@@ -3,6 +3,7 @@ package client.scenes;
 import client.MyFXML;
 import client.data.DataManipulator;
 import client.data.LocalStorage;
+import client.utils.ConfigService;
 import client.utils.SearchService;
 import client.utils.ServerUtils;
 import client.data.TranslationManager;
@@ -31,9 +32,9 @@ public class RecipesWindowCtrlTest {
     public void setup() {
         tm = new TranslationManager();
         error = new ErrorCtrl(null, tm);
-        server = new ServerUtils(error);
+        server = new ServerUtils(error, new ConfigService(error));
         storage = new LocalStorage(null);
-        dataManipulator = new DataManipulator(storage, server, error);
+        dataManipulator = new DataManipulator(storage, server, error, new ConfigService(error));
         tm = new TranslationManager();
         window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchService(), server, null, tm);
     }

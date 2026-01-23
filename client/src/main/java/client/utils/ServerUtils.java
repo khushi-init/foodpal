@@ -43,21 +43,24 @@ import jakarta.ws.rs.core.GenericType;
 
 public class ServerUtils {
 
-    private  final String server = "http://localhost:8080";
-    private  final int statusOK = 200;
-    private  final int statusCreation = 201;
-    private  final int statusNoContent = 204;
-    private  final int statusSameName = 409;
+    private final String server;
+    private final int statusOK = 200;
+    private final int statusCreation = 201;
+    private final int statusNoContent = 204;
+    private final int statusSameName = 409;
 
     private final ErrorCtrl errorCtrl;
 
     /**
      * Constructor for server utils. Just look at it
      * @param errorCtrl - Injected error ctrl
+     * @param configService - Injected configService
      */
     @Inject
-    public ServerUtils(ErrorCtrl errorCtrl) {
+    public ServerUtils(ErrorCtrl errorCtrl, ConfigService configService) {
         this.errorCtrl = errorCtrl;
+
+        server = configService.get().getUrl();
     }
 
     /**
