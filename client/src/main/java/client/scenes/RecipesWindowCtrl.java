@@ -52,8 +52,8 @@ public class RecipesWindowCtrl {
     private final List<Pair<RecipeInstructionUICtrl, Node>> instructionCache = new ArrayList<>();
     private final List<Pair<RecipeIngredientUICtrl, Node>> ingredientCache = new ArrayList<>();
 
-    // Make sure to change to *flagPT.jpg* after we made him mad
-    private final String francisco = "flatPT.jpg";
+    // Make sure to change to *flagPT.png* after we made him mad
+    private final String francisco = "flatPT.png";
 
     private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r);
@@ -160,7 +160,7 @@ public class RecipesWindowCtrl {
     private final TranslationManager tm;
 
     private Locale activeLocale = Locale.ENGLISH;
-    private String activeFlagPath = "/client/images/flagUS.png";
+    private String activeFlagPath = "/client/images/flagEN.png";
 
     private CustomMenuItem englishItem;
     private CustomMenuItem dutchItem;
@@ -359,6 +359,7 @@ public class RecipesWindowCtrl {
         initializeRecipeAdditionSubscription();
         initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
+        openRecipe(currentRecipe, true);
     }
 
     /**
@@ -596,6 +597,7 @@ public class RecipesWindowCtrl {
      * @param updateRecipe True iff the recipe should be updated from the server
      */
     public void openRecipe(Recipe recipe, boolean updateRecipe) {
+        if (recipe == null) return;
         this.currentRecipe = recipe;
         ignoreSideBarSelectionEvent = true;
         if(updateRecipe){
@@ -623,6 +625,12 @@ public class RecipesWindowCtrl {
 
         recipeNameField.setText(currentRecipe.getName());
 
+        String lang = currentRecipe.getLanguage();
+        if(lang == null){
+            lang = "en";
+        }
+
+        updateLanguageMenu(lang);
         // Activate recipe specific buttons
         updateRecipeSelectionState(true);
 
@@ -632,6 +640,25 @@ public class RecipesWindowCtrl {
 
         updateScale(recipeScale);
 
+    }
+
+    /**
+     * Handles the updating of a recipe's language
+     * @param language the language to set it to
+     */
+    private void updateRecipeLanguage(String language) {
+        currentRecipe.setLanguage(language);
+        updateLanguageMenu(language);
+        System.out.println("Changed language of recipe "+ currentRecipe.getName()+ " to: " + currentRecipe.getLanguage());
+        updateRefresh();
+    }
+
+    /**
+     * Change the language menu icon to the specified language icon path
+     * @param language the language to change the icon to.
+     */
+    private void updateLanguageMenu(String language) {
+        languageMenu.setGraphic(icon("/client/images/flag" + language.toUpperCase() +".png"));
     }
 
     /**
@@ -819,30 +846,6 @@ public class RecipesWindowCtrl {
         openRecipe(currentRecipe);
         updateNutritionSummary();
     }
-
-
-//    /**
-//     * Handling input window for ingredient editing
-//     * @param initName the initial name value to be displayed
-//     * @param initQty  the initial quantity value to be displayed
-//     * @param handler  the consumer that handles to call back to the value's usage
-//     */
-//    public void handleIngredientInput(String initName, double initQty, BiConsumer<String, Double> handler) {
-//        showIngredientPopUp(initName, String.valueOf(initQty)).ifPresent(pair -> {
-//            String name = pair.getKey();
-//            String quantityText = pair.getValue();
-//            double quantity;
-//            try {
-//                quantity = Double.parseDouble(quantityText);
-//            } catch (NumberFormatException err) {
-//                if (errorCtrl != null) {
-//                    errorCtrl.showGenericError("Quantity must be a number.");
-//                }
-//                return;
-//            }
-//            handler.accept(name, quantity);
-//        });
-//    }
 
     /**
      * Loads the instructions within a list to the recipeView UI element
@@ -1072,6 +1075,7 @@ public class RecipesWindowCtrl {
         List<String> stepsCopy = new ArrayList<>(original.getPreparationSteps());
 
         Recipe clone = new Recipe(newName, totalServings, null, stepsCopy);
+        clone.setLanguage(original.getLanguage());
 
         List<RecipeIngredient> ingredientsCopy = new ArrayList<>();
         for (RecipeIngredient ri : original.getIngredients()) {
@@ -1101,6 +1105,7 @@ public class RecipesWindowCtrl {
                 new ArrayList<>(),
                 new ArrayList<>()
         );
+        newRecipe.setLanguage(tm.getCurrentLocale().getLanguage());
         //calls the fixed ServerUtils method addRecipe
         Optional<Recipe> savedRecipe = dataManipulator.addRecipe(newRecipe);
         savedRecipe.ifPresent(recipe -> {
@@ -1524,10 +1529,10 @@ public class RecipesWindowCtrl {
 
     private void setUpLanguageDropdown() {
         // 1. Create Labels (Nodes) that can detect hover
-        Label engLabel = new Label("English", icon("/client/images/flagUS.png"));
+        Label engLabel = new Label("English", icon("/client/images/flagEN.png"));
         Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
         Label skLabel = new Label("Slovencina", icon("/client/images/flagSK.png"));
-        Label grLabel = new Label("Ελληνικά", icon("/client/images/flagGR.jpg"));
+        Label grLabel = new Label("Ελληνικά", icon("/client/images/flagGR.png"));
         Label ptLabel = new Label("Português", icon("/client/images/" + francisco));
 
         // Set styling so the hover area fills the menu width
@@ -1558,31 +1563,46 @@ public class RecipesWindowCtrl {
         addIngredientMenu.setOnHidden(e -> tm.setLanguage(activeLocale));
 
         // 5. Standard Click Logic (Actions)
-        englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagUS.png"));
+        englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagEN.png"));
         dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
         slovakItem.setOnAction(e -> setLanguage(new Locale("sk"), "/client/images/flagSK.png"));
-        greekItem.setOnAction(e -> setLanguage(new Locale("gr"), "/client/images/flagGR.jpg"));
+        greekItem.setOnAction(e -> setLanguage(new Locale("gr"), "/client/images/flagGR.png"));
         portugueseItem.setOnAction(e -> setLanguage(new Locale("pt"), "/client/images/" + francisco));
 
         addIngredientMenu.getItems().setAll(englishItem, dutchItem, slovakItem, greekItem, portugueseItem);
 
         // Default starting state
-        setLanguage(Locale.ENGLISH, "/client/images/flagUS.png");
+        setLanguage(Locale.ENGLISH, "/client/images/flagEN.png");
 
-        MenuItem visualEng = new MenuItem("", icon("/client/images/flagUS.png"));
+        MenuItem visualUS = new MenuItem("", icon("/client/images/flagEN.png"));
         MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
         MenuItem visualSk = new MenuItem("", icon("/client/images/flagSK.png"));
-        MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.jpg"));
-        MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.jpg"));
+        MenuItem visualGr = new MenuItem("", icon("/client/images/flagGR.png"));
+        MenuItem visualPt = new MenuItem("", icon("/client/images/flagPT.png"));
 
-        visualEng.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagUS.png")));
-        visualNl.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagNL.png")));
-        visualSk.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagSK.png")));
-        visualGr.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/flagGR.jpg")));
-        visualPt.setOnAction(e -> languageMenu.setGraphic(icon("/client/images/" + francisco)));
+        visualUS.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagEN.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "en");
+        });
+        visualNl.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagNL.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "nl");
+        });
+        visualSk.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagSK.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "sk");
+        });
+        visualGr.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagGR.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "gr");
+        });
+        visualPt.setOnAction(e -> {
+            languageMenu.setGraphic(icon("/client/images/flagPT.png"));
+            dataManipulator.editRecipeLanguage(currentRecipe, "pt");
+        });
 
-        languageMenu.getItems().setAll(visualEng, visualNl, visualSk, visualGr, visualPt);
-        languageMenu.setGraphic(icon("/client/images/flagUS.png")); //initial language = english
+        languageMenu.getItems().setAll(visualUS, visualNl, visualSk, visualGr, visualPt);
+        languageMenu.setGraphic(icon("/client/images/flagEN.png")); //initial language = english
         languageMenu.setText("");
 
     }
