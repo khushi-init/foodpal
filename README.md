@@ -67,8 +67,20 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
+  * Open the shopping list by clicking on the shopping cart in the right corner, in the red bar.
+  * This opens the shopping list menu. You can add, edit and delete ingredients from the list.
+  * You can add the ingredients of a specific recipe by clicking the shopping cart with an arrow pointing into the cart in the right corner. This opens the To Be Added menu, where you can modify the ingredients before you add them.
+  * When scaling the recipe, the quantity of the ingredients that will be added to the shopping list are adjusted to the scale as well.
+  * If you add the same ingredient through adding multiple recipes, it appears multiple times in the shopping list, with the name of the source recipes included.
+  * You can reset the list by pressing the reset button.
+  * You can download the list by pressing the download button.
 * **Bonus Feature(s):**
-
+  * You can mark off ingredients from the shopping list by pressing the box on the left side of the ingredient. This greys out the ingredient, indicating you have already gotten the ingredient. This way, you can prevent adding this ingredient to the list again, since you van see you've already thought of it and have gotten it. The ingredient is also greyed out and crossed out when downloading the shopping list.
+  * When downloading the shopping list, the date and time is nicely displayed in the downloaded file.
+* **Why we should get excellent:**
+  * Ingredients in the shopping list can be checked off, greying them out and crossing them through. This makes it clear which items have already been purchased.
+  * Checked-off ingredients help prevent duplicate additions, improving clarity and usability when managing larger shopping lists.
+  * The date and time are clearly displayed in the downloaded shopping list, adding useful information to the file.
 ---
 
 ## 6. Live Language Switch
