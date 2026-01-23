@@ -1088,6 +1088,7 @@ public class RecipesWindowCtrl {
                 new ArrayList<>(),
                 new ArrayList<>()
         );
+        newRecipe.setLanguage(tm.getCurrentLocale().getLanguage());
         //calls the fixed ServerUtils method addRecipe
         Optional<Recipe> savedRecipe = dataManipulator.addRecipe(newRecipe);
         savedRecipe.ifPresent(recipe -> {
