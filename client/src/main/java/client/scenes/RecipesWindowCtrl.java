@@ -1271,9 +1271,9 @@ public class RecipesWindowCtrl {
     private Optional<IngredientPopUpCtrl> showIngredientPopUp(Ingredient initialIngredient, Double initialQuantity,
                                                               RecipeIngredientUnit unit) {
 
-            Pair<IngredientPopUpCtrl, Parent> addIngPair = fxml.load(IngredientPopUpCtrl.class, "client", "modules", "IngredientPopUp.fxml");
-            Parent root = addIngPair.getValue();
-            IngredientPopUpCtrl ctrl =addIngPair.getKey();
+        Pair<IngredientPopUpCtrl, Parent> addIngPair = fxml.load(IngredientPopUpCtrl.class, "client", "modules", "IngredientPopUp.fxml");
+        Parent root = addIngPair.getValue();
+        IngredientPopUpCtrl ctrl =addIngPair.getKey();
 
 
         Stage popUpStage = new Stage();
@@ -1281,21 +1281,21 @@ public class RecipesWindowCtrl {
         popUpStage.setTitle(tm.tr("title.editIngredient"));
         popUpStage.setScene(new Scene(root));
 
-            ctrl.setStage(popUpStage);
+        ctrl.setStage(popUpStage);
 
-            // 1. Pass the full list of ingredients to the dropdown
-            ctrl.setIngredients(storage.getIngredients(), initialIngredient);
+        // 1. Pass the full list of ingredients to the dropdown
+        ctrl.setIngredients(storage.getIngredients(), initialIngredient);
 
             // 2. Update this call to pass the Ingredient object instead of just a String name
-            ctrl.setInitialValues(initialIngredient, initialQuantity, unit);
+        ctrl.setInitialValues(initialIngredient, initialQuantity, unit);
 
         popUpStage.showAndWait();
 
-            if (ctrl.isOkClicked()) {
-                updateNutritionSummary();
-                // 3. Return the entire controller instead of a Pair
-                return Optional.of(ctrl);
-            }
+        if (ctrl.isOkClicked()) {
+            updateNutritionSummary();
+           // 3. Return the entire controller instead of a Pair
+            return Optional.of(ctrl);
+        }
 
         return Optional.empty();
     }
