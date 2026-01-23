@@ -264,7 +264,7 @@ public class RecipesWindowCtrl {
                     openRecipe(currentRecipe);
                 } catch (NumberFormatException err) {
                     if (errorCtrl != null) {
-                        errorCtrl.showGenericError("Scale must be a number.");
+                        errorCtrl.showGenericError(tm.tr("error.scale.nan"));
                     }
                     return;
                 }
@@ -280,7 +280,7 @@ public class RecipesWindowCtrl {
                     openRecipe(currentRecipe);
                 } catch (NumberFormatException err) {
                     if (errorCtrl != null) {
-                        errorCtrl.showGenericError("Scale must be a number.");
+                        errorCtrl.showGenericError(tm.tr("error.scale.nan"));
                     }
                 }
             }
@@ -302,7 +302,7 @@ public class RecipesWindowCtrl {
             }
         }
         else {
-            errorCtrl.showGenericError("Scale limit ("+scaleLimit+") exceeded!");
+            errorCtrl.showGenericError(tm.tr("error.scale.limit", scaleLimit));
         }
     }
 
@@ -509,7 +509,7 @@ public class RecipesWindowCtrl {
                         );
                         sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                         searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
-                    } else errorCtrl.showGenericError("Search Query must not be empty!");
+                    } else errorCtrl.showGenericError(tm.tr("error.search.empty"));
 
                 } catch (Exception e){
                     errorCtrl.showGenericError(e);
