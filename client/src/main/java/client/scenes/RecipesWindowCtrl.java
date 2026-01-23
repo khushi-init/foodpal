@@ -101,6 +101,10 @@ public class RecipesWindowCtrl {
     @FXML
     private ImageView kcalIcon;
 
+    @FXML private Label totalKcalLabel;
+
+    @FXML private Label kcalPer100gLabel;
+
     @FXML
     private Label advancedSearchButton;
 
@@ -242,13 +246,6 @@ public class RecipesWindowCtrl {
         updateTotalServingsLabelText();
         initializeSceneEvents();
         intializeSearchElements();
-
-        kcalIcon.setPickOnBounds(true);
-
-        Tooltip tooltip = new Tooltip("0 kcal/100g");
-        tooltip.setShowDelay(javafx.util.Duration.millis(processingDelay*2)); // Instant popup
-        Tooltip.install(kcalIcon, tooltip);
-        kcalIcon.setOnMouseEntered(e -> System.out.println("Mouse is over the leaf!"));
     }
 
     /**
@@ -273,7 +270,7 @@ public class RecipesWindowCtrl {
         });
         // Focused Property Listener, saves when the TextField loses focus
         scaleTextField.focusedProperty().addListener((obs,
-                                                          oldFocused, newFocused) -> {
+                                                      oldFocused, newFocused) -> {
             if (oldFocused && !newFocused) {
                 try {
                     updateScale(Double.parseDouble(scaleTextField.getText()));
@@ -298,6 +295,7 @@ public class RecipesWindowCtrl {
             recipeScale = newScale;
             if(currentRecipe != null) {
                 scaleTextField.setText(String.valueOf(recipeScale));
+                updateNutritionSummary();
             }
         }
         else {
@@ -328,36 +326,13 @@ public class RecipesWindowCtrl {
         });
         // Focused Property Listener, saves when the TextField loses focus
         totalServingsField.focusedProperty().addListener((obs,
-                                                       oldFocused, newFocused) -> {
+                                                          oldFocused, newFocused) -> {
             if (oldFocused && !newFocused) {
                 addRecipeServings();
             }
         });
     }
 
-    public void refreshNutritionTooltip(Recipe recipe) {
-        // If there's no recipe at all (sidebar cleared), hide the icon
-        if (recipe == null) {
-            kcalIcon.setVisible(false);
-            return;
-        }
-
-        // Ensure the icon is visible because a recipe IS selected
-        kcalIcon.setVisible(true);
-
-        // Calculate the density
-        double density = recipe.calculateRecipeKcalPer100g(recipe);
-
-        // Create the text (e.g., "0 kcal/100g" or "145 kcal/100g")
-        String tooltipText = String.format("%.0f kcal/100g", density);
-
-        Tooltip tooltip = new Tooltip(tooltipText);
-        tooltip.setShowDelay(javafx.util.Duration.millis(processingDelay));
-
-        // Force update the Tooltip
-        Tooltip.uninstall(kcalIcon, null);
-        Tooltip.install(kcalIcon, tooltip);
-    }
     /**
      * Sets the total servings label to the correct amount and resets the field.
      */
@@ -562,6 +537,10 @@ public class RecipesWindowCtrl {
      */
     private void updateRecipeSelectionState(boolean active) {
 
+        kcalIcon.setVisible(active);
+        totalKcalLabel.setVisible(active);
+        kcalPer100gLabel.setVisible(active);
+
         totalServingsField.setDisable(!active);
         totalServingsField.setVisible(active);
 
@@ -654,7 +633,7 @@ public class RecipesWindowCtrl {
 
         updateTotalServingsUI();
 
-        refreshNutritionTooltip(currentRecipe);
+        updateNutritionSummary();
 
         updateScale(recipeScale);
 
@@ -721,28 +700,47 @@ public class RecipesWindowCtrl {
                 }
                 server.updateRecipe(currentRecipe);
                 openRecipe(currentRecipe);
-                refreshNutritionTooltip(currentRecipe);
+                updateNutritionSummary();
             });
             ingCtrl.setEditIngredient(() -> {
-                showIngredientPopUp(ri.getIngredient().getName(), ri.getQuantity(), ri.getUnit())
-                                .ifPresent(result -> {
-                                    try {
-                                        ri.setQuantity(Double.parseDouble(result.getKey()));
-                                        Unit selectedUnit = result.getValue();
-                                        ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
-                                        refreshNutritionTooltip(currentRecipe);
-                                        openRecipe(currentRecipe);
-                                        server.updateRecipe(currentRecipe);
-                                    } catch (NumberFormatException err) {
-                                        errorCtrl.showGenericError(tm.tr("error.quantityMustBeNumber"));
-                                    }
-                                });
+                showIngredientPopUp(ri.getIngredient(), ri.getQuantity(), ri.getUnit())
+                        .ifPresent(result -> {
+                            try {
+                                // Now these methods match the ones in IngredientPopUpCtrl!
+                                ri.setIngredient(result.getSelectedIngredient());
+                                ri.setQuantity(Double.parseDouble(result.getQuantity()));
+
+                                Unit selectedUnit = result.getSelectedUnit();
+                                ri.setUnit(selectedUnit == null ? null : RecipeIngredientUnit.fromUnit(selectedUnit));
+
+                                openRecipe(currentRecipe);
+                                updateNutritionSummary();
+                                server.updateRecipe(currentRecipe);
+                            } catch (NumberFormatException err) {
+                                errorCtrl.showGenericError(tm.tr("error.quantityMustBeNumber"));
+                            }
+                        });
             });
         }
         //menu button for adding an ingredient --> shows all currently saved ingredients! On click: add it to recipe.
         // Still called here, but logic is moved to a helper
         setupAddIngredientButton();
         recipeView.requestLayout();
+    }
+
+    private void updateNutritionSummary() {
+        if (currentRecipe == null) return;
+
+        // 1. Calculate values from the commons Recipe model
+        double totalKcal = currentRecipe.calculateTotalKcal();
+        double density = currentRecipe.calculateRecipeKcalPer100g(currentRecipe);
+
+        // 2. Apply the scaling factor to the total (density remains the same)
+        double scaledTotal = totalKcal * recipeScale;
+
+        // 3. Update the labels
+        totalKcalLabel.setText(String.format("%.0f total kcal", scaledTotal));
+        kcalPer100gLabel.setText(String.format("%.0f kcal/100g", density));
     }
 
 
@@ -834,7 +832,7 @@ public class RecipesWindowCtrl {
         }
         applyUpdatedRecipe(updated);
         openRecipe(currentRecipe);
-        refreshNutritionTooltip(currentRecipe);
+        updateNutritionSummary();
     }
 
     /**
@@ -974,9 +972,7 @@ public class RecipesWindowCtrl {
                         Platform.runLater(() ->
                                 updateRefresh());
                     }
-                },
-                        processingDelay
-                );
+                }, processingDelay);
 
                 succes = true;
             }
@@ -991,7 +987,8 @@ public class RecipesWindowCtrl {
     public void clearRecipeView() {
         recipeView.getChildren().clear();
         recipeNameField.setText("");
-        refreshNutritionTooltip(null);
+        updateNutritionSummary();
+        updateRecipeSelectionState(false);
     }
 
     /**
@@ -1247,12 +1244,11 @@ public class RecipesWindowCtrl {
     /**
      * Displays a modal dialog for editing an ingredient and returns the entered values
      *
-     * @param initialName ingredient name
      * @param initialQuantity ingredient quantity
      * @return Optional containing the name and quantity if confirmed, otherwise Optional is empty
      */
-    private Optional<Pair<String, Unit>> showIngredientPopUp(String initialName, Double initialQuantity,
-                                                             RecipeIngredientUnit unit) {
+    private Optional<IngredientPopUpCtrl> showIngredientPopUp(Ingredient initialIngredient, Double initialQuantity,
+                                                              RecipeIngredientUnit unit) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/modules/IngredientPopUp.fxml"));
             Parent root = loader.load();
@@ -1264,14 +1260,19 @@ public class RecipesWindowCtrl {
             popUpStage.setScene(new Scene(root));
 
             ctrl.setStage(popUpStage);
-            ctrl.setInitialValues(initialName, initialQuantity, unit);
+
+            // 1. Pass the full list of ingredients to the dropdown
+            ctrl.setIngredients(storage.getIngredients(), initialIngredient);
+
+            // 2. Update this call to pass the Ingredient object instead of just a String name
+            ctrl.setInitialValues(initialIngredient, initialQuantity, unit);
 
             popUpStage.showAndWait();
 
             if (ctrl.isOkClicked()) {
-                refreshNutritionTooltip(currentRecipe);
-                // Pair holds the Quantity String (Key) and the Unit Enum/Object (Value)
-                return Optional.of(new Pair<>(ctrl.getQuantity(), ctrl.getSelectedUnit()));
+                updateNutritionSummary();
+                // 3. Return the entire controller instead of a Pair
+                return Optional.of(ctrl);
             }
 
         } catch (IOException e) {
@@ -1397,7 +1398,7 @@ public class RecipesWindowCtrl {
         ctrl.setShoppingList(shoppingList);
         ctrl.setSourceRecipeName(getSelectedRecipe().getName());
         ctrl.setOpenShoppingList(this::showShoppingList);
-        ctrl.loadFromRecipe(getSelectedRecipe().getIngredients());
+        ctrl.loadFromRecipe(getIngredientQuantityToScale());
 
         Stage popUpStage = new Stage();
         popUpStage.initModality(Modality.APPLICATION_MODAL);
@@ -1408,6 +1409,36 @@ public class RecipesWindowCtrl {
         popUpStage.showAndWait();
     }
 
+    /**
+     * Returns the list of ingredients of the current recipe adjusted to the set scale.
+     * @return the list of ingredients.
+     */
+    private List<RecipeIngredient> getIngredientQuantityToScale() {
+        if (currentRecipe == null) {
+            return List.of();
+        }
+
+        List<RecipeIngredient> scaledIngredients = new ArrayList<>();
+
+        for (RecipeIngredient ri : currentRecipe.getIngredients()) {
+            double quantity = ri.getQuantity();
+
+            if (ri.getUnit() != null && ri.getUnit().toUnit() != null
+                    && (ri.getUnit().toUnit() instanceof FormalUnit)) {
+                quantity = quantity * recipeScale;
+            }
+
+            scaledIngredients.add(
+                    new RecipeIngredient(
+                            currentRecipe,
+                            ri.getIngredient(),
+                            quantity,
+                            ri.getUnit()
+                    )
+            );
+        }
+        return scaledIngredients;
+    }
 
     @FXML
     private void onAdvancedSearch(){
@@ -1463,7 +1494,7 @@ public class RecipesWindowCtrl {
             currentRecipe.getIngredients().add(newEntry);
             // Refresh the UI to show the new item
             updateRefresh();
-            refreshNutritionTooltip(currentRecipe);
+            updateNutritionSummary();
         }
     }
 

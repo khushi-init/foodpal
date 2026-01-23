@@ -247,4 +247,29 @@ public class Recipe {
         }
         return (totalCalories / totalWeightInGrams) * hundered;
     }
+
+    /**
+     * Calculates the total calories for the entire recipe based on all ingredients.
+     * @return total kcal
+     */
+    public double calculateTotalKcal() {
+        double totalCalories = 0;
+
+        for (RecipeIngredient ri : this.ingredients) {
+            if (ri.getUnit() == null) continue;
+
+            Unit unit = ri.getUnit().toUnit();
+            if (unit != null) {
+                // Convert current ingredient quantity to grams
+                double weightGrams = convertToGrams(ri.getQuantity(), unit);
+
+                // Get kcal per 100g from the NutritionalValue object
+                double kcalPer100g = ri.getIngredient().getNutritionalValue().kcal100g();
+
+                // Add to total: (Weight / 100) * kcal
+                totalCalories += (weightGrams * kcalPer100g) / hundered;
+            }
+        }
+        return totalCalories;
+    }
 }
