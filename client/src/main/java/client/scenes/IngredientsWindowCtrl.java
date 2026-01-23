@@ -168,7 +168,6 @@ public class IngredientsWindowCtrl {
         tm.bundleProperty().addListener((obs, oldBundle, newBundle) -> {
             applyTexts();
         });
-
         // logic to sort ingredients by name
         sortSideBar();
 
@@ -580,6 +579,7 @@ public class IngredientsWindowCtrl {
         kcalInf.setText(tm.tr("ingredient.kcal"));
         usedIn.setText(tm.tr("ingredient.used.in.recipes"));
         nameLabel.setText(tm.tr("ingredient.name.Label"));
+
 
 
     }
