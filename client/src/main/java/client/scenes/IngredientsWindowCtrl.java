@@ -283,7 +283,7 @@ public class IngredientsWindowCtrl {
                     sortSideBar();
                     if(currentIngredient != null && currentIngredient.getId().equals(update.id())){
                         clearDetails();
-                        errorCtrl.showGenericError("Someone deleted the ingredient you were viewing ):");
+                        errorCtrl.showGenericError("ingredient.deleted.viewing");
                     }
                     ignoreIngredientSelectionEvent = false;
                 });

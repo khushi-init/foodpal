@@ -39,7 +39,7 @@ public class RootPropositionUI implements ParentPropositionUI{
      * @param child Dummy, here for compatibility
      */
     public void deleteChild(PropositionUI child){
-        errorCtrl.showGenericError("Cannot delete root proposition!");
+        errorCtrl.showGenericError(tm.tr("error.cannot.delete.root"));
     }
 
     /**

@@ -578,6 +578,7 @@ public class RecipesWindowCtrl {
         languageMenu.setManaged(active);
 
         if (!active) {
+            recipeView.getChildren().clear();
             Label noRecipeSelectedLabel = new Label(tm.tr("label.noRecipeSelected"));
             noRecipeSelectedLabel.setStyle(
                     "-fx-text-fill: #6b7280; " +

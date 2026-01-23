@@ -32,7 +32,7 @@ public class RecipesWindowCtrlTest {
     public void setup() {
         tm = new TranslationManager();
         error = new ErrorCtrl(null, tm);
-        server = new ServerUtils(error, new ConfigService(error));
+        server = new ServerUtils(error, new ConfigService(error), tm);
         storage = new LocalStorage(null);
         dataManipulator = new DataManipulator(storage, server, error, new ConfigService(error));
         tm = new TranslationManager();

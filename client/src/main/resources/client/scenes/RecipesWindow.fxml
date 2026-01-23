@@ -93,9 +93,9 @@
                             <Insets bottom="2.0" left="5.0" right="5.0" top="8.0" />
                         </padding>
                     </ScrollPane>
-               <HBox alignment="CENTER" prefHeight="28.0" prefWidth="146.0">
-                  <children>
-                     <CheckBox fx:id="favoriteCheck" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="22.0" prefWidth="75.0" text="Favorites">
+               <HBox alignment="CENTER" prefHeight="28.0" prefWidth="70.0">
+                  <children >
+                     <CheckBox fx:id="favoriteCheck" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="22.0" text="Favorites">
                         <opaqueInsets>
                            <Insets />
                         </opaqueInsets>
