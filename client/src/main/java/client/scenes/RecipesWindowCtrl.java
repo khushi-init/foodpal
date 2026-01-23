@@ -368,10 +368,12 @@ public class RecipesWindowCtrl {
      */
     public void shutdown() {
         // Unsubscribe from all websockets
-        socker.unsubscribe("/updates/title");
-        socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
-        socker.unsubscribe("/updates/recipe-addition");
-        socker.unsubscribe("/updates/recipe-deletion");
+        subscriptionExecutor.submit(() -> {
+            socker.unsubscribe("/updates/title");
+            socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
+            socker.unsubscribe("/updates/recipe-addition");
+            socker.unsubscribe("/updates/recipe-deletion");
+        });
 
     }
 
@@ -401,7 +403,7 @@ public class RecipesWindowCtrl {
     public void initializeRecipeSubscription(Long id, boolean forceResubscribe){
         if (previousRecipeSubscription.equals(id) && !forceResubscribe) return;
         // Unsubscribe from previous recipe
-        if (previousRecipeSubscription != -1) subscriptionExecutor.submit(() -> socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription));
+        if (previousRecipeSubscription != -1) socker.unsubscribe("/updates/recipe/" + previousRecipeSubscription);
         subscriptionExecutor.submit(() -> {
             socker.subscribe("/updates/recipe/" + Long.toString(id), RecipeUpdate.class, update -> {
                 Platform.runLater(() -> {

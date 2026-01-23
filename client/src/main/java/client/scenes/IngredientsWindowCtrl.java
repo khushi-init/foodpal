@@ -209,11 +209,13 @@ public class IngredientsWindowCtrl {
      * Unsubsribes from websockets
      */
     public void shutdown(){
-        socker.unsubscribe("/updates/ingredient-addition");
-        socker.unsubscribe("/updates/ingredient-name");
-        socker.unsubscribe("/updates/ingredient/" + previousIngredientSubscription);
-        socker.unsubscribe("/updates/ingredient-linked-recipes/" + previousLinkedRecipesSubscription);
-        socker.unsubscribe("/updates/ingredient-deletion");
+        subscriptionExecutor.submit(() -> {
+            socker.unsubscribe("/updates/ingredient-addition");
+            socker.unsubscribe("/updates/ingredient-name");
+            socker.unsubscribe("/updates/ingredient/" + previousIngredientSubscription);
+            socker.unsubscribe("/updates/ingredient-linked-recipes/" + previousLinkedRecipesSubscription);
+            socker.unsubscribe("/updates/ingredient-deletion");
+        });
     }
 
     /**
