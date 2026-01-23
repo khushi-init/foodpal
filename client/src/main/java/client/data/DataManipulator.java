@@ -6,36 +6,39 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;
-import javafx.collections.FXCollections;
-
 import commons.RecipeIngredient;
+import javafx.collections.FXCollections;
 
 import java.text.Collator;
 import java.util.*;
 
 public class DataManipulator {
 
-    private LocalStorage storage;
-    private ServerUtils server;
-
-    private ErrorCtrl errs;
-
-    // File used for storing favorite ID's. Add additional stuff for config as you wish
-//    private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
+    private final LocalStorage storage;
+    private final ServerUtils server;
+    private final ErrorCtrl errs;
     private final ConfigService configService;
+    private final TranslationManager tm;
 
     /**
      * Constructor of DataManipulator
      * @param storage - LocalStorage is injected
      * @param server - The serveruitls instance for server interactions. Is also injected
      * @param errs - The injected error controller
+     * @param configService - The injected config service
+     * @param tm - The injected TranslationManager
      */
     @Inject
-    public DataManipulator(LocalStorage storage, ServerUtils server, ErrorCtrl errs, ConfigService configService) {
+    public DataManipulator(LocalStorage storage,
+                           ServerUtils server,
+                           ErrorCtrl errs,
+                           ConfigService configService,
+                           TranslationManager tm) {
         this.storage = storage;
         this.server = server;
         this.errs = errs;
         this.configService = configService;
+        this.tm = tm;
     }
 
     /**
@@ -87,11 +90,17 @@ public class DataManipulator {
             return Optional.of(updated);
         }
         else{
-            errs.showGenericError("Something went wrong! (Either a recipe of this name already exists or you haven't selected one yet!");
+            errs.showGenericError(tm.tr("error.recipe.rename.failed"));
             return Optional.empty();
         }
     }
 
+    /**
+     * Edit the recipe language
+     * @param target the recipe
+     * @param newLang the new language
+     * @return true if successful
+     */
     public boolean editRecipeLanguage(Recipe target, String newLang) {
         target.setLanguage(newLang);
 
@@ -102,7 +111,7 @@ public class DataManipulator {
             return true;
         }
         else {
-            errs.showGenericError("Couldn't change the recipe language");
+            errs.showGenericError(tm.tr("error.recipe.language.failed"));
             return false;
         }
     }
@@ -252,7 +261,7 @@ public class DataManipulator {
         if (!successful) {
             // Show error using injected ErrorCtrl
             sortLocalIngredients();
-            errs.showGenericError("Failed to delete ingredient from the server.");
+            errs.showGenericError(tm.tr("error.ingredient.delete.failed"));
             return;
         }
 
@@ -273,7 +282,7 @@ public class DataManipulator {
         Optional<Ingredient> update = server.editIngredient(replacement);
 
         if (update.isEmpty()) {
-            errs.showGenericError("Failed to update ingredient in the server");
+            errs.showGenericError(tm.tr("error.ingredient.update.failed"));
             sortLocalIngredients();
             return false;
         }
@@ -288,7 +297,7 @@ public class DataManipulator {
             }
         }
         sortLocalIngredients();
-        errs.showGenericError("Ingredient updated on server but not found locally");
+        errs.showGenericError(tm.tr("error.ingredient.updated.notfound"));
         return false;
     }
 
@@ -322,13 +331,14 @@ public class DataManipulator {
 
         for (Long id : storage.getFavoriteIDs()) {
             if (!getRecipeIDs().contains(id)) {
-                errs.showGenericError("Favorite recipe with id " + id + " has been deleted! Sorry :(");
+                errs.showGenericError(tm.tr("error.favorite.deleted"));
                 configService.get().getFavoriteIds().remove(id);
             }
         }
         configService.save();
 
     }
+
     public List<Long> getRecipeIDs() {
         List<Long> ids = new ArrayList<>();
         for (Recipe r : storage.getRecipes()) {
@@ -356,6 +366,4 @@ public class DataManipulator {
             sortLocalIngredients();
         }
     }
-
-
 }
