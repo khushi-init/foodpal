@@ -40,7 +40,8 @@ out/
 /nbdist/
 /.nb-gradle/
 
+**/config/*
+
 ### VS Code ###
 .vscode/
 /.run/
-/config/
