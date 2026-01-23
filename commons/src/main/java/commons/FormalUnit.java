@@ -2,14 +2,13 @@ package commons;
 
 public enum FormalUnit implements Unit{
     // Weight Units
-    GRAM("g"),
-    MILLIGRAM("mg"),
-    KILOGRAM("kg"),
+    G("g"),
+    MG("mg"),
+    KG("kg"),
 
     // Volume Units
-    MILLILITER("ml"),
-    LITER("l"),
-    TABLESPOON("tbsp");
+    ML("ml"),
+    L("l");
     private String displayName;
 
     /**
