@@ -1408,6 +1408,10 @@ public class RecipesWindowCtrl {
         popUpStage.showAndWait();
     }
 
+    /**
+     * Returns the list of ingredients of the current recipe adjusted to the set scale.
+     * @return the list of ingredients.
+     */
     private List<RecipeIngredient> getIngredientQuantityToScale() {
         if (currentRecipe == null) {
             return List.of();
