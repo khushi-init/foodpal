@@ -88,8 +88,23 @@ public class DataManipulator {
             return Optional.of(updated);
         }
         else{
-            errs.showGenericError("A recipe with this name already exists!");
+            errs.showGenericError("Something went wrong! (Either a recipe of this name already exists or you haven't selected one yet!");
             return Optional.empty();
+        }
+    }
+
+    public boolean editRecipeLanguage(Recipe target, String newLang) {
+        target.setLanguage(newLang);
+
+        Recipe updated = server.updateRecipe(target);
+        if (updated != null) {
+            updateRecipe(updated);
+            System.out.println("Recipe language set to: " + newLang);
+            return true;
+        }
+        else {
+            errs.showGenericError("Couldn't change the recipe language");
+            return false;
         }
     }
 
