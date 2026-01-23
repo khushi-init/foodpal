@@ -27,6 +27,5 @@ public class AppSettings {
 
     public void setFavoriteIds(List<Long> favoriteIds) {
         this.favoriteIds = favoriteIds;
-        System.out.println("Fav ids changed");
     }
 }
