@@ -35,7 +35,16 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
+
+   FoodPal makes use of *WebSockets* to update content **dynamically** the second it changes!
+   * A change in the recipe title is instantly visible to all client's sidebars! The same goes for additions & deletions of recipes.
+   * Editing *any* detail of a recipe will instantly change it in all clients that have it open.
+   *  *Only* updated content is sent every update, don't worry about your bandwidth!
 * **Bonus Feature(s):**
+> Because that's not all!
+   * Everything seen about recipes above also applies to ingredients in the *Ingredients Tab*!
+   * FoodPal is able to recover from a server disconnect and automatically resubscribes to all websockets it lost connection to.
+
 
 ---
 
@@ -44,12 +53,31 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
+
+    **Global Ingredient Management**
+  *  **Ingredient List Access:** Clicking the carrot icon at the top right switches the view to the global Ingredient List.
+  * **Management Tools:** Users can add or delete ingredients via the bottom-left buttons, consistent with the recipe window interface.
+  * **Inline Editing:** Ingredients can be modified by clicking the pencil icon next to their name.
+  * **Real-Time Sorting:** The ingredient list automatically maintains alphabetical order after any addition or modification.
+  * **Nutritional Data:** Each entry displays Carbohydrates, Fat, and Protein per 100g, alongside automatically calculated Inferred Calories and a usage counter showing how many recipes include that item.
+
+   **Recipe Integration & Integrity**
+  * **Smart Addition:** When adding ingredients to a recipe, users can select from a dropdown of existing items or create a brand-new ingredient.
+  * **Propagation:** Renaming an ingredient automatically updates that name across every recipe where it is used.
+  * **Deletion Safeguards:** The system issues a warning if a user attempts to delete an ingredient currently used in recipes. If deleted, it is automatically removed from all associated recipes.
+  * **Unit Support:** Supports both **informal units** (text-based) and **formal units** (G, MG, KG, L, ML).
+
+  **Nutritional Scaling & Totals**
+  * **Serving Size Control:** A dedicated text field allows users to set and display the recipe's serving size.
+  * **Dynamic Calculations:** Total kcal and kcal/100g are calculated for the entire recipe and displayed next to the leaf symbol.
+  * **Recipe Scaling:** Users can scale the entire recipe via the bottom text field. This scales ingredient quantities, total calories, and serving sizes simultaneously.
+  * **Automatic Normalization:** During scaling, units are automatically normalized if they exceed standard thresholds (e.g., 1000g automatically converts to 1kg).
 * **Bonus Feature(s):** **Nutri-Score Integration**
-    * **Overview:** A nutritional value-based scoring system for ingredients, visually displayed via the standard Dutch labeling system (A-E) within the Ingredient Window for each Ingredient.
-    * **Functionality Enhancement:** Transforms raw macronutrient data into an intelligent health profile. This allows users to instantly identify the "healthiest" ingredients without manual comparisons.
-    * **The Logic:** Points are accumulated for "negative" components (high calories, fats, and carbs) and deducted for "positive" components (high protein).
-    * **Calculation:** `Final Score = (Calories Points + Fats Points + Carbs Points) - Protein Points`.
-    * **Visual Indicator:** The score is mapped to a color-coded grade (A through E), providing a familiar visual cue for informed dietary decision-making.
+  * **Overview:** A nutritional value-based scoring system for ingredients, visually displayed via the standard Dutch labeling system (A-E) within the Ingredient Window for each Ingredient.
+  * **Functionality Enhancement:** Transforms raw macronutrient data into an intelligent health profile. This allows users to instantly identify the "healthiest" ingredients without manual comparisons.
+  * **The Logic:** Points are accumulated for "negative" components (high calories, fats, and carbs) and deducted for "positive" components (high protein).
+  * **Calculation:** `Final Score = (Calories Points + Fats Points + Carbs Points) - Protein Points`.
+  * **Visual Indicator:** The score is mapped to a color-coded grade (A through E), providing a familiar visual cue for informed dietary decision-making.
 
 ---
 

@@ -359,7 +359,9 @@ public class RecipesWindowCtrl {
         initializeRecipeAdditionSubscription();
         initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
-        openRecipe(currentRecipe, true);
+        Platform.runLater(() -> {
+            openRecipe(currentRecipe, true);
+        });
     }
 
     /**
@@ -969,7 +971,7 @@ public class RecipesWindowCtrl {
         n.setOnDragEntered(dragEvent -> {
             if (dragEvent.getGestureSource() != n && dragEvent.getDragboard().hasString()) {
                 int initIndex = Integer.parseInt(dragEvent.getDragboard().getString());
-                String border = "-fx-border-style: solid; -fx-border-color: GREENYELLOW; ";
+                String border = "-fx-border-style: solid; -fx-border-color: #ADFF2F; ";
                 if (initIndex < currentIndex) {
                     n.setStyle(border + "-fx-border-width: 0 0 3 0;"); // Coming from above, highlight bottom
                 } else {

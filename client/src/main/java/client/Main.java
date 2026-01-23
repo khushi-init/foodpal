@@ -19,6 +19,7 @@ import static com.google.inject.Guice.createInjector;
 
 import client.data.TranslationManager;
 import client.scenes.*;
+import client.utils.ConfigService;
 import client.utils.ServerUtils;
 import com.google.inject.Injector;
 
@@ -26,6 +27,8 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+
+import java.util.List;
 
 public class Main extends Application {
 
@@ -44,6 +47,20 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         System.out.println("Opening very cool amazing recipe app!");
+
+        List<String> params = getParameters().getRaw();
+        ConfigService configService = injector.getInstance(ConfigService.class);
+
+        for (int i = 0; i < params.size(); i++) {
+            if (params.get(i).equals("-cfg") && (i+1) < params.size()) {
+                String customPath = params.get(i+1);
+                configService.setCustomConfigPath(customPath);
+                break;
+            }
+        }
+
+        configService.load();
+
         ServerUtils serverUtils = injector.getInstance(ServerUtils.class);
 
         for (int i = 0; i < maxRetries; i++) {

@@ -23,6 +23,7 @@ import client.popups.ServerDisconnectPopupCtrl;
 import client.scenes.*;
 import client.scenes.ErrorCtrl;
 
+import client.utils.ConfigService;
 import client.utils.ServerUtils;
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -44,5 +45,6 @@ public class MyModule implements Module {
         binder.bind(WebSocketManager.class).in(Scopes.SINGLETON);
         binder.bind(TranslationManager.class).in(Scopes.SINGLETON);
         binder.bind(ServerDisconnectPopupCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(ConfigService.class).in(Scopes.SINGLETON);
     }
 }

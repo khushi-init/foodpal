@@ -31,9 +31,9 @@ public class RecipesWindowCtrlTest {
     public void setup() {
         tm = new TranslationManager();
         error = new ErrorCtrl(null, tm);
-        server = new ServerUtils(error, tm);
+        server = new ServerUtils(error, new ConfigService(error), tm);
         storage = new LocalStorage(null);
-        dataManipulator = new DataManipulator(storage, server, error, tm);
+        dataManipulator = new DataManipulator(storage, server, error, tm, new ConfigService(error));
         tm = new TranslationManager();
         window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchService(), server, null, tm);
     }

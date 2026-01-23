@@ -1,6 +1,7 @@
 package client.data;
 
 import client.scenes.ErrorCtrl;
+import client.utils.ConfigService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
@@ -9,10 +10,6 @@ import javafx.collections.FXCollections;
 
 import commons.RecipeIngredient;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
@@ -22,24 +19,23 @@ public class DataManipulator {
     private ServerUtils server;
 
     private ErrorCtrl errs;
-    private TranslationManager tm;
 
     // File used for storing favorite ID's. Add additional stuff for config as you wish
-    private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
+//    private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
+    private final ConfigService configService;
 
     /**
      * Constructor of DataManipulator
      * @param storage - LocalStorage is injected
      * @param server - The serveruitls instance for server interactions. Is also injected
      * @param errs - The injected error controller
-     * @param tm - The injected Translation Manager
      */
     @Inject
-    public DataManipulator(LocalStorage storage, ServerUtils server, ErrorCtrl errs, TranslationManager tm) {
+    public DataManipulator(LocalStorage storage, ServerUtils server, ErrorCtrl errs, ConfigService configService) {
         this.storage = storage;
         this.server = server;
         this.errs = errs;
-        this.tm = tm;
+        this.configService = configService;
     }
 
     /**
@@ -91,7 +87,7 @@ public class DataManipulator {
             return Optional.of(updated);
         }
         else{
-            errs.showGenericError(tm.tr("error.recipe.rename.failed"));
+            errs.showGenericError("Something went wrong! (Either a recipe of this name already exists or you haven't selected one yet!");
             return Optional.empty();
         }
     }
@@ -106,7 +102,7 @@ public class DataManipulator {
             return true;
         }
         else {
-            errs.showGenericError(tm.tr("error.recipe.language.failed"));
+            errs.showGenericError("Couldn't change the recipe language");
             return false;
         }
     }
@@ -256,7 +252,7 @@ public class DataManipulator {
         if (!successful) {
             // Show error using injected ErrorCtrl
             sortLocalIngredients();
-            errs.showGenericError(tm.tr("error.ingredient.delete.failed"));
+            errs.showGenericError("Failed to delete ingredient from the server.");
             return;
         }
 
@@ -277,7 +273,7 @@ public class DataManipulator {
         Optional<Ingredient> update = server.editIngredient(replacement);
 
         if (update.isEmpty()) {
-            errs.showGenericError(tm.tr("error.ingredient.update.failed"));
+            errs.showGenericError("Failed to update ingredient in the server");
             sortLocalIngredients();
             return false;
         }
@@ -292,8 +288,7 @@ public class DataManipulator {
             }
         }
         sortLocalIngredients();
-        errs.showGenericError(tm.tr("error.ingredient.updated.notfound"));
-
+        errs.showGenericError("Ingredient updated on server but not found locally");
         return false;
     }
 
@@ -301,23 +296,20 @@ public class DataManipulator {
      * Saves the current favorites to the local persistent properties file.
      */
     public void saveFave() {
-        // Convert all favorite ID's to a single string that will be stored
-        Properties prop = new Properties();
         // THIS TIME COMPLEXITY SUCKS ASS LMAO O(n^2) (But im lazy, will probably refactor later)
-        for (Long id : storage.getFavoriteIDs()) {
-            String name = "Unknown";
-            for (Recipe r : storage.getRecipes()) {
-                if (Objects.equals(r.getId(), id)) {
-                    name = r.getName();
-                }
-            }
-            prop.setProperty(id.toString(), name);
-        }
-        try {
-            prop.store(new FileOutputStream(properties), "Favorites");
-        } catch (IOException e) {
-            errs.showGenericError(tm.tr("error.favorites.save.failed"));
-        }
+//        for (Long id : storage.getFavoriteIDs()) {
+//            String name = "Unknown";
+//            for (Recipe r : storage.getRecipes()) {
+//                if (Objects.equals(r.getId(), id)) {
+//                    name = r.getName();
+//                }
+//            }
+//            prop.setProperty(id.toString(), name);
+//        }
+        List<Long> favIds = storage.getFavoriteIDs();
+        configService.get().getFavoriteIds().clear();
+        configService.get().getFavoriteIds().addAll(favIds);
+        configService.save();
 
     }
 
@@ -325,42 +317,17 @@ public class DataManipulator {
      * Load the favorites from the properties file, and displays a notification if the favorite is GONE
      */
     public void loadFavs() {
-        Properties prop = new Properties();
-        try {
-            FileInputStream fis = new FileInputStream(properties);
-            prop.load(fis);
-            storage.getFavoriteIDs().clear();
-            for (String key : prop.stringPropertyNames()) {
-                Long id = Long.parseLong(key);
-                storage.getFavoriteIDs().add(id);
-            }
+        storage.getFavoriteIDs().clear();
+        storage.getFavoriteIDs().setAll(configService.get().getFavoriteIds());
 
-            List<Long> toRemove = new ArrayList<>();
-            for (Long id : storage.getFavoriteIDs()) {
-                if (!getRecipeIDs().contains(id)) {
-                    errs.showGenericError(
-                            tm.tr("error.favorite.missing", prop.getProperty(id.toString()))
-                    );
-                    System.out.println(id + prop.getProperty(id.toString()));
-                    prop.remove(id.toString());
-                    toRemove.add(id);
-                }
+        for (Long id : storage.getFavoriteIDs()) {
+            if (!getRecipeIDs().contains(id)) {
+                errs.showGenericError("Favorite recipe with id " + id + " has been deleted! Sorry :(");
+                configService.get().getFavoriteIds().remove(id);
             }
-            if(!toRemove.isEmpty()) {
-                storage.getFavoriteIDs().removeAll(toRemove);
-            }
-
-            // Remove lost recipe from properties file
-            try {
-                prop.store(new FileOutputStream(properties), "Favorites Updated");
-            } catch (IOException e) {
-                errs.showGenericError(tm.tr("error.favorites.update.failed"));
-            }
-
-        } catch (Exception e) {
-            errs.showGenericError(tm.tr("error.favorites.load.failed"));
-            e.printStackTrace();
         }
+        configService.save();
+
     }
     public List<Long> getRecipeIDs() {
         List<Long> ids = new ArrayList<>();
