@@ -22,6 +22,7 @@ public class DataManipulator {
     private ServerUtils server;
 
     private ErrorCtrl errs;
+    private TranslationManager tm;
 
     // File used for storing favorite ID's. Add additional stuff for config as you wish
     private final File properties = new File(System.getProperty("user.home"), "foodPal.properties");
@@ -31,12 +32,14 @@ public class DataManipulator {
      * @param storage - LocalStorage is injected
      * @param server - The serveruitls instance for server interactions. Is also injected
      * @param errs - The injected error controller
+     * @param tm - The injected Translation Manager
      */
     @Inject
-    public DataManipulator(LocalStorage storage, ServerUtils server, ErrorCtrl errs) {
+    public DataManipulator(LocalStorage storage, ServerUtils server, ErrorCtrl errs, TranslationManager tm) {
         this.storage = storage;
         this.server = server;
         this.errs = errs;
+        this.tm = tm;
     }
 
     /**
@@ -88,7 +91,7 @@ public class DataManipulator {
             return Optional.of(updated);
         }
         else{
-            errs.showGenericError("Something went wrong! (Either a recipe of this name already exists or you haven't selected one yet!");
+            errs.showGenericError(tm.tr("error.recipe.rename.failed"));
             return Optional.empty();
         }
     }
@@ -103,7 +106,7 @@ public class DataManipulator {
             return true;
         }
         else {
-            errs.showGenericError("Couldn't change the recipe language");
+            errs.showGenericError(tm.tr("error.recipe.language.failed"));
             return false;
         }
     }
@@ -253,7 +256,7 @@ public class DataManipulator {
         if (!successful) {
             // Show error using injected ErrorCtrl
             sortLocalIngredients();
-            errs.showGenericError("Failed to delete ingredient from the server.");
+            errs.showGenericError(tm.tr("error.ingredient.delete.failed"));
             return;
         }
 
@@ -274,7 +277,7 @@ public class DataManipulator {
         Optional<Ingredient> update = server.editIngredient(replacement);
 
         if (update.isEmpty()) {
-            errs.showGenericError("Failed to update ingredient in the server");
+            errs.showGenericError(tm.tr("error.ingredient.update.failed"));
             sortLocalIngredients();
             return false;
         }
@@ -289,7 +292,8 @@ public class DataManipulator {
             }
         }
         sortLocalIngredients();
-        errs.showGenericError("Ingredient updated on server but not found locally");
+        errs.showGenericError(tm.tr("error.ingredient.updated.notfound"));
+
         return false;
     }
 
@@ -312,7 +316,7 @@ public class DataManipulator {
         try {
             prop.store(new FileOutputStream(properties), "Favorites");
         } catch (IOException e) {
-            errs.showGenericError("Unable to store favorites, try again later!");
+            errs.showGenericError(tm.tr("error.favorites.save.failed"));
         }
 
     }
@@ -334,7 +338,9 @@ public class DataManipulator {
             List<Long> toRemove = new ArrayList<>();
             for (Long id : storage.getFavoriteIDs()) {
                 if (!getRecipeIDs().contains(id)) {
-                    errs.showGenericError("RIP: Recipe " + prop.getProperty(id.toString()) + " not found!");
+                    errs.showGenericError(
+                            tm.tr("error.favorite.missing", prop.getProperty(id.toString()))
+                    );
                     System.out.println(id + prop.getProperty(id.toString()));
                     prop.remove(id.toString());
                     toRemove.add(id);
@@ -348,11 +354,11 @@ public class DataManipulator {
             try {
                 prop.store(new FileOutputStream(properties), "Favorites Updated");
             } catch (IOException e) {
-                errs.showGenericError("Can not update favorites, yikes...");
+                errs.showGenericError(tm.tr("error.favorites.update.failed"));
             }
 
         } catch (Exception e) {
-            errs.showGenericError("Unable to load favorites, try again later!");
+            errs.showGenericError(tm.tr("error.favorites.load.failed"));
             e.printStackTrace();
         }
     }

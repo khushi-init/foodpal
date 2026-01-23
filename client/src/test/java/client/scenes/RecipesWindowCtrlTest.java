@@ -33,7 +33,7 @@ public class RecipesWindowCtrlTest {
         error = new ErrorCtrl(null, tm);
         server = new ServerUtils(error, tm);
         storage = new LocalStorage(null);
-        dataManipulator = new DataManipulator(storage, server, error);
+        dataManipulator = new DataManipulator(storage, server, error, tm);
         tm = new TranslationManager();
         window = new RecipesWindowCtrl(null, error, primary, storage, dataManipulator, new SearchService(), server, null, tm);
     }
