@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import client.data.TranslationManager;
 import client.scenes.ErrorCtrl;
 import com.google.inject.Inject;
 import commons.Ingredient;
@@ -43,32 +44,26 @@ import jakarta.ws.rs.core.GenericType;
 
 public class ServerUtils {
 
-    private  final String server = "http://localhost:8080";
-    private  final int statusOK = 200;
-    private  final int statusCreation = 201;
-    private  final int statusNoContent = 204;
-    private  final int statusSameName = 409;
+    private final String server = "http://localhost:8080";
+    private final int statusOK = 200;
+    private final int statusCreation = 201;
+    private final int statusNoContent = 204;
+    private final int statusSameName = 409;
 
     private final ErrorCtrl errorCtrl;
+    private final TranslationManager tm;
 
-    /**
-     * Constructor for server utils. Just look at it
-     * @param errorCtrl - Injected error ctrl
-     */
     @Inject
-    public ServerUtils(ErrorCtrl errorCtrl) {
+    public ServerUtils(ErrorCtrl errorCtrl, TranslationManager tm) {
         this.errorCtrl = errorCtrl;
+        this.tm = tm;
     }
 
-    /**
-     * Returns true if a server is running on port 8080
-     * @return - Boolean value representing an active server
-     */
     public boolean isServerAvailable() {
         try {
-            ClientBuilder.newClient(new ClientConfig()) //
-                    .target(server) //
-                    .request(APPLICATION_JSON) //
+            ClientBuilder.newClient(new ClientConfig())
+                    .target(server)
+                    .request(APPLICATION_JSON)
                     .get();
         } catch (ProcessingException e) {
             if (e.getCause() instanceof ConnectException) {
@@ -77,9 +72,6 @@ public class ServerUtils {
         }
         return true;
     }
-
-    // WARNING THE FOLLOWING METHODS ARE TEMPLATES AND NOT PART OF THE BASE CLIENT, THEY ARE TO BE
-    // REWORKED AS PART OF OTHER ISSUES. Until implemented, ignore javadoc warnings
 
     public void getRecipesTheHardWay() throws IOException, URISyntaxException {
         java.net.URL url = new URI("http://localhost:8080/api/recipes").toURL();
@@ -92,9 +84,9 @@ public class ServerUtils {
     }
 
     public List<Recipe> getRecipes() {
-        return ClientBuilder.newClient(new ClientConfig()) //
-                .target(server).path("api/recipes") //
-                .request(APPLICATION_JSON) //
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(server).path("api/recipes")
+                .request(APPLICATION_JSON)
                 .get(new GenericType<List<Recipe>>() {});
     }
 
@@ -105,89 +97,80 @@ public class ServerUtils {
                 .get(new GenericType<List<Ingredient>>() {});
     }
 
-    public Recipe getRecipe(Long id){
+    public Recipe getRecipe(Long id) {
         return ClientBuilder.newClient(new ClientConfig())
-            .target(server).path("/api/recipes/" + Long.toString(id))
-            .request(APPLICATION_JSON)
-            .get(new GenericType<Recipe>(){});
+                .target(server).path("/api/recipes/" + id)
+                .request(APPLICATION_JSON)
+                .get(new GenericType<Recipe>() {});
     }
 
-    public Ingredient getIngredient(Long id){
+    public Ingredient getIngredient(Long id) {
         return ClientBuilder.newClient(new ClientConfig())
-            .target(server).path("/api/ingredients/" + Long.toString(id))
-            .request(APPLICATION_JSON)
-            .get(new GenericType<Ingredient>(){});
+                .target(server).path("/api/ingredients/" + id)
+                .request(APPLICATION_JSON)
+                .get(new GenericType<Ingredient>() {});
     }
 
-
-    /**
-     * Sends a POST request to the server to create a new recipe
-     * @param recipe the recipe object to be saved
-     * @return newly created recipe object returned by the server
-     */
     public Recipe addRecipe(Recipe recipe) {
-
-        Response response = null; // Declare Response outside the try block if needed elsewhere
+        Response response = null;
         try {
             response = ClientBuilder.newClient(new ClientConfig())
                     .target(server).path("api/recipes")
                     .request(APPLICATION_JSON)
-                    // POST the entity and wait for the Response object
                     .post(Entity.entity(recipe, APPLICATION_JSON));
 
-            // check for success (201 Created)
             if (response.getStatus() == statusCreation) {
-                // read the JSON response body into a Recipe object
                 return response.readEntity(Recipe.class);
-            } else if (response.getStatus() == statusSameName){
-                errorCtrl.showErrorPopup("Error adding recipe", "You can't add a recipe with the same name!",
-                        "Make sure that you rename any recipes called 'New Recipe' before adding a new one!");
+            } else if (response.getStatus() == statusSameName) {
+                errorCtrl.showErrorPopup(
+                        tm.tr("error.title"),
+                        tm.tr("error.addingRecipeHeader"),
+                        tm.tr("error.addingRecipeMessage")
+                );
                 return null;
             } else {
-                // log non-success status and return null
-                System.err.println("Failed to add recipe. Server returned status: " + response.getStatus());
-                // It's crucial to read the entity even on failure to avoid connection issues
-                response.readEntity(String.class); // Consume the body
+                System.err.println(
+                        tm.tr("error.addRecipeFailed") + " " +
+                                tm.tr("error.httpStatus") + ": " + response.getStatus()
+                );
+                response.readEntity(String.class);
                 return null;
             }
         } catch (ProcessingException e) {
-            // handle network/processing error
-            System.err.println("Network/Processing error while adding recipe: " + e.getMessage());
+            System.err.println(tm.tr("error.addRecipeNetwork") + ": " + e.getMessage());
             return null;
         } finally {
-            // always close the response object to free up resources
             if (response != null) {
                 response.close();
             }
         }
     }
 
-    /**
-     * Adds provided ingredient to the server. If unsuccessful alerts user and returns empty optional.
-     * @param ingredient - Ingredient to Post
-     * @return - The response entity ingredient or empty optional if creation failed.
-     */
     public Optional<Ingredient> addIngredient(Ingredient ingredient) {
         try (Response response = ClientBuilder.newClient(new ClientConfig())
                 .target(server).path("api/ingredients")
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(ingredient, APPLICATION_JSON))) {
+
             if (response.getStatus() == statusCreation) {
                 return Optional.of(response.readEntity(Ingredient.class));
             }
-            errorCtrl.showErrorPopup("Server error handler", "Failed to create ingredient", "Server returned status " +
-                    response.getStatus());
+            errorCtrl.showErrorPopup(
+                    tm.tr("error.title"),
+                    tm.tr("error.createIngredientHeader"),
+                    tm.tr("error.createIngredientMessage") + " " + response.getStatus()
+            );
             return Optional.empty();
         } catch (ProcessingException e) {
-            errorCtrl.showErrorPopup("Server error handler", "Failed to create ingredient", "Failed to connect to server");
+            errorCtrl.showErrorPopup(
+                    tm.tr("error.title"),
+                    tm.tr("error.createIngredientHeader"),
+                    tm.tr("error.failConnectServer")
+            );
             return Optional.empty();
         }
     }
 
-    /**
-     * Download a recipe markdown file.
-     * @param recipeId the id of the recipe to download.
-     */
     public void downloadRecipe(Long recipeId) {
         try {
             Response response = ClientBuilder.newClient()
@@ -197,46 +180,41 @@ public class ServerUtils {
                     .get(Response.class);
 
             if (response.getStatus() == statusOK) {
-                // The path to save the file to
                 String userDownloads = System.getProperty("user.home") + "/Downloads/";
                 String fileName = "recipe_" + recipeId + ".md";
                 Path filePath = Paths.get(userDownloads + fileName);
 
-                // Write the file to the path
                 Files.write(filePath, response.readEntity(byte[].class));
-                System.out.println("Downloaded recipe " + recipeId + " to " + filePath);
-                errorCtrl.displayInfo("The download has been successful! " +
-                                "You can find it at " + filePath,
-                        "Close",
-                        "SUCCESS");
+                errorCtrl.displayInfo(
+                        tm.tr("info.downloadRecipeSuccess") + " " + filePath,
+                        tm.tr("button.close"),
+                        tm.tr("status.success")
+                );
             }
-
         } catch (Exception e) {
-            System.out.println("An error has occurred!");
+            errorCtrl.showGenericError(tm.tr("error.downloadRecipeFailed"));
         }
     }
 
-    /**
-     * Sends a DELETE request to the server to delete the recipe of the provided id
-     * @param recipeId - The id of the recipe to destroy
-     * @return - A boolean indicating whether the deletion was successful or not
-     */
     public boolean deleteRecipe(Long recipeId) {
-        Response response = null; // Declare Response outside the try block if needed elsewhere
+        Response response = null;
         try {
             response = ClientBuilder.newClient()
                     .target(server)
                     .path("api/recipes/" + recipeId)
                     .request()
                     .delete();
+
             if (response.getStatus() != statusNoContent) {
-                System.err.println("Failed to delete recipe. Server returned status: " + response.getStatus());
+                System.err.println(
+                        tm.tr("error.deleteRecipeFailed") + " " +
+                                tm.tr("error.httpStatus") + ": " + response.getStatus()
+                );
                 return false;
             }
             return true;
-
         } catch (ProcessingException e) {
-            System.err.println("Network/Processing error while deleting recipe: " + e.getMessage());
+            System.err.println(tm.tr("error.deleteRecipeNetwork") + ": " + e.getMessage());
         } finally {
             if (response != null) {
                 response.close();
@@ -245,12 +223,6 @@ public class ServerUtils {
         return false;
     }
 
-    /**
-     * Sends a DELETE request to the server to delete the ingredient of the provided id.
-     * This will trigger the server-side cascading deletion to remove it from all recipes.
-     * @param ingredientId - The id of the ingredient to destroy
-     * @return - A boolean indicating whether the deletion was successful or not
-     */
     public boolean deleteIngredient(Long ingredientId) {
         Response response = null;
         try {
@@ -261,13 +233,17 @@ public class ServerUtils {
                     .delete();
 
             if (response.getStatus() != statusNoContent) {
-                errorCtrl.showGenericError("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                errorCtrl.showGenericError(
+                        tm.tr("error.deleteIngredientFailed") + " " +
+                                tm.tr("error.httpStatus") + ": " + response.getStatus()
+                );
                 return false;
             }
             return true;
-
         } catch (ProcessingException e) {
-            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
+            errorCtrl.showGenericError(
+                    tm.tr("error.deleteIngredientNetwork") + ": " + e.getMessage()
+            );
         } finally {
             if (response != null) {
                 response.close();
@@ -276,11 +252,6 @@ public class ServerUtils {
         return false;
     }
 
-    /**
-     * Method for pushing changes to the recipe, including recipeIngredients and preparationSteps
-     * @param recipe The recipe to be put
-     * @return a boolean to indicate whether put was successful or not
-     */
     public Recipe updateRecipe(Recipe recipe) {
         Response response = null;
         try {
@@ -289,35 +260,29 @@ public class ServerUtils {
                     .path("api/recipes/" + recipe.getId())
                     .request()
                     .put(Entity.entity(recipe, APPLICATION_JSON));
+
             int status = response.getStatus();
-            if(status == statusNoContent) {
-                return recipe; //return the same unchanged recipe
-            }else if(status == statusOK) {
-                return response.readEntity(Recipe.class); //return updated recipe
-            }
-            else{
-                System.err.println("Failed to update recipe. Server returned status: " + status);
+            if (status == statusNoContent) {
+                return recipe;
+            } else if (status == statusOK) {
+                return response.readEntity(Recipe.class);
+            } else {
+                System.err.println(
+                        tm.tr("error.updateRecipeFailed") + " " +
+                                tm.tr("error.httpStatus") + ": " + status
+                );
                 return null;
             }
-        }
-        catch (ProcessingException e) {
-            System.err.println("Network/Processing error while changing recipe: " + e.getMessage());
+        } catch (ProcessingException e) {
+            System.err.println(tm.tr("error.updateRecipeNetwork") + ": " + e.getMessage());
             return null;
-        }
-        finally {
+        } finally {
             if (response != null) {
                 response.close();
             }
         }
-
     }
 
-    /**
-     * method for removing recipe ingredient form recipe
-     * @param recipeId which recipe is the ingredient from
-     * @param ingredientId which ingredient
-     * @return boolean to indicate if removal was success
-     */
     public boolean deleteIngredient(long recipeId, long ingredientId) {
         Response response = null;
         try {
@@ -328,12 +293,17 @@ public class ServerUtils {
                     .delete();
 
             if (response.getStatus() != statusNoContent && response.getStatus() != statusOK) {
-                errorCtrl.showGenericError("Failed to delete ingredient. Server returned status: " + response.getStatus());
+                errorCtrl.showGenericError(
+                        tm.tr("error.deleteIngredientFailed") + " " +
+                                tm.tr("error.httpStatus") + ": " + response.getStatus()
+                );
                 return false;
             }
             return true;
         } catch (ProcessingException e) {
-            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
+            errorCtrl.showGenericError(
+                    tm.tr("error.deleteIngredientNetwork") + ": " + e.getMessage()
+            );
             return false;
         } finally {
             if (response != null) {
@@ -342,25 +312,25 @@ public class ServerUtils {
         }
     }
 
-    /**
-     * PUTs the replacement ingredient to the server and returns the response entity in an optional
-     * @param replacement - The updated ingredient to PUT
-     * @return - The response entity ingredient if successful and an empty optional otherwise
-     */
     public Optional<Ingredient> editIngredient(Ingredient replacement) {
         try (Response response = ClientBuilder.newClient()
                 .target(server)
                 .path("api/ingredients")
                 .request()
-                .put(Entity.entity(replacement, APPLICATION_JSON))
-        ) {
+                .put(Entity.entity(replacement, APPLICATION_JSON))) {
+
             if (response.getStatus() != statusOK) {
-                errorCtrl.showGenericError("Failed to update ingredient. Server returned status: " + response.getStatus());
+                errorCtrl.showGenericError(
+                        tm.tr("error.updateIngredientFailed") + " " +
+                                tm.tr("error.httpStatus") + ": " + response.getStatus()
+                );
                 return Optional.empty();
             }
             return Optional.of(response.readEntity(Ingredient.class));
         } catch (ProcessingException e) {
-            errorCtrl.showGenericError("Network/Processing error while deleting ingredient: " + e.getMessage());
+            errorCtrl.showGenericError(
+                    tm.tr("error.updateIngredientNetwork") + ": " + e.getMessage()
+            );
             return Optional.empty();
         }
     }
@@ -373,12 +343,17 @@ public class ServerUtils {
                 .get()) {
 
             if (response.getStatus() != statusOK) {
-                errorCtrl.showGenericError("Failed to fetch recipes in which the ingredient is used in. Server returned status: " + response.getStatus());
+                errorCtrl.showGenericError(
+                        tm.tr("error.fetchIngredientUsageFailed") + " " +
+                                tm.tr("error.httpStatus") + ": " + response.getStatus()
+                );
                 return Optional.empty();
             }
             return Optional.of(response.readEntity(Integer.class));
         } catch (ProcessingException e) {
-            errorCtrl.showGenericError("Network/Processing error while counting recipe usage: " + e.getMessage());
+            errorCtrl.showGenericError(
+                    tm.tr("error.fetchIngredientUsageNetwork") + ": " + e.getMessage()
+            );
             return Optional.empty();
         }
     }
