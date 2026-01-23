@@ -44,7 +44,12 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
-* **Bonus Feature(s):**
+* **Bonus Feature(s):** **Nutri-Score Integration**
+    * **Overview:** A nutritional value-based scoring system for ingredients, visually displayed via the standard Dutch labeling system (A-E) within the Ingredient Window for each Ingredient.
+    * **Functionality Enhancement:** Transforms raw macronutrient data into an intelligent health profile. This allows users to instantly identify the "healthiest" ingredients without manual comparisons.
+    * **The Logic:** Points are accumulated for "negative" components (high calories, fats, and carbs) and deducted for "positive" components (high protein).
+    * **Calculation:** `Final Score = (Calories Points + Fats Points + Carbs Points) - Protein Points`.
+    * **Visual Indicator:** The score is mapped to a color-coded grade (A through E), providing a familiar visual cue for informed dietary decision-making.
 
 ---
 
@@ -53,7 +58,7 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
-* **Bonus Feature(s):**
+* **Bonus Feature(s):** 
 
 ---
 
