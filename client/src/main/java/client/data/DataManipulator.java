@@ -305,16 +305,6 @@ public class DataManipulator {
      * Saves the current favorites to the local persistent properties file.
      */
     public void saveFave() {
-        // THIS TIME COMPLEXITY SUCKS ASS LMAO O(n^2) (But im lazy, will probably refactor later)
-//        for (Long id : storage.getFavoriteIDs()) {
-//            String name = "Unknown";
-//            for (Recipe r : storage.getRecipes()) {
-//                if (Objects.equals(r.getId(), id)) {
-//                    name = r.getName();
-//                }
-//            }
-//            prop.setProperty(id.toString(), name);
-//        }
         List<Long> favIds = storage.getFavoriteIDs();
         configService.get().getFavoriteIds().clear();
         configService.get().getFavoriteIds().addAll(favIds);
@@ -331,7 +321,7 @@ public class DataManipulator {
 
         for (Long id : storage.getFavoriteIDs()) {
             if (!getRecipeIDs().contains(id)) {
-                errs.showGenericError(tm.tr("error.favorite.deleted"));
+                errs.showGenericError(tm.tr("error.favorite.missing"));
                 configService.get().getFavoriteIds().remove(id);
             }
         }

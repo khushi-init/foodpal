@@ -89,7 +89,7 @@ public class SearchService {
                 function = SearchFunctions.valueOf(functionName);
             } catch (Exception e){
                 scanner.close();
-                throw new IllegalArgumentException("Function " + functionName + " does not exist.");
+                throw new IllegalArgumentException();
             }
             if(function.isAtomic){
                 //if the function is atomic, extract the arguments by splitting on commas

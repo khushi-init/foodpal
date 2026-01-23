@@ -264,7 +264,7 @@ public class RecipesWindowCtrl {
                     openRecipe(currentRecipe);
                 } catch (NumberFormatException err) {
                     if (errorCtrl != null) {
-                        errorCtrl.showGenericError(tm.tr("error.scale.nan"));
+                        errorCtrl.showGenericError("Scale must be a number.");
                     }
                     return;
                 }
@@ -280,7 +280,7 @@ public class RecipesWindowCtrl {
                     openRecipe(currentRecipe);
                 } catch (NumberFormatException err) {
                     if (errorCtrl != null) {
-                        errorCtrl.showGenericError(tm.tr("error.scale.nan"));
+                        errorCtrl.showGenericError("Scale must be a number.");
                     }
                 }
             }
@@ -302,7 +302,7 @@ public class RecipesWindowCtrl {
             }
         }
         else {
-            errorCtrl.showGenericError(tm.tr("error.scale.limit", scaleLimit));
+            errorCtrl.showGenericError("Scale limit ("+scaleLimit+") exceeded!");
         }
     }
 
@@ -359,9 +359,16 @@ public class RecipesWindowCtrl {
         initializeRecipeAdditionSubscription();
         initializeRecipeDeletionSubscription();
         dataManipulator.refreshRecipes();
-        Platform.runLater(() -> {
-            openRecipe(currentRecipe, true);
-        });
+        for(Long id: storage.getFavoriteIDs()){
+            if(storage.getRecipes().stream().noneMatch(x -> x.getId().equals(id))){
+                errorCtrl.showGenericError(tm.tr("error.favorite.missing"));
+            }
+        }
+        if(currentRecipe != null && storage.getRecipes().stream().anyMatch(x -> x.getId().equals(currentRecipe.getId()))){
+            Platform.runLater(() -> {
+                openRecipe(currentRecipe, true);
+            });
+        }
     }
 
     /**
@@ -442,15 +449,16 @@ public class RecipesWindowCtrl {
         subscriptionExecutor.submit(() -> {
             socker.subscribe("/updates/recipe-deletion", RecipeDeletion.class, update -> {
                 Platform.runLater(() -> {
+                    if(storage.getFavoriteIDs().contains(update.id())){
+                        errorCtrl.showGenericError(String.format(tm.tr("error.favorite.missing")));
+                        storage.getFavoriteIDs().remove(update.id());
+                        dataManipulator.saveFave();
+                    }
                     ignoreSideBarSelectionEvent = true;
                     if(currentRecipe != null && update.id().equals(currentRecipe.getId())){
                         clearRecipeView();
                         sidebarRecipeNamesList.getSelectionModel().clearSelection();
-                        errorCtrl.showErrorPopup(
-                                tm.tr("recipe.deleted.title"),
-                                "",
-                                tm.tr("recipe.deleted.viewing")
-                        );
+                        errorCtrl.showErrorPopup(tm.tr("error.recipe.recipeDeletedHeader"), "", tm.tr("error.recipe.deletedWhileViewing"));
                     }
                     dataManipulator.deleteRecipeLocal(update.id());
                     ignoreSideBarSelectionEvent = false;
@@ -501,7 +509,7 @@ public class RecipesWindowCtrl {
                         );
                         sidebarRecipeNamesList.setItems(searchResults); //show results in the sidebar
                         searchField.getParent().requestFocus(); //shift focus to a different element, away from the searchField
-                    } else errorCtrl.showGenericError(tm.tr("error.search.empty"));
+                    } else errorCtrl.showGenericError("Search Query must not be empty!");
 
                 } catch (Exception e){
                     errorCtrl.showGenericError(e);
@@ -1201,6 +1209,7 @@ public class RecipesWindowCtrl {
         ignoreSideBarSelectionEvent = true;
         dataManipulator.deleteRecipe(hit);
         ignoreSideBarSelectionEvent = false;
+        currentRecipe = null;
         if(getSelectedRecipe() == null) return;
         openRecipe(getSelectedRecipe());
     }
@@ -1221,6 +1230,11 @@ public class RecipesWindowCtrl {
             Recipe selectedRecipe = getSelectedRecipe();
 
             dataManipulator.refreshRecipes();
+            for(Long id: storage.getFavoriteIDs()){
+                if(storage.getRecipes().stream().noneMatch(x -> x.getId().equals(id))){
+                    errorCtrl.showGenericError(tm.tr("error.favorite.missing"));
+                }
+            }
 
             //update the recipe UI to contain the new contents of the previously selected recipe:
             if (selectedRecipe == null) return;
