@@ -38,8 +38,8 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
    FoodPal makes use of *WebSockets* to update content **dynamically** the second it changes!
    * A change in the recipe title is instantly visible to all client's sidebars! The same goes for additions & deletions of recipes.
- Editing *any* detail of a recipe will instantly change it in all clients that have it open.
-  *  *Only* updated content is sent every update, don't worry about your bandwidth!
+   * Editing *any* detail of a recipe will instantly change it in all clients that have it open.
+   *  *Only* updated content is sent every update, don't worry about your bandwidth!
 * **Bonus Feature(s):**
 > Because that's not all!
    * Everything seen about recipes above also applies to ingredients in the *Ingredients Tab*!
