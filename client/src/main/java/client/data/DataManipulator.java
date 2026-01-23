@@ -366,4 +366,20 @@ public class DataManipulator {
             sortLocalIngredients();
         }
     }
+
+    /**
+     * Saves the locale to the config file via ConfigService
+     * @param locale the locale to save to the config file
+     */
+    public void saveLocale(Locale locale) {
+        configService.get().setSavedLocale(locale);
+        configService.save();
+    }
+
+    /**
+     * Gets the saved locale from ConfigService
+     */
+    public Locale getSavedLocale() {
+        return configService.get().getSavedLocale();
+    }
 }
