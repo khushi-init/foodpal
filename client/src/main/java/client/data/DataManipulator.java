@@ -108,6 +108,21 @@ public class DataManipulator {
     }
 
     /**
+     * Locally updates the name of the ingredient with the specified ID, and all recipes containing this ingredient
+     * @param id ID of the ingredient to change
+     * @param newName The new name
+     */
+    public void changeIngredientNameLocal(Long id, String newName){
+        for (int i = 0; i < storage.getIngredients().size(); i++) {
+            if (Objects.equals(storage.getIngredients().get(i).getId(), id)) {
+                storage.getIngredients().get(i).setName(newName);
+                updateIngredientLocal(storage.getIngredients().get(i));
+                break;
+            }
+        }
+    }
+
+    /**
      * Updates the ingredient list and updates the ingredients within all recipes
      * @param newIngredient The (changed) ingredient
      */
@@ -150,7 +165,18 @@ public class DataManipulator {
      * @param id
      */
     public void deleteRecipeLocal(Long id){
-        System.out.println(storage.getRecipes().removeIf(x -> x.getId().equals(id)));
+        storage.getRecipes().removeIf(x -> x.getId().equals(id));
+    }
+
+    /**
+     * Deletes the ingredient with the specified ID from the list and all recipes
+     * @param id ID of the ingredient
+     */
+    public void deleteIngredientLocal(Long id){
+        storage.getIngredients().removeIf(x -> x.getId().equals(id));
+        for(Recipe r: storage.getRecipes()){
+            r.getIngredients().removeIf(x -> x.getIngredient().getId().equals(id));
+        }
     }
 
     /**
@@ -162,9 +188,25 @@ public class DataManipulator {
         storage.getRecipes().setAll(serverResponse);
     }
 
+    /**
+     * Gets the up-to-date version of a recipe
+     * @param id ID of the recipe
+     * @return Server response
+     */
     public Recipe refreshRecipe(Long id){
         Recipe updated = server.getRecipe(id);
         updateRecipe(updated);
+        return updated;
+    }
+
+    /**
+     * Gets the up-to-date version of an ingredient
+     * @param id ID of the ingredient
+     * @return Server response
+     */
+    public Ingredient refreshIngredient(Long id){
+        Ingredient updated = server.getIngredient(id);
+        updateIngredientLocal(updated);
         return updated;
     }
 

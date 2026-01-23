@@ -66,6 +66,7 @@ public class PrimaryCtrl {
     public void showRecipesWindow() {
         primaryStage.setTitle(tm.tr("title")); // Subject to change
         recipesWindowCtrl.startup();
+        ingredientsWindowCtrl.shutdown();
         primaryStage.setScene(recipesWindowScene);
     }
 
@@ -83,6 +84,7 @@ public class PrimaryCtrl {
     public void showIngredientsWindow() {
         primaryStage.setTitle(tm.tr("ingredients.list"));
         recipesWindowCtrl.shutdown();
+        ingredientsWindowCtrl.startup();
         primaryStage.setScene(ingredientsWindowScene);
     }
 

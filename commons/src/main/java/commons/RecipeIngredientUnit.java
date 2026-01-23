@@ -2,6 +2,7 @@ package commons;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import org.apache.commons.lang3.tuple.Pair;
 
 // The @Embeddable annotation tells JPA/Hibernate that this class
 // is not a separate table, but that it's fields should be inserted directly
@@ -15,6 +16,8 @@ public class RecipeIngredientUnit {
 
     private String formalUnitName;
     private String informalUnitName;
+
+    private final static int thousand= 1000;
 
     /**
      * JPA required no argument constructor
@@ -86,5 +89,30 @@ public class RecipeIngredientUnit {
             return new InformalUnit(informalUnitName);
         }
         return null;
+    }
+
+    /**
+     * Normalizes quantity and unit for display purposes.
+     * Note: This uses Pair.of() because Apache Commons Pair is abstract.
+     */
+    public Pair<Double, String> getNormalizedDisplay(double qty) {
+        String unit = "";
+
+        // Get the name to check
+        if (this.type == UnitType.FORMAL && this.formalUnitName != null) {
+            // Assuming FormalUnit is an enum like GRAM("g")
+            unit = FormalUnit.valueOf(formalUnitName).getDisplayName();
+        } else if (this.type == UnitType.INFORMAL) {
+            unit = informalUnitName;
+        }
+
+        if (qty >= thousand && unit != null) {
+            switch (unit.toLowerCase()) {
+                case "mg": return Pair.of(qty / thousand, "g");
+                case "g":  return Pair.of(qty / thousand, "kg");
+                case "ml": return Pair.of(qty / thousand, "l");
+            }
+        }
+        return Pair.of(qty, unit);
     }
 }

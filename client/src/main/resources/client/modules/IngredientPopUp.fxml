@@ -17,8 +17,8 @@
     <Label style="-fx-font-size: 18px; -fx-text-fill: #333333;" text="Edit Ingredient" />
     <VBox spacing="12.0">
         <VBox spacing="4.0">
-            <Label style="-fx-text-fill: #666666; -fx-font-size: 11px;" text="NAME" />
-            <TextField fx:id="nameField" prefHeight="32.0" promptText="Enter ingredient name..." style="-fx-background-radius: 4; -fx-border-radius: 4;" />
+            <Label style="-fx-text-fill: #666666; -fx-font-size: 11px;" text="SELECT INGREDIENT" />
+            <ComboBox fx:id="ingredientComboBox" prefHeight="32.0" maxWidth="Infinity" promptText="Choose an ingredient..." style="-fx-background-radius: 4; -fx-border-radius: 4;" />
         </VBox>
 
         <HBox spacing="12.0">

@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import server.service.RecipeService;
 
@@ -109,6 +110,7 @@ public class RecipeController {
      * @return 200 OK with or 400 bad request or 404 not found
      */
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<Recipe> changeRecipe(@PathVariable Long id, @RequestBody Recipe incoming) {
         // checking if the recipe has a valid name
         if(incoming.getName() == null || incoming.getName().trim().isEmpty()){

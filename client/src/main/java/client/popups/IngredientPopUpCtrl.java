@@ -1,13 +1,14 @@
 package client.popups;
 
-import commons.FormalUnit;
-import commons.InformalUnit;
-import commons.RecipeIngredientUnit;
-import commons.Unit;
+import commons.*;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 
 public class IngredientPopUpCtrl {
@@ -23,12 +24,28 @@ public class IngredientPopUpCtrl {
     private ComboBox<FormalUnit> formalUnitPicker;
     @FXML
     private TextField informalUnitField;
+    @FXML private ComboBox<Ingredient> ingredientComboBox;
 
     private Stage stage;
     private boolean okClicked = false;
 
     public void setStage(Stage stage) {
         this.stage = stage;
+
+        ingredientComboBox.setCellFactory(lv -> new ListCell<Ingredient>() {
+            @Override
+            protected void updateItem(Ingredient item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item.getName());
+            }
+        });
+        ingredientComboBox.setButtonCell(new ListCell<Ingredient>() {
+            @Override
+            protected void updateItem(Ingredient item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item.getName());
+            }
+        });
 
         unitTypePicker.getItems().setAll("Formal", "Informal");
         formalUnitPicker.getItems().setAll(FormalUnit.values());
@@ -37,8 +54,11 @@ public class IngredientPopUpCtrl {
         informalUnitField.visibleProperty().bind(unitTypePicker.valueProperty().isEqualTo("Informal"));
     }
 
-    public void setInitialValues(String name, Double quantity, RecipeIngredientUnit unitWrapper) {
-        nameField.setText(name);
+    // Change the first parameter from String to Ingredient
+    public void setInitialValues(Ingredient ingredient, Double quantity, RecipeIngredientUnit unitWrapper) {
+        // Set the selection in your new ComboBox
+        ingredientComboBox.setValue(ingredient);
+
         quantityField.setText(String.valueOf(quantity));
 
         if (unitWrapper != null && unitWrapper.toUnit() != null) {
@@ -87,6 +107,15 @@ public class IngredientPopUpCtrl {
             return formalUnitPicker.getValue(); // Returns the Enum constant (e.g., GRAM)
         }
         return new InformalUnit(informalUnitField.getText());
+    }
+
+    public void setIngredients(List<Ingredient> ingredients, Ingredient current) {
+        ingredientComboBox.setItems(FXCollections.observableArrayList(ingredients));
+        ingredientComboBox.setValue(current);
+    }
+
+    public Ingredient getSelectedIngredient() {
+        return ingredientComboBox.getValue();
     }
 
 }
