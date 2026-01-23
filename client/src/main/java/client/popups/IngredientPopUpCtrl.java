@@ -9,10 +9,7 @@ import commons.Unit;
 import commons.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -38,6 +35,8 @@ public class IngredientPopUpCtrl {
     @FXML private Label quantityLabel;
     @FXML private Label typeLabel;
     @FXML private Label unitLabel;
+    @FXML private Button cancel;
+    @FXML private Button ok;
 
 
     private Stage stage;
@@ -141,6 +140,8 @@ public class IngredientPopUpCtrl {
         quantityLabel.setText(tm.tr("label.quantity"));
         typeLabel.setText(tm.tr("label.type"));
         unitLabel.setText(tm.tr("label.unit"));
+        ok.setText(tm.tr("button.save"));
+        cancel.setText(tm.tr("button.cancelCreate"));
 
         informalUnitField.setPromptText(tm.tr("prompt.pinch"));
         if (unitTypePicker == null) return;

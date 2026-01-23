@@ -46,7 +46,7 @@
         <padding>
             <Insets top="10.0" />
         </padding>
-        <Button mnemonicParsing="false" onAction="#handleCancel" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: transparent; -fx-text-fill: #757575;" text="Cancel" />
-        <Button mnemonicParsing="false" onAction="#handleOk" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #0275d8; -fx-text-fill: white; -fx-background-radius: 4;" text="Save" />
+        <Button fx:id="cancel" mnemonicParsing="false" onAction="#handleCancel" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: transparent; -fx-text-fill: #757575;" text="Cancel" />
+        <Button fx:id="ok" onAction="#handleOk" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #0275d8; -fx-text-fill: white; -fx-background-radius: 4;" text="Save" />
     </HBox>
 </VBox>
