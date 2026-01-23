@@ -25,10 +25,9 @@ public class CombinedProposition implements Proposition{
      */
     public boolean evaluate(Recipe recipe) throws IllegalArgumentException{
         if(!verifyArguments()){
-            String message = generateIllegalArgumentExceptionMessage();
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException();
         }
-        if(recipe == null) throw new IllegalArgumentException("Cannot evaluate null recipe");
+        if(recipe == null) throw new IllegalArgumentException();
         ArrayList<Object> objectArgs = new ArrayList<>(arguments.stream().map(x -> (Object) x).toList());
         return this.function.evaluate.apply(recipe, objectArgs);
     }
