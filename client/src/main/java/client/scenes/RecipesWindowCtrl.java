@@ -52,7 +52,7 @@ public class RecipesWindowCtrl {
     private final List<Pair<RecipeInstructionUICtrl, Node>> instructionCache = new ArrayList<>();
     private final List<Pair<RecipeIngredientUICtrl, Node>> ingredientCache = new ArrayList<>();
 
-    // Make sure to change to *flagPT.png* after we made him mad
+    // Make sure to change to *flagPT.png* after we made him mad. A little remembrance of ragebait
     private final String francisco = "flatPT.png";
 
     private volatile ExecutorService subscriptionExecutor = Executors.newSingleThreadExecutor(r -> {
@@ -874,15 +874,12 @@ public class RecipesWindowCtrl {
         Label stepsLabel = new Label(tm.tr("label.steps"));
         stepsLabel.setFont(Font.font("System", FontWeight.BOLD, fontSize));
         recipeView.getChildren().add(stepsLabel);
-
         if (recipeInstructions.isEmpty()) {
             recipeView.getChildren().add(new Label(tm.tr("label.noSteps")));
         }
-
         for (int i = 0; i < recipeInstructions.size(); ++i) {
             String instruction = recipeInstructions.get(i);
             Pair<RecipeInstructionUICtrl, Node> inst;
-
             // CACHE CHECK: Reuse existing node if possible
             if (i < instructionCache.size()) {
                 inst = instructionCache.get(i);
@@ -890,13 +887,11 @@ public class RecipesWindowCtrl {
                 inst = fxml.loadNode(RecipeInstructionUICtrl.class, "client", "modules", "RecipeInstruction.fxml");
                 instructionCache.add(inst);
             }
-
             RecipeInstructionUICtrl instCtrl = inst.getKey();
             Node ingNode = inst.getValue();
 
             ingNode.setStyle("");
             int currentIndex = i;
-
             // Drag and drop trigger
             detectDrag(ingNode, currentIndex, recipeInstructions);
             // Delete logic
@@ -1549,8 +1544,8 @@ public class RecipesWindowCtrl {
         Label nlLabel = new Label("Nederlands", icon("/client/images/flagNL.png"));
         Label skLabel = new Label("Slovencina", icon("/client/images/flagSK.png"));
         Label grLabel = new Label("Ελληνικά", icon("/client/images/flagGR.png"));
-        Label ptLabel = new Label("Português", icon("/client/images/" + francisco));
-
+        Label ptLabel = new Label("Português", icon("/client/images/flagPT.png"));
+        Locale saved = dataManipulator.getSavedLocale();
         // Set styling so the hover area fills the menu width
         engLabel.setMinWidth(hundredtwenty);
         nlLabel.setMinWidth(hundredtwenty);
@@ -1559,36 +1554,30 @@ public class RecipesWindowCtrl {
         skLabel.setPadding(new Insets(five, ten, five, ten));
         grLabel.setPadding(new Insets(five, ten, five, ten));
         ptLabel.setPadding(new Insets(five, ten, five, ten));
-
-
         // 2. Initialize the CustomMenuItems with these labels
         englishItem = new CustomMenuItem(engLabel);
         dutchItem = new CustomMenuItem(nlLabel);
         slovakItem = new CustomMenuItem(skLabel);
         greekItem = new CustomMenuItem(grLabel);
         portugueseItem = new CustomMenuItem(ptLabel);
-
         // 3. Attach Hover Listeners directly to the Labels
         engLabel.setOnMouseEntered(e -> tm.setLanguage(Locale.ENGLISH));
         nlLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("nl")));
         skLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("sk")));
         grLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("gr")));
         ptLabel.setOnMouseEntered(e -> tm.setLanguage(new Locale("pt")));
-
         // 4. Revert to the "Official" language when the menu is closed
         addIngredientMenu.setOnHidden(e -> tm.setLanguage(activeLocale));
-
         // 5. Standard Click Logic (Actions)
         englishItem.setOnAction(e -> setLanguage(Locale.ENGLISH, "/client/images/flagEN.png"));
         dutchItem.setOnAction(e -> setLanguage(new Locale("nl"), "/client/images/flagNL.png"));
         slovakItem.setOnAction(e -> setLanguage(new Locale("sk"), "/client/images/flagSK.png"));
         greekItem.setOnAction(e -> setLanguage(new Locale("gr"), "/client/images/flagGR.png"));
-        portugueseItem.setOnAction(e -> setLanguage(new Locale("pt"), "/client/images/" + francisco));
-
+        portugueseItem.setOnAction(e -> setLanguage(new Locale("pt"), "/client/images/flagPT.png"));
         addIngredientMenu.getItems().setAll(englishItem, dutchItem, slovakItem, greekItem, portugueseItem);
 
         // Default starting state
-        setLanguage(Locale.ENGLISH, "/client/images/flagEN.png");
+        setLanguage(saved, getLangStartIcon(saved));
 
         MenuItem visualUS = new MenuItem("", icon("/client/images/flagEN.png"));
         MenuItem visualNl = new MenuItem("", icon("/client/images/flagNL.png"));
@@ -1623,11 +1612,29 @@ public class RecipesWindowCtrl {
 
     }
 
+    public String getLangStartIcon(Locale saved) {
+        String flagPath;
+        String langCode = saved.getLanguage();
+
+        flagPath = switch (langCode) {
+            case "nl" -> "/client/images/flagNL.png";
+            case "sk" -> "/client/images/flagSK.png"; // Or "el" depending on how Java interprets your locale
+            case "gr", "el" -> "/client/images/flagGR.png";
+            case "pt" -> "/client/images/flagPT.png"; // Or francisco variable (teehee)
+            default ->
+                // Default to English if unknown or actually English
+                    "/client/images/flagEN.png";
+        };
+        return flagPath;
+    }
+
     private void setLanguage(Locale locale, String flagPath) {
         this.activeLocale = locale;
         this.activeFlagPath = flagPath;
 
         tm.setLanguage(locale);
+
+        dataManipulator.saveLocale(locale);
 
         // Update the dropdown button look
         addIngredientMenu.setGraphic(icon(flagPath));
