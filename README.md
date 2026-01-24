@@ -138,6 +138,27 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 ## 6. Live Language Switch
 > **Goal:** To allow users to switch the application's language at runtime without having to restart the application.
+* **Implementation Details:**
+    * In the main window, a language selector is displayed as a dropdown containing flag icons of all supported languages. This allows the user to immediately see which language is currently active at a glance.
+    * Clicking the language indicator opens a list of available languages, represented by their respective flags.
+    * When a language is selected, the application interface updates to the chosen language, and the selected language remains when navigating between different windows.
+    * The selected application language is persisted and automatically restored after restarting the application. If the user has not selected a language before, English is used as the default.
+    * When creating or editing a recipe, the user can assign a specific language to that recipe to indicate the language of the ingredients and preparation instructions.
+    * Recipes can be filtered by language using the advanced search functionality:
+        * Next to the search bar, an icon opens the extended filtering menu.
+        * In this menu, the user can select the **Atomic** search option.
+        * Within the Atomic search, the `HASLANG` filter can be used to specify the desired recipe language.
+        * The language shortcut (e.g. en, nl, etc.) must be entered manually and can be found by clicking the **?** icon, which displays a hint with all supported shortcuts.
+* Language-based filtering affects which recipes are displayed, based on the language assigned to each recipe.
+* **Bonus Feature(s):**
+    * A language preview feature is available: when hovering over a language flag in the selector, the user can preview how the application interface would appear in that language before selecting it.
+    * Multiple additional languages (Slovak, Greek, and Portuguese) were added as a proof of concept beyond the required languages.
+* **Why we should get excellent:**
+    * The language selector is intuitive and visually clear through the use of flag icons and immediate feedback.
+    * Persisting the application language across restarts improves usability and accessibility.
+    * Assigning a language to individual recipes enables meaningful filtering and better organization of multilingual content.
+    * The advanced filtering system using Atomic search demonstrates a flexible and powerful approach to recipe discovery.
+    * The language preview and additional supported languages show extra effort beyond the core requirements.
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
