@@ -26,7 +26,20 @@ FoodPal is a novel, distributed cooking organizer app that runs in a client/serv
 
 * **Expected Grade:** Excellent
 * **Implementation Details:**
+    
+    FoodPal allows you to create, view, and modify recipes through the following features.
+  * **Create and display recipes:**
+ You can create, edit and delete recipes from the sidebar buttons, giving a nice overview of your culinary delights.
+  * **Edit Recipes from the Recipe view:** From the Recipe View you can change the name of recipes, add ingredients and add preparation instructions.
+  * **Edit Ingredients:** Inside the recipe view you can easily create, edit and delete Ingredients with the colorful pencil and cross buttons respectively.
+  * **Download Recipes:** Tired of blue light affecting your sleep? Reduce eyestrain by downloading recipes to a MarkdDown file. Print and share them all you like! (Printer not included)
+  * **Refresh button:** Yep, it's there. See section 2 for more details.
+  * **And so much more!** Additional bonus features can be found inside the Recipe View. You can favorite, duplicate, download recipes, get insights about nutritional value, and set their language. Read more about the respective implementations further down below.
+  * **Proper server propagation:** All changes made to recipes and their properties are propagated to the server for storage. Read more about this in section 2.
 * **Bonus Feature(s):**
+  * **Modern UI:** FoodPal comes shipped with a colorful modern UI. This allows for easy distinction between windows, clean representations of recipe attributes and intuitive buttons. All of which fall easy on the eye!
+  * **Drag and drop system:** Want to change the order of your preparation instructions? Now you can! Simply drag and drop the instruction to your preferred position, and watch it change on the fly. (FoodPal is not legally responsible for physical harm attained from dragging harshly on a trackpad)
+
 
 ---
 
