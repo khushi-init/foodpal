@@ -4,7 +4,6 @@ A collaborative recipe manager with real-time synchronization across clients. Bu
 
 **Tech stack:** Java · Spring Boot · JavaFX · WebSockets · H2 · Maven · Checkstyle · GitLab CI
 
-![FoodPal main window](docs/screenshots/main.png)
 
 ## Highlights
 
